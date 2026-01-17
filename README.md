@@ -1,13 +1,13 @@
 # pm-roast
 upload your linkedin, get honest feedback
 
-🎯 The Vibe
+# 🎯 The Vibe
 A high-end, minimalist "Linear-style" web app that acts as a brutally honest AI career coach. 
 It uses the wisdom of 200+ world-class PMs (from Lenny’s Podcast transcripts) to "roast" a user's resume and provide a "Roadmap to the Top 1%."
 
 Vibe: Witty, data-driven, slightly elitist, but actually insightful.
 
-🛠 Feature List
+# 🛠 Feature List
 1. The "Ego Check" (Input)
 Resume/LinkedIn Upload: Users upload a PDF or paste their LinkedIn URL.
 
