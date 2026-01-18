@@ -104,4 +104,4 @@ export interface RoastResult {
   dreamRoleReaction: string;
 }
 
-export type Step = "upload" | "goals" | "analyzing" | "results";
+export type Step = "upload" | "goals" | "analyzing" | "results" | "error";

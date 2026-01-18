@@ -103,6 +103,14 @@ You're helpful but don't pull punches. You hate fluff like "stakeholder manageme
 
 When analyzing a PM's profile, provide brutally honest but constructive feedback. Identify patterns that separate top 1% PMs from the rest.
 
+CRITICAL RULES - YOU MUST FOLLOW THESE:
+1. ONLY use information explicitly stated in the provided profile/resume. DO NOT invent, assume, or hallucinate any details.
+2. Base the archetype, roasts, gaps, and scores SOLELY on what the person has actually done according to their profile.
+3. If the profile mentions specific companies, use those. If it mentions specific achievements, reference those.
+4. The career score, capabilities, and stage MUST reflect the actual experience level shown in the profile.
+5. DO NOT make up job titles, companies, or achievements that aren't in the profile.
+6. If the profile lacks detail, reflect that in your roast (e.g., "Your profile is vaguer than a PM's success metrics").
+
 PM ELEMENT TYPES (choose the most fitting one):
 - "data": PMs obsessed with metrics, dashboards, A/B tests
 - "chaos": PMs who thrive in ambiguity, firefighting, rapid pivots
@@ -211,12 +219,41 @@ export async function POST(request: NextRequest) {
       resumeText = profileText;
     }
 
-    if (!resumeText || resumeText.trim().length < 50) {
+    // Validate profile content - need meaningful data
+    const trimmedText = resumeText.trim();
+    if (!trimmedText || trimmedText.length < 100) {
       return NextResponse.json(
-        { error: "Not enough content to analyze. Please provide more details about your experience." },
+        {
+          error: "Not enough content to analyze. Please provide more details about your experience.",
+          errorCode: "INSUFFICIENT_DATA"
+        },
         { status: 400 }
       );
     }
+
+    // Check for meaningful content (should have some work-related keywords)
+    const meaningfulKeywords = [
+      'product', 'manager', 'pm', 'lead', 'senior', 'staff', 'director',
+      'company', 'startup', 'experience', 'worked', 'built', 'launched',
+      'team', 'engineering', 'design', 'growth', 'strategy', 'revenue',
+      'users', 'customers', 'metrics', 'shipped', 'developed', 'managed'
+    ];
+    const lowerText = trimmedText.toLowerCase();
+    const hasRelevantContent = meaningfulKeywords.some(keyword => lowerText.includes(keyword));
+
+    if (!hasRelevantContent) {
+      return NextResponse.json(
+        {
+          error: "The content doesn't appear to contain PM/work experience. Please paste your LinkedIn profile or resume content.",
+          errorCode: "INVALID_CONTENT"
+        },
+        { status: 400 }
+      );
+    }
+
+    console.log("=== PROFILE TEXT BEING ANALYZED ===");
+    console.log(trimmedText.slice(0, 500) + (trimmedText.length > 500 ? "..." : ""));
+    console.log("=== END PROFILE PREVIEW ===");
 
     // Call Gemini
     const model = genAI.getGenerativeModel({
@@ -230,10 +267,15 @@ export async function POST(request: NextRequest) {
 
     const prompt = `${SYSTEM_PROMPT}
 
-Analyze this PM's profile/resume and provide a brutally honest roast. Their dream role is: ${DREAM_ROLES[dreamRole].label} (${DREAM_ROLES[dreamRole].description}).
+Analyze the following PM's profile/resume and provide a brutally honest roast. Their dream role is: ${DREAM_ROLES[dreamRole].label} (${DREAM_ROLES[dreamRole].description}).
 
-Profile/Resume:
+IMPORTANT: Your entire analysis MUST be based ONLY on the information below. Reference specific companies, roles, and achievements mentioned. Do not invent details.
+
+=== START OF PROFILE ===
 ${resumeText}
+=== END OF PROFILE ===
+
+Based ONLY on the profile above, generate your roast. If the profile mentions working at Google, reference Google. If they were at a startup, reference that. Every roast bullet and observation must tie back to something in their actual profile.
 
 Remember: Respond with valid JSON only. No markdown formatting, no code blocks, just the raw JSON object.`;
 
