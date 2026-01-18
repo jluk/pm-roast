@@ -52,6 +52,13 @@ export interface RoastResult {
   // Career score (0-100)
   careerScore: number;
 
+  // PM capability scores (0-99 each, FIFA style)
+  capabilities: {
+    productSense: number;
+    execution: number;
+    leadership: number;
+  };
+
   // Gap analysis
   gaps: string[];
 

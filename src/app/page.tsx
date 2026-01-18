@@ -162,7 +162,7 @@ export default function Home() {
           >
             PM Roast
           </button>
-          <span className="text-xs text-muted-foreground">by Lenny&apos;s AI</span>
+          <span className="text-xs text-muted-foreground">Powered by Gemini</span>
         </div>
       </nav>
 
