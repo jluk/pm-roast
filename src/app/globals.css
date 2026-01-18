@@ -76,4 +76,52 @@
   .glow-hover:hover {
     box-shadow: 0 0 30px rgba(99, 102, 241, 0.35);
   }
+
+  .perspective-1000 {
+    perspective: 1000px;
+  }
+}
+
+/* Holographic card animations */
+@keyframes holo-spin {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes holo-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-holo-spin {
+  background-size: 200% 200%;
+  animation: holo-spin 3s ease infinite;
+}
+
+.animate-holo-rotate {
+  animation: holo-rotate 8s linear infinite;
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
 }

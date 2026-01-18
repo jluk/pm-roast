@@ -119,32 +119,53 @@ export async function GET(request: NextRequest) {
           padding: 40,
         }}
       >
-        {/* Card */}
+        {/* Card with holographic border */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
             width: 500,
-            background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)",
-            borderRadius: 24,
-            border: "2px solid rgba(99, 102, 241, 0.3)",
-            overflow: "hidden",
+            position: "relative",
           }}
         >
-          {/* Header */}
+          {/* Holographic border glow */}
           <div
             style={{
-              height: 48,
-              background: "linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #6366f1 100%)",
+              position: "absolute",
+              inset: -4,
+              background: "linear-gradient(45deg, #ff0080, #ff8c00, #40e0d0, #7b68ee, #ff0080)",
+              borderRadius: 28,
+              filter: "blur(8px)",
+              opacity: 0.7,
+            }}
+          />
+
+          {/* Main card */}
+          <div
+            style={{
               display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              flexDirection: "column",
+              position: "relative",
+              background: "linear-gradient(135deg, rgba(26,26,46,0.98) 0%, rgba(22,33,62,0.98) 50%, rgba(15,15,35,0.98) 100%)",
+              borderRadius: 24,
+              border: "2px solid rgba(255,255,255,0.2)",
+              overflow: "hidden",
             }}
           >
-            <span style={{ color: "white", fontSize: 16, fontWeight: "bold", letterSpacing: 4 }}>
-              PM ROAST
-            </span>
-          </div>
+            {/* Header - Gold Pokemon style */}
+            <div
+              style={{
+                height: 48,
+                background: "linear-gradient(90deg, #eab308 0%, #fbbf24 50%, #eab308 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ color: "black", fontSize: 16, fontWeight: 900, letterSpacing: 4 }}>
+                PM ROAST
+              </span>
+            </div>
 
           {/* Content */}
           <div style={{ padding: 32, display: "flex", flexDirection: "column" }}>
@@ -242,18 +263,21 @@ export async function GET(request: NextRequest) {
             </div>
           </div>
 
-          {/* Footer */}
-          <div
-            style={{
-              height: 40,
-              background: "rgba(99, 102, 241, 0.1)",
-              borderTop: "1px solid rgba(99, 102, 241, 0.2)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <span style={{ fontSize: 12, color: "#9ca3af" }}>pmroast.com • Get your roast</span>
+            {/* Footer */}
+            <div
+              style={{
+                height: 40,
+                background: "linear-gradient(90deg, rgba(234,179,8,0.15) 0%, rgba(251,191,36,0.15) 50%, rgba(234,179,8,0.15) 100%)",
+                borderTop: "1px solid rgba(234,179,8,0.3)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <span style={{ fontSize: 12, color: "rgba(234,179,8,0.8)", fontWeight: 600, letterSpacing: 1 }}>
+                pmroast.com • Get your roast
+              </span>
+            </div>
           </div>
         </div>
 

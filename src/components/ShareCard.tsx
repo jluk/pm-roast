@@ -1,5 +1,7 @@
 "use client";
 
+import { HoloCard } from "./HoloCard";
+
 interface ShareCardProps {
   score: number;
   archetypeName: string;
@@ -55,12 +57,12 @@ export function ShareCard({
   bangerQuote,
 }: ShareCardProps) {
   return (
-    <div className="relative w-[320px] sm:w-[360px]">
+    <HoloCard className="w-[320px] sm:w-[360px]">
       {/* Card Background */}
-      <div className="relative bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] rounded-2xl border border-[#6366f1]/30 overflow-hidden shadow-2xl shadow-[#6366f1]/20">
+      <div className="relative rounded-2xl overflow-hidden bg-gradient-to-br from-[#1a1a2e] via-[#16213e] to-[#0f0f23] border border-white/20">
         {/* Top Accent Bar with Branding */}
-        <div className="h-8 bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#6366f1] flex items-center justify-center">
-          <span className="text-white text-xs font-bold tracking-widest">PM ROAST</span>
+        <div className="h-10 bg-gradient-to-r from-yellow-500 via-amber-400 to-yellow-500 flex items-center justify-center relative overflow-hidden">
+          <span className="text-black text-xs font-black tracking-widest drop-shadow-sm relative z-10">PM ROAST</span>
         </div>
 
         {/* Card Content */}
@@ -151,13 +153,10 @@ export function ShareCard({
         </div>
 
         {/* Bottom Branding */}
-        <div className="h-8 bg-gradient-to-r from-[#6366f1]/20 via-[#8b5cf6]/20 to-[#6366f1]/20 flex items-center justify-center border-t border-[#6366f1]/20">
-          <span className="text-[10px] text-gray-400">pmroast.com</span>
+        <div className="h-10 bg-gradient-to-r from-yellow-500/20 via-amber-400/20 to-yellow-500/20 flex items-center justify-center border-t border-yellow-500/30">
+          <span className="text-[10px] text-yellow-500/80 font-semibold tracking-wider">pmroast.com • Get your roast</span>
         </div>
       </div>
-
-      {/* Card Glow Effect */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-[#6366f1]/20 via-[#8b5cf6]/20 to-[#6366f1]/20 rounded-2xl blur-xl -z-10" />
-    </div>
+    </HoloCard>
   );
 }

@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GoalSelector } from "@/components/steps/GoalSelector";
 import { AnalyzingLoader } from "@/components/steps/AnalyzingLoader";
 import { Results } from "@/components/steps/Results";
+import { ExampleGallery } from "@/components/ExampleGallery";
 import { Step, DreamRole, RoastResult } from "@/lib/types";
 
 export default function Home() {
@@ -167,7 +168,7 @@ export default function Home() {
       </nav>
 
       {/* Main Content */}
-      <section className="flex-1 flex flex-col items-center justify-center px-6 pt-20 pb-12">
+      <section className="flex-1 flex flex-col items-center px-6 pt-24 pb-12">
         <AnimatePresence mode="wait">
           {step === "upload" && (
             <motion.div
@@ -353,6 +354,9 @@ Experience:
                   <span className="text-foreground"> Linear</span>, and more
                 </p>
               </div>
+
+              {/* Example Gallery */}
+              <ExampleGallery />
             </motion.div>
           )}
 
