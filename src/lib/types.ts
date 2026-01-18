@@ -38,6 +38,17 @@ export const DREAM_ROLES: Record<DreamRole, { label: string; description: string
   },
 };
 
+// PM Element types
+export type PMElement = "data" | "chaos" | "strategy" | "shipping" | "politics" | "vision";
+
+// PM Move for Pokemon-style attacks
+export interface PMMove {
+  name: string;
+  energyCost: number;
+  damage: number;
+  effect?: string;
+}
+
 export interface RoastResult {
   // The biting roast bullets
   roastBullets: string[];
@@ -47,7 +58,17 @@ export interface RoastResult {
     name: string;
     description: string;
     emoji: string;
+    element: PMElement;
+    flavor: string; // Pokédex-style flavor text
+    stage: string; // e.g., "Junior", "Senior", "Staff", "Principal"
+    weakness: string; // Funny one-word weakness
   };
+
+  // PM moves (2-3 funny attacks)
+  moves: PMMove[];
+
+  // Generated archetype image (base64)
+  archetypeImage?: string;
 
   // Career score (0-100)
   careerScore: number;

@@ -5,25 +5,28 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GoalSelector } from "@/components/steps/GoalSelector";
 import { AnalyzingLoader } from "@/components/steps/AnalyzingLoader";
 import { Results } from "@/components/steps/Results";
 import { ExampleGallery } from "@/components/ExampleGallery";
 import { Step, DreamRole, RoastResult } from "@/lib/types";
+import { HeroCard } from "@/components/InteractiveCard";
+
+type InputMode = "magic" | "manual";
 
 export default function Home() {
   const [step, setStep] = useState<Step>("upload");
+  const [inputMode, setInputMode] = useState<InputMode>("magic");
   const [linkedinUrl, setLinkedinUrl] = useState("");
   const [profileText, setProfileText] = useState("");
-  const [showManualInput, setShowManualInput] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dreamRole, setDreamRole] = useState<DreamRole | null>(null);
   const [result, setResult] = useState<RoastResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingLinkedin, setIsLoadingLinkedin] = useState(false);
-  const [inputSource, setInputSource] = useState<"linkedin" | "pdf">("linkedin");
+  const [inputSource, setInputSource] = useState<"linkedin" | "pdf" | "manual">("linkedin");
+  const [magicLinkTried, setMagicLinkTried] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -50,19 +53,12 @@ export default function Home() {
     }
   };
 
-  const handleLinkedinSubmit = async () => {
-    if (!linkedinUrl && !profileText) return;
+  const handleMagicLinkSubmit = async () => {
+    if (!linkedinUrl) return;
 
-    // If we have manual profile text, go straight to goals
-    if (profileText.trim().length > 50) {
-      setInputSource("linkedin");
-      setStep("goals");
-      return;
-    }
-
-    // Try to fetch LinkedIn profile
     setIsLoadingLinkedin(true);
     setError(null);
+    setMagicLinkTried(true);
 
     try {
       const response = await fetch("/api/linkedin", {
@@ -77,22 +73,27 @@ export default function Home() {
         setProfileText(data.profileText);
         setInputSource("linkedin");
         setStep("goals");
-      } else if (data.needsManual) {
-        setShowManualInput(true);
-        setError(data.message);
       } else {
-        setError(data.error || "Failed to fetch LinkedIn profile");
+        // Graceful fallback to manual mode
+        setInputMode("manual");
+        setError(data.isMock
+          ? null // Don't show error for mock mode, just switch
+          : "We couldn't fetch your profile automatically. No worries - just paste your info below!"
+        );
       }
     } catch {
-      setError("Failed to connect. Please paste your profile manually.");
-      setShowManualInput(true);
+      setInputMode("manual");
+      setError("Connection failed. No worries - just paste your info or upload your resume below!");
     } finally {
       setIsLoadingLinkedin(false);
     }
   };
 
-  const handlePdfSubmit = () => {
-    if (file) {
+  const handleManualSubmit = () => {
+    if (profileText.trim().length >= 50) {
+      setInputSource("manual");
+      setStep("goals");
+    } else if (file) {
       setInputSource("pdf");
       setStep("goals");
     }
@@ -109,7 +110,7 @@ export default function Home() {
 
       if (inputSource === "pdf" && file) {
         formData.append("file", file);
-      } else if (inputSource === "linkedin" && profileText) {
+      } else if ((inputSource === "linkedin" || inputSource === "manual") && profileText) {
         formData.append("profileText", profileText);
       }
 
@@ -136,14 +137,15 @@ export default function Home() {
 
   const handleStartOver = () => {
     setStep("upload");
+    setInputMode("magic");
     setFile(null);
     setLinkedinUrl("");
     setProfileText("");
-    setShowManualInput(false);
     setDreamRole(null);
     setResult(null);
     setError(null);
     setInputSource("linkedin");
+    setMagicLinkTried(false);
   };
 
   const getInputName = () => {
@@ -151,6 +153,8 @@ export default function Home() {
     if (inputSource === "linkedin") return linkedinUrl || "LinkedIn Profile";
     return "Your Profile";
   };
+
+  const canSubmitManual = profileText.trim().length >= 50 || file !== null;
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -178,167 +182,282 @@ export default function Home() {
               exit={{ opacity: 0, y: -20 }}
               className="w-full"
             >
-              <div className="max-w-2xl mx-auto text-center space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border text-xs text-muted-foreground mb-4">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#6366f1] animate-pulse" />
-                  Powered by 200+ PM interviews
+              {/* Hero Section with Card */}
+              <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 max-w-6xl mx-auto">
+                {/* Left side - Copy */}
+                <div className="flex-1 text-center lg:text-left space-y-6">
+                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border text-xs text-muted-foreground">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#6366f1] animate-pulse" />
+                    Powered by 200+ PM interviews
+                  </div>
+
+                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-balance">
+                    Get your PM
+                    <span className="block bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                      Trading Card
+                    </span>
+                  </h1>
+
+                  <p className="text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 text-balance">
+                    Share your LinkedIn or resume. Get roasted by AI and receive a collectible card showing your true PM archetype.
+                  </p>
+
+                  {/* Stats */}
+                  <div className="flex flex-wrap justify-center lg:justify-start gap-6 pt-2">
+                    <div className="text-center lg:text-left">
+                      <p className="text-2xl font-bold text-white">10k+</p>
+                      <p className="text-xs text-muted-foreground">Cards Generated</p>
+                    </div>
+                    <div className="text-center lg:text-left">
+                      <p className="text-2xl font-bold text-white">9</p>
+                      <p className="text-xs text-muted-foreground">PM Archetypes</p>
+                    </div>
+                    <div className="text-center lg:text-left">
+                      <p className="text-2xl font-bold text-white">6</p>
+                      <p className="text-xs text-muted-foreground">Element Types</p>
+                    </div>
+                  </div>
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-balance">
-                  Get brutally honest feedback on your PM career
-                </h1>
-
-                <p className="text-lg text-muted-foreground max-w-lg mx-auto text-balance">
-                  Share your LinkedIn or resume. Get roasted by AI trained on the wisdom of world-class product leaders.
-                </p>
+                {/* Right side - Hero Card */}
+                <div className="flex-shrink-0">
+                  <HeroCard />
+                </div>
               </div>
 
-              {/* Upload Card */}
-              <Card className="mt-12 w-full max-w-xl mx-auto p-6 bg-card border-border">
-                <Tabs defaultValue="linkedin" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-6">
-                    <TabsTrigger value="linkedin">LinkedIn</TabsTrigger>
-                    <TabsTrigger value="resume">Upload PDF</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="linkedin" className="space-y-4">
-                    {error && (
-                      <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                        <p className="text-destructive text-sm">{error}</p>
+              {/* Input Card */}
+              <Card className="mt-16 w-full max-w-xl mx-auto p-6 bg-card border-border">
+                <AnimatePresence mode="wait">
+                  {inputMode === "magic" ? (
+                    <motion.div
+                      key="magic"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className="space-y-4"
+                    >
+                      {/* Magic Link Header */}
+                      <div className="text-center space-y-2">
+                        <div className="inline-flex items-center gap-2 text-[#6366f1]">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                          </svg>
+                          <span className="font-semibold">Magic Link</span>
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                          </svg>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Paste your LinkedIn URL and we&apos;ll do the rest
+                        </p>
                       </div>
-                    )}
 
-                    {!showManualInput ? (
-                      <>
-                        <div className="space-y-2">
+                      {/* URL Input */}
+                      <div className="space-y-2">
+                        <div className="relative">
+                          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                          </div>
                           <Input
                             type="url"
-                            placeholder="https://linkedin.com/in/yourprofile"
+                            placeholder="linkedin.com/in/yourprofile"
                             value={linkedinUrl}
                             onChange={(e) => setLinkedinUrl(e.target.value)}
-                            className="h-12 bg-secondary border-border focus:ring-[#6366f1]/20"
+                            className="h-12 pl-11 bg-secondary border-border focus:ring-[#6366f1]/20"
                           />
-                          <p className="text-xs text-muted-foreground">
-                            We&apos;ll try to fetch your public profile
-                          </p>
                         </div>
-                        <Button
-                          onClick={handleLinkedinSubmit}
-                          disabled={!linkedinUrl || isLoadingLinkedin}
-                          className="w-full h-12 bg-[#6366f1] text-white font-medium hover:bg-[#6366f1]/90 transition-all glow-hover disabled:opacity-50"
+                      </div>
+
+                      {/* Submit Button */}
+                      <Button
+                        onClick={handleMagicLinkSubmit}
+                        disabled={!linkedinUrl || isLoadingLinkedin}
+                        className="w-full h-12 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white font-medium hover:from-[#5558e3] hover:to-[#7c4fe0] transition-all shadow-lg shadow-[#6366f1]/25 disabled:opacity-50 disabled:shadow-none"
+                      >
+                        {isLoadingLinkedin ? (
+                          <span className="flex items-center gap-2">
+                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                            </svg>
+                            Extracting profile...
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-2">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                            </svg>
+                            Extract My Profile
+                          </span>
+                        )}
+                      </Button>
+
+                      {/* Manual Fallback Link */}
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-border" />
+                        </div>
+                        <div className="relative flex justify-center text-xs">
+                          <span className="bg-card px-2 text-muted-foreground">or</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setInputMode("manual")}
+                        className="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Enter info manually instead
+                      </button>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="manual"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 20 }}
+                      className="space-y-4"
+                    >
+                      {/* Manual Mode Header */}
+                      <div className="text-center space-y-2">
+                        <h3 className="font-semibold text-lg">Tell us about yourself</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Paste your LinkedIn profile or upload your resume
+                        </p>
+                      </div>
+
+                      {/* Error Message (graceful) */}
+                      {error && magicLinkTried && (
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg"
                         >
-                          {isLoadingLinkedin ? (
-                            <span className="flex items-center gap-2">
-                              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                              </svg>
-                              Fetching...
-                            </span>
-                          ) : (
-                            "Continue"
-                          )}
-                        </Button>
-                        <button
-                          onClick={() => setShowManualInput(true)}
-                          className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          Or paste your profile manually →
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <div className="space-y-2">
-                          <p className="text-sm text-muted-foreground mb-2">
-                            Copy your LinkedIn headline, about section, and experience, then paste below:
-                          </p>
-                          <textarea
-                            placeholder="Paste your LinkedIn profile content here...
+                          <p className="text-amber-500 text-sm text-center">{error}</p>
+                        </motion.div>
+                      )}
+
+                      {/* Paste Text Area */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-muted-foreground">
+                          Option 1: Paste your LinkedIn info
+                        </label>
+                        <textarea
+                          placeholder="Copy and paste your LinkedIn headline, about section, and experience here...
 
 Example:
 Senior Product Manager at Stripe
-Building the future of payments...
+Building the future of payments | Ex-Airbnb, Ex-Google
+
+About:
+Product leader with 8+ years building consumer and B2B products...
 
 Experience:
-- Product Manager at Airbnb (2020-2023)
-- Software Engineer at Google (2018-2020)
+- Senior PM at Stripe (2022-Present)
+- PM at Airbnb (2019-2022)
 ..."
-                            value={profileText}
-                            onChange={(e) => setProfileText(e.target.value)}
-                            className="w-full h-48 p-4 bg-secondary border border-border rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20"
-                          />
-                          <p className="text-xs text-muted-foreground">
-                            Include your headline, about section, and work experience for the best roast
+                          value={profileText}
+                          onChange={(e) => setProfileText(e.target.value)}
+                          className="w-full h-40 p-4 bg-secondary border border-border rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20 placeholder:text-muted-foreground/50"
+                        />
+                        {profileText.length > 0 && profileText.length < 50 && (
+                          <p className="text-xs text-amber-500">
+                            Please add more details ({50 - profileText.length} more characters needed)
                           </p>
-                        </div>
-                        <Button
-                          onClick={handleLinkedinSubmit}
-                          disabled={profileText.trim().length < 50}
-                          className="w-full h-12 bg-[#6366f1] text-white font-medium hover:bg-[#6366f1]/90 transition-all glow-hover disabled:opacity-50"
-                        >
-                          Continue
-                        </Button>
-                        <button
-                          onClick={() => {
-                            setShowManualInput(false);
-                            setError(null);
-                          }}
-                          className="w-full text-sm text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                          ← Back to URL input
-                        </button>
-                      </>
-                    )}
-                  </TabsContent>
+                        )}
+                      </div>
 
-                  <TabsContent value="resume" className="space-y-4">
-                    <div
-                      onDragOver={handleDragOver}
-                      onDragLeave={handleDragLeave}
-                      onDrop={handleDrop}
-                      className={`
-                        relative border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer
-                        ${isDragging ? "border-[#6366f1] bg-[#6366f1]/5" : "border-border hover:border-muted-foreground"}
-                        ${file ? "border-[#6366f1]/50 bg-[#6366f1]/5" : ""}
-                      `}
-                    >
-                      <input
-                        type="file"
-                        accept=".pdf"
-                        onChange={handleFileChange}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      />
-                      {file ? (
-                        <div className="space-y-2">
-                          <div className="w-10 h-10 mx-auto rounded-lg bg-[#6366f1]/10 flex items-center justify-center">
-                            <svg className="w-5 h-5 text-[#6366f1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                          </div>
-                          <p className="text-sm font-medium">{file.name}</p>
-                          <p className="text-xs text-muted-foreground">Click or drag to replace</p>
+                      {/* Divider */}
+                      <div className="relative">
+                        <div className="absolute inset-0 flex items-center">
+                          <div className="w-full border-t border-border" />
                         </div>
-                      ) : (
-                        <div className="space-y-2">
-                          <div className="w-10 h-10 mx-auto rounded-lg bg-secondary flex items-center justify-center">
-                            <svg className="w-5 h-5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                            </svg>
-                          </div>
-                          <p className="text-sm font-medium">Drop your resume here</p>
-                          <p className="text-xs text-muted-foreground">PDF only, max 10MB</p>
+                        <div className="relative flex justify-center text-xs">
+                          <span className="bg-card px-2 text-muted-foreground">or</span>
                         </div>
-                      )}
-                    </div>
-                    <Button
-                      onClick={handlePdfSubmit}
-                      disabled={!file}
-                      className="w-full h-12 bg-[#6366f1] text-white font-medium hover:bg-[#6366f1]/90 transition-all glow-hover disabled:opacity-50"
-                    >
-                      Continue
-                    </Button>
-                  </TabsContent>
-                </Tabs>
+                      </div>
+
+                      {/* PDF Upload */}
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-muted-foreground">
+                          Option 2: Upload your resume
+                        </label>
+                        <div
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                          className={`
+                            relative border-2 border-dashed rounded-lg p-6 text-center transition-all cursor-pointer
+                            ${isDragging ? "border-[#6366f1] bg-[#6366f1]/5" : "border-border hover:border-muted-foreground"}
+                            ${file ? "border-[#6366f1]/50 bg-[#6366f1]/5" : ""}
+                          `}
+                        >
+                          <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={handleFileChange}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
+                          {file ? (
+                            <div className="flex items-center justify-center gap-3">
+                              <div className="w-8 h-8 rounded-lg bg-[#6366f1]/10 flex items-center justify-center">
+                                <svg className="w-4 h-4 text-[#6366f1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                              </div>
+                              <div className="text-left">
+                                <p className="text-sm font-medium">{file.name}</p>
+                                <p className="text-xs text-muted-foreground">Click to replace</p>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setFile(null);
+                                }}
+                                className="ml-auto p-1 hover:bg-secondary rounded"
+                              >
+                                <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              <svg className="w-8 h-8 mx-auto text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                              <p className="text-sm">Drop PDF here or click to browse</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Submit Button */}
+                      <Button
+                        onClick={handleManualSubmit}
+                        disabled={!canSubmitManual}
+                        className="w-full h-12 bg-[#6366f1] text-white font-medium hover:bg-[#6366f1]/90 transition-all disabled:opacity-50"
+                      >
+                        Continue
+                      </Button>
+
+                      {/* Back to Magic Link */}
+                      <button
+                        onClick={() => {
+                          setInputMode("magic");
+                          setError(null);
+                        }}
+                        className="w-full py-2 text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back to Magic Link
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </Card>
 
               {/* Social proof */}
