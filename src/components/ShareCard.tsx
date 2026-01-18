@@ -9,6 +9,9 @@ interface ShareCardProps {
   archetypeDescription: string;
   archetypeImage?: string;
   element?: PMElement;
+  stage?: string;
+  weakness?: string;
+  flavor?: string;
   moves?: PMMove[];
   productSense: number;
   execution: number;
@@ -42,6 +45,9 @@ export function ShareCard({
   archetypeDescription,
   archetypeImage,
   element = "chaos",
+  stage = "Senior",
+  weakness = "Meetings",
+  flavor,
   moves = DEFAULT_MOVES,
   productSense,
   execution,
@@ -60,11 +66,13 @@ export function ShareCard({
         archetypeDescription={stripMarkdown(archetypeDescription)}
         archetypeImage={archetypeImage}
         element={element}
+        stage={stage}
+        weakness={weakness}
         moves={moves}
         productSense={productSense}
         execution={execution}
         leadership={leadership}
-        flavor={stripMarkdown(bangerQuote)}
+        flavor={stripMarkdown(flavor || bangerQuote)}
       />
 
       {/* Dream Role Info - displayed below the card */}

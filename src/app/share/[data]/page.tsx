@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { decodeCardData } from "@/lib/share";
 import { DREAM_ROLES, DreamRole } from "@/lib/types";
 import { ShareCard } from "@/components/ShareCard";
+import { PMElement, PMMove } from "@/components/PokemonCard";
 
 interface PageProps {
   params: Promise<{ data: string }>;
@@ -92,6 +93,16 @@ export default async function SharePage({ params }: PageProps) {
           archetypeName={card.n}
           archetypeEmoji={card.e}
           archetypeDescription={card.d}
+          element={(card.el as PMElement) || "chaos"}
+          stage={card.st || "Senior"}
+          weakness={card.w || "Meetings"}
+          flavor={card.f || card.d}
+          moves={card.m ? card.m.map(m => ({
+            name: m.n,
+            energyCost: m.c,
+            damage: m.d,
+            effect: m.e,
+          } as PMMove)) : undefined}
           productSense={card.ps}
           execution={card.ex}
           leadership={card.ld}
