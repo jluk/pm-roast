@@ -1,5 +1,5 @@
 # pm-roast
-upload your linkedin, get honest feedback
+upload your linkedin, get honest feedback courtesy of Gemini 2.5 flash and a custom career card
 
 # 🎯 The Vibe
 A high-end, minimalist "Linear-style" web app that acts as a brutally honest AI career coach. 
