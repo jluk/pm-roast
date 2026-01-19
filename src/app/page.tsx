@@ -185,7 +185,7 @@ export default function Home() {
                 </svg>
               </a>
               <a
-                href="https://linkedin.com/in/justinluk"
+                href="https://www.linkedin.com/in/lukjustin/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-foreground transition-colors"
