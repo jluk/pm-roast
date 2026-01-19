@@ -181,10 +181,8 @@ export function InteractiveCard({
   );
 }
 
-// Hero card for the landing page - larger, auto-animated, clickable
+// Hero card for the landing page - click to enlarge like gallery cards
 export function HeroCard() {
-  const [isFlipped, setIsFlipped] = useState(false);
-
   // Example hero card data
   const heroData = {
     score: 85,
@@ -223,65 +221,32 @@ export function HeroCard() {
         style={{ transform: "scale(1.2)" }}
       />
 
-      {/* Card with flip on hover */}
-      <motion.div
-        className="relative cursor-pointer"
-        style={{ perspective: "1000px" }}
-        onHoverStart={() => setIsFlipped(true)}
-        onHoverEnd={() => setIsFlipped(false)}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => setIsFlipped(!isFlipped)}
-      >
-        <motion.div
-          animate={{ rotateY: isFlipped ? 180 : 0 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          style={{ transformStyle: "preserve-3d" }}
-          className="relative"
-        >
-          {/* Front */}
-          <div
-            style={{
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-            }}
-          >
-            <PokemonCard
-              score={heroData.score}
-              archetypeName={heroData.name}
-              archetypeEmoji={heroData.emoji}
-              archetypeDescription={heroData.description}
-              element={heroData.element}
-              moves={heroData.moves}
-              stage={heroData.stage}
-              weakness={heroData.weakness}
-              flavor={heroData.flavor}
-              compact={false}
-            />
-          </div>
+      {/* Card - uses InteractiveCard for click-to-enlarge behavior */}
+      <div className="relative">
+        <InteractiveCard
+          score={heroData.score}
+          archetypeName={heroData.name}
+          archetypeEmoji={heroData.emoji}
+          archetypeDescription={heroData.description}
+          element={heroData.element}
+          moves={heroData.moves}
+          stage={heroData.stage}
+          weakness={heroData.weakness}
+          flavor={heroData.flavor}
+          compact={false}
+          enableFlip
+          enableModal
+        />
+      </div>
 
-          {/* Back */}
-          <div
-            className="absolute top-0 left-0"
-            style={{
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
-              transform: "rotateY(180deg)",
-            }}
-          >
-            <CardBack compact={false} />
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* Hover hint */}
+      {/* Click hint */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
         className="text-center text-xs text-muted-foreground mt-4"
       >
-        Hover to flip
+        Click to enlarge
       </motion.p>
     </motion.div>
   );
