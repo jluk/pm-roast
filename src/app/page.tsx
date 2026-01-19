@@ -6,12 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { GoalSelector } from "@/components/steps/GoalSelector";
-import { CardPackOpening } from "@/components/CardPackOpening";
 import { Results } from "@/components/steps/Results";
 import { ExampleGallery } from "@/components/ExampleGallery";
 import { Step, DreamRole, RoastResult } from "@/lib/types";
 import { HeroCard } from "@/components/InteractiveCard";
-import { PMElement } from "@/components/PokemonCard";
 
 type InputMode = "magic" | "manual";
 
@@ -100,14 +98,11 @@ export default function Home() {
     }
   };
 
-  const [isRoastReady, setIsRoastReady] = useState(false);
-
   const handleAnalyze = async () => {
     if (!dreamRole) return;
 
     setStep("analyzing");
     setError(null);
-    setIsRoastReady(false);
 
     try {
       const formData = new FormData();
@@ -132,16 +127,11 @@ export default function Home() {
 
       const data: RoastResult = await response.json();
       setResult(data);
-      setIsRoastReady(true);
-      // Don't set step to results - CardPackOpening will handle the transition
+      setStep("results"); // Go directly to results
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       setStep("error");
     }
-  };
-
-  const handlePackRevealComplete = () => {
-    setStep("results");
   };
 
   const handleStartOver = () => {
@@ -155,7 +145,6 @@ export default function Home() {
     setError(null);
     setInputSource("linkedin");
     setMagicLinkTried(false);
-    setIsRoastReady(false);
     window.scrollTo(0, 0);
   };
 
@@ -544,23 +533,21 @@ Experience:
           )}
 
           {step === "analyzing" && (
-            <CardPackOpening
+            <motion.div
               key="analyzing"
-              isReady={isRoastReady}
-              onRevealComplete={handlePackRevealComplete}
-              cardData={result ? {
-                score: result.careerScore,
-                archetypeName: result.archetype.name,
-                archetypeEmoji: result.archetype.emoji,
-                archetypeDescription: result.archetype.description,
-                archetypeImage: result.archetypeImage,
-                element: (result.archetype.element as PMElement) || "chaos",
-                moves: result.moves || [],
-                stage: result.archetype.stage,
-                weakness: result.archetype.weakness,
-                flavor: result.archetype.flavor,
-              } : undefined}
-            />
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="w-full max-w-lg mx-auto text-center py-12"
+            >
+              <motion.div
+                animate={{ rotate: 360 }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                className="w-16 h-16 mx-auto mb-6 rounded-full border-4 border-yellow-400 border-t-transparent"
+              />
+              <h2 className="text-xl font-bold mb-2">Generating your card...</h2>
+              <p className="text-muted-foreground">This takes about 10 seconds</p>
+            </motion.div>
           )}
 
           {step === "results" && result && dreamRole && (

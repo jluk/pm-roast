@@ -73,6 +73,7 @@ export function PokemonCard({
         className="relative rounded-xl overflow-hidden border-[6px] border-yellow-400"
         style={{
           background: "linear-gradient(180deg, #fef3c7 0%, #fde68a 20%, #fbbf24 100%)",
+          aspectRatio: "2.5/3.5",
         }}
       >
         {/* Inner border effect */}
@@ -86,11 +87,12 @@ export function PokemonCard({
               {archetypeName}
             </h2>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0 ml-2">
-            <span className={`font-black text-red-600 ${compact ? "text-xl" : "text-2xl"}`}>
+          <div className="flex items-center gap-1 shrink-0 ml-2">
+            <span className={`font-black text-red-600 ${compact ? "text-lg" : "text-xl"}`}>
               {score}
             </span>
-            <span className={`font-bold text-gray-600 ${compact ? "text-xs" : "text-sm"}`}>HP</span>
+            <span className={`font-bold text-gray-500 ${compact ? "text-xs" : "text-sm"}`}>/100</span>
+            <span className={`font-bold text-gray-600 ml-1 ${compact ? "text-xs" : "text-sm"}`}>HP</span>
             <EnergySymbol element={element} size={compact ? "sm" : "md"} />
           </div>
         </div>
