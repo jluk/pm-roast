@@ -156,6 +156,7 @@ export default function Home() {
     setInputSource("linkedin");
     setMagicLinkTried(false);
     setIsRoastReady(false);
+    window.scrollTo(0, 0);
   };
 
   const getInputName = () => {
