@@ -484,7 +484,16 @@ Experience:
               {/* Social proof */}
               <div className="mt-8 text-center">
                 <p className="text-sm text-muted-foreground">
-                  Wisdom from <span className="text-foreground font-medium">Lenny&apos;s Podcast</span> — PMs from
+                  Wisdom from{" "}
+                  <a
+                    href="https://www.youtube.com/@LennysPodcast"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground font-medium hover:text-[#6366f1] transition-colors"
+                  >
+                    Lenny&apos;s Podcast
+                  </a>
+                  {" "}— PMs from
                   <span className="text-foreground"> Airbnb</span>,
                   <span className="text-foreground"> Stripe</span>,
                   <span className="text-foreground"> Figma</span>,
