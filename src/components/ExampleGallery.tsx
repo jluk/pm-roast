@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { PMElement, PMMove } from "./PokemonCard";
 import { InteractiveCard } from "./InteractiveCard";
+import { getCardRarity } from "./HoloCard";
 
 // Example card data showcasing different PM archetypes - 9 cards for 3x3 grid
 const EXAMPLE_CARDS: {
@@ -18,6 +19,7 @@ const EXAMPLE_CARDS: {
   productSense: number;
   execution: number;
   leadership: number;
+  archetypeImage?: string; // Custom generated image URL
 }[] = [
   {
     score: 87,
@@ -30,12 +32,12 @@ const EXAMPLE_CARDS: {
     moves: [
       { name: "Equity Flex", energyCost: 1, damage: 30, effect: "Show off vested shares." },
       { name: "Lucky Timing", energyCost: 2, damage: 50, effect: "Claim credit for market conditions." },
-      { name: "Exit Interview", energyCost: 3, damage: 80 },
     ],
     flavor: "Often found mentioning their employee number. Peaked in 2021.",
     productSense: 72,
     execution: 91,
     leadership: 68,
+    archetypeImage: "/cards/rocketship-rider.png",
   },
   {
     score: 64,
@@ -48,12 +50,12 @@ const EXAMPLE_CARDS: {
     moves: [
       { name: "Dashboard Stare", energyCost: 1, damage: 20, effect: "Confuse with 47 metrics." },
       { name: "Stat Significance", energyCost: 2, damage: 40, effect: "Delay decision 2 weeks." },
-      { name: "P-Value Punch", energyCost: 3, damage: 70 },
     ],
     flavor: "Natural habitat: Looker dashboard. Strong opinions on sample sizes.",
     productSense: 58,
     execution: 85,
     leadership: 42,
+    archetypeImage: "/cards/metric-monk.png",
   },
   {
     score: 73,
@@ -66,12 +68,12 @@ const EXAMPLE_CARDS: {
     moves: [
       { name: "Scope Creep", energyCost: 1, damage: 25, effect: "Add 3 requirements mid-sprint." },
       { name: "Deadline Dodge", energyCost: 2, damage: 45, effect: "Push launch back 1 week." },
-      { name: "Burnout Blast", energyCost: 3, damage: 90 },
     ],
     flavor: "Twitches at 'quick sync'. Shipped 200 features nobody uses.",
     productSense: 58,
     execution: 88,
     leadership: 51,
+    archetypeImage: "/cards/factory-survivor.png",
   },
   {
     score: 91,
@@ -84,12 +86,12 @@ const EXAMPLE_CARDS: {
     moves: [
       { name: "First Principles", energyCost: 2, damage: 50, effect: "Reframe entire problem." },
       { name: "Investor Pitch", energyCost: 2, damage: 60, effect: "Secure funding with napkin math." },
-      { name: "Market Maker", energyCost: 3, damage: 100 },
     ],
     flavor: "Rare PM who thinks AND executes. Handle with care - they have options.",
     productSense: 94,
     execution: 85,
     leadership: 89,
+    archetypeImage: "/cards/strategic-visionary.png",
   },
   {
     score: 55,
@@ -102,12 +104,12 @@ const EXAMPLE_CARDS: {
     moves: [
       { name: "Doc Block", energyCost: 1, damage: 15, effect: "Paralyze team with 50-page PRD." },
       { name: "Edge Case Spiral", energyCost: 2, damage: 35, effect: "Discover 12 new blockers." },
-      { name: "Analysis Paralysis", energyCost: 3, damage: 60 },
     ],
     flavor: "Written more words than shipped features. Their PRDs have PRDs.",
     productSense: 62,
     execution: 35,
     leadership: 48,
+    archetypeImage: "/cards/prd-perfectionist.png",
   },
   {
     score: 78,
@@ -120,12 +122,12 @@ const EXAMPLE_CARDS: {
     moves: [
       { name: "Pivot Strike", energyCost: 1, damage: 30, effect: "Change direction mid-sprint." },
       { name: "Stakeholder Shuffle", energyCost: 2, damage: 50, effect: "Realign priorities overnight." },
-      { name: "Controlled Burn", energyCost: 3, damage: 85 },
     ],
     flavor: "Turns every fire into opportunity. Calendar is 90% 'quick syncs'.",
     productSense: 75,
     execution: 82,
     leadership: 71,
+    archetypeImage: "/cards/chaos-navigator.png",
   },
   {
     score: 82,
@@ -138,12 +140,12 @@ const EXAMPLE_CARDS: {
     moves: [
       { name: "Smoke & Mirrors", energyCost: 1, damage: 35, effect: "Hide bugs during demo." },
       { name: "Exec Dazzle", energyCost: 2, damage: 55, effect: "Secure budget with vibes." },
-      { name: "Happy Path Only", energyCost: 3, damage: 75 },
     ],
     flavor: "Demo environment: perfect. Prod: 47 Jira tickets. Every time.",
     productSense: 70,
     execution: 65,
     leadership: 85,
+    archetypeImage: "/cards/demo-wizard.png",
   },
   {
     score: 68,
@@ -156,12 +158,12 @@ const EXAMPLE_CARDS: {
     moves: [
       { name: "Buzzword Blast", energyCost: 1, damage: 25, effect: "Confuse with jargon." },
       { name: "GenAI Pivot", energyCost: 2, damage: 45, effect: "Rebrand existing feature as AI." },
-      { name: "LLM Integration", energyCost: 3, damage: 70 },
     ],
     flavor: "Every solution involves an LLM. Even the login page. Why not?",
     productSense: 60,
     execution: 72,
     leadership: 65,
+    archetypeImage: "/cards/ai-bandwagoner.png",
   },
   {
     score: 76,
@@ -174,38 +176,119 @@ const EXAMPLE_CARDS: {
     moves: [
       { name: "Process Import", energyCost: 1, damage: 20, effect: "Introduce 6 new meetings." },
       { name: "Scale Story", energyCost: 2, damage: 45, effect: "Mention previous MAUs." },
-      { name: "Culture Shock", energyCost: 3, damage: 80 },
     ],
     flavor: "Still refers to levels. Adjusting to life without design systems.",
     productSense: 78,
     execution: 70,
     leadership: 74,
+    archetypeImage: "/cards/faang-escapee.png",
   },
 ];
 
 function GalleryCard({ card, index }: { card: typeof EXAMPLE_CARDS[0]; index: number }) {
+  const rarity = getCardRarity(card.score);
+  const isUltraRare = rarity === "ultra" || rarity === "rainbow" || rarity === "gold";
+  const isRainbowOrGold = rarity === "rainbow" || rarity === "gold";
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.08 }}
-      className="flex justify-center"
+      className="flex justify-center relative"
     >
-      <InteractiveCard
-        score={card.score}
-        archetypeName={card.name}
-        archetypeEmoji={card.emoji}
-        archetypeDescription={card.description}
-        element={card.element}
-        stage={card.stage}
-        weakness={card.weakness}
-        moves={card.moves}
-        flavor={card.flavor}
-        compact
-        enableFlip
-        enableModal
-      />
+      {/* Special glow effect for ultra rare+ cards */}
+      {isUltraRare && (
+        <motion.div
+          className={`absolute -inset-4 rounded-3xl blur-2xl ${
+            isRainbowOrGold
+              ? "bg-gradient-to-r from-pink-500/40 via-purple-500/40 to-cyan-500/40"
+              : "bg-pink-500/30"
+          }`}
+          animate={isRainbowOrGold ? {
+            opacity: [0.4, 0.7, 0.4],
+            scale: [1, 1.05, 1],
+          } : {}}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+      )}
+
+      {/* Sparkle effects for rainbow/gold cards */}
+      {isRainbowOrGold && (
+        <>
+          <motion.div
+            className="absolute -top-2 -left-2 w-3 h-3 bg-white rounded-full"
+            animate={{
+              opacity: [0, 1, 0],
+              scale: [0.5, 1, 0.5],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              delay: 0,
+            }}
+          />
+          <motion.div
+            className="absolute top-1/4 -right-3 w-2 h-2 bg-yellow-300 rounded-full"
+            animate={{
+              opacity: [0, 1, 0],
+              scale: [0.5, 1, 0.5],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              delay: 0.5,
+            }}
+          />
+          <motion.div
+            className="absolute -bottom-1 left-1/4 w-2 h-2 bg-cyan-300 rounded-full"
+            animate={{
+              opacity: [0, 1, 0],
+              scale: [0.5, 1, 0.5],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              delay: 1,
+            }}
+          />
+          <motion.div
+            className="absolute top-1/2 -left-3 w-2 h-2 bg-pink-300 rounded-full"
+            animate={{
+              opacity: [0, 1, 0],
+              scale: [0.5, 1, 0.5],
+            }}
+            transition={{
+              duration: 1.5,
+              repeat: Infinity,
+              delay: 0.75,
+            }}
+          />
+        </>
+      )}
+
+      <div className="relative z-10">
+        <InteractiveCard
+          score={card.score}
+          archetypeName={card.name}
+          archetypeEmoji={card.emoji}
+          archetypeDescription={card.description}
+          archetypeImage={card.archetypeImage}
+          element={card.element}
+          stage={card.stage}
+          weakness={card.weakness}
+          moves={card.moves}
+          flavor={card.flavor}
+          compact
+          enableFlip
+          enableModal
+        />
+      </div>
     </motion.div>
   );
 }
