@@ -1,7 +1,7 @@
 import axios, { AxiosError } from "axios";
 
-// LinkdAPI endpoint (migrated from Proxycurl)
-const LINKDAPI_URL = "https://api.linkdapi.com/v1/profiles";
+// LinkdAPI endpoint - correct URL is linkdapi.com (not api.linkdapi.com)
+const LINKDAPI_URL = "https://linkdapi.com/api/v1/profile/overview";
 
 // Types for the LinkedIn profile data we care about
 export interface LinkedInExperience {
@@ -277,13 +277,19 @@ export async function fetchLinkedInData(linkedinUrl: string): Promise<FetchLinke
   }
 
   try {
+    // Extract username from LinkedIn URL (e.g., "linkedin.com/in/username" -> "username")
+    const usernameMatch = linkedinUrl.match(/linkedin\.com\/in\/([^/?]+)/);
+    const username = usernameMatch ? usernameMatch[1] : linkedinUrl;
+
+    console.log("Fetching LinkedIn profile for username:", username);
+
     const response = await axios.get(LINKDAPI_URL, {
       headers: {
-        "x-api-key": apiKey,
+        "X-linkdapi-apikey": apiKey,
         "Content-Type": "application/json",
       },
       params: {
-        url: linkedinUrl,
+        username: username,
       },
     });
 
