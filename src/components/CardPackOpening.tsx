@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PokemonCard, PMElement, PMMove } from "./PokemonCard";
+import { Button } from "./ui/button";
 
 interface CardPackOpeningProps {
   isReady: boolean;
@@ -22,20 +23,20 @@ interface CardPackOpeningProps {
 }
 
 // Sparkle component for the opening effect
-function Sparkle({ delay, x, y }: { delay: number; x: number; y: number }) {
+function Sparkle({ delay, x, y, size = 2 }: { delay: number; x: number; y: number; size?: number }) {
   return (
     <motion.div
-      className="absolute w-2 h-2 bg-yellow-300 rounded-full"
-      style={{ left: `${x}%`, top: `${y}%` }}
+      className="absolute bg-yellow-300 rounded-full pointer-events-none"
+      style={{ left: `${x}%`, top: `${y}%`, width: size, height: size }}
       initial={{ scale: 0, opacity: 1 }}
       animate={{
         scale: [0, 1.5, 0],
         opacity: [1, 1, 0],
-        x: [0, (Math.random() - 0.5) * 100],
-        y: [0, (Math.random() - 0.5) * 100],
+        x: [0, (Math.random() - 0.5) * 150],
+        y: [0, (Math.random() - 0.5) * 150],
       }}
       transition={{
-        duration: 0.8,
+        duration: 1.2,
         delay,
         ease: "easeOut",
       }}
@@ -47,16 +48,18 @@ function Sparkle({ delay, x, y }: { delay: number; x: number; y: number }) {
 function generateSparkles(count: number) {
   return Array.from({ length: count }, (_, i) => ({
     id: i,
-    x: 20 + Math.random() * 60,
-    y: 20 + Math.random() * 60,
-    delay: Math.random() * 0.5,
+    x: 30 + Math.random() * 40,
+    y: 30 + Math.random() * 40,
+    delay: Math.random() * 0.3,
+    size: 2 + Math.random() * 4,
   }));
 }
 
 export function CardPackOpening({ isReady, onRevealComplete, cardData }: CardPackOpeningProps) {
   const [stage, setStage] = useState<"loading" | "ready" | "opening" | "revealed">("loading");
-  const [sparkles, setSparkles] = useState<{ id: number; x: number; y: number; delay: number }[]>([]);
+  const [sparkles, setSparkles] = useState<{ id: number; x: number; y: number; delay: number; size: number }[]>([]);
   const [loadingMessage, setLoadingMessage] = useState(0);
+  const [continuousSparkles, setContinuousSparkles] = useState<{ id: number; x: number; y: number; delay: number; size: number }[]>([]);
 
   const LOADING_MESSAGES = [
     { text: "Scanning your profile...", emoji: "🔍" },
@@ -83,29 +86,38 @@ export function CardPackOpening({ isReady, onRevealComplete, cardData }: CardPac
   useEffect(() => {
     if (isReady && cardData && stage === "loading") {
       // Small delay to let the last message show
-      setTimeout(() => setStage("ready"), 500);
+      setTimeout(() => setStage("ready"), 800);
     }
   }, [isReady, cardData, stage]);
 
-  const handlePackClick = () => {
+  // Continuous sparkles in revealed state
+  useEffect(() => {
+    if (stage === "revealed") {
+      const interval = setInterval(() => {
+        setContinuousSparkles(generateSparkles(8));
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [stage]);
+
+  const handlePackClick = useCallback(() => {
     if (stage === "ready") {
-      setSparkles(generateSparkles(30));
+      setSparkles(generateSparkles(40));
       setStage("opening");
 
       // After opening animation, reveal the card
       setTimeout(() => {
         setStage("revealed");
-        // Give time for card reveal animation
-        setTimeout(onRevealComplete, 1500);
-      }, 1000);
+        setContinuousSparkles(generateSparkles(12));
+      }, 1200);
     }
-  };
+  }, [stage]);
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="w-full max-w-lg mx-auto text-center py-8"
+      className="w-full max-w-lg mx-auto text-center py-4"
     >
       <AnimatePresence mode="wait">
         {/* Loading Stage */}
@@ -115,10 +127,10 @@ export function CardPackOpening({ isReady, onRevealComplete, cardData }: CardPac
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0, y: -20 }}
-            className="space-y-8"
+            className="space-y-6"
           >
             {/* Progress indicators */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               {LOADING_MESSAGES.map((msg, index) => (
                 <motion.div
                   key={index}
@@ -127,12 +139,12 @@ export function CardPackOpening({ isReady, onRevealComplete, cardData }: CardPac
                     opacity: index <= loadingMessage ? 1 : 0.3,
                     x: 0,
                   }}
-                  transition={{ delay: index * 0.1, duration: 0.3 }}
+                  transition={{ delay: index * 0.05, duration: 0.3 }}
                   className={`flex items-center gap-3 justify-center ${
                     index <= loadingMessage ? "text-foreground" : "text-muted-foreground"
                   }`}
                 >
-                  <span className="text-lg">{msg.emoji}</span>
+                  <span className="text-base">{msg.emoji}</span>
                   <span className={`text-sm ${index === loadingMessage ? "font-medium" : ""}`}>
                     {msg.text}
                   </span>
@@ -140,7 +152,7 @@ export function CardPackOpening({ isReady, onRevealComplete, cardData }: CardPac
                     <motion.span
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="text-green-500"
+                      className="text-green-500 text-sm"
                     >
                       ✓
                     </motion.span>
@@ -174,7 +186,8 @@ export function CardPackOpening({ isReady, onRevealComplete, cardData }: CardPac
             key="ready"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 1.2 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="space-y-6"
           >
             <motion.p
@@ -182,21 +195,22 @@ export function CardPackOpening({ isReady, onRevealComplete, cardData }: CardPac
               animate={{ opacity: 1, y: 0 }}
               className="text-xl font-bold text-foreground"
             >
-              Your card is ready!
+              Your card is ready! 🎉
             </motion.p>
 
             {/* Card Pack */}
             <motion.div
               onClick={handlePackClick}
-              className="relative w-72 h-96 mx-auto cursor-pointer"
+              className="relative w-64 h-80 mx-auto cursor-pointer"
               animate={{
-                rotate: [-1, 1, -1],
-                y: [0, -5, 0],
+                rotate: [-2, 2, -2],
+                y: [0, -8, 0],
               }}
               transition={{
-                duration: 0.3,
+                duration: 0.4,
                 repeat: Infinity,
                 repeatType: "reverse",
+                ease: "easeInOut",
               }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -206,15 +220,15 @@ export function CardPackOpening({ isReady, onRevealComplete, cardData }: CardPac
                 <div className="w-full h-full rounded-lg bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col items-center justify-center p-6 relative overflow-hidden">
                   {/* Holographic pattern */}
                   <div
-                    className="absolute inset-0 opacity-30"
+                    className="absolute inset-0 opacity-20"
                     style={{
                       backgroundImage: `
                         repeating-linear-gradient(
                           45deg,
                           transparent,
-                          transparent 10px,
-                          rgba(255,255,255,0.1) 10px,
-                          rgba(255,255,255,0.1) 20px
+                          transparent 8px,
+                          rgba(255,255,255,0.1) 8px,
+                          rgba(255,255,255,0.1) 16px
                         )
                       `,
                     }}
@@ -222,129 +236,128 @@ export function CardPackOpening({ isReady, onRevealComplete, cardData }: CardPac
 
                   {/* Shimmer effect */}
                   <motion.div
-                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent"
-                    animate={{ x: ["-100%", "100%"] }}
-                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
+                    animate={{ x: ["-200%", "200%"] }}
+                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 0.5, ease: "easeInOut" }}
                   />
 
                   {/* PM Roast Logo */}
                   <div className="relative z-10 text-center">
                     <motion.div
-                      className="text-6xl mb-4"
-                      animate={{ scale: [1, 1.1, 1] }}
+                      className="text-5xl mb-3"
+                      animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
                       🔥
                     </motion.div>
-                    <div className="font-black text-3xl bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
+                    <div className="font-black text-2xl bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">
                       PM ROAST
                     </div>
-                    <p className="text-yellow-400/80 text-sm mt-2 font-medium">
+                    <p className="text-yellow-400/80 text-xs mt-1 font-medium">
                       Trading Card
                     </p>
                   </div>
 
                   {/* Sealed indicator */}
-                  <div className="absolute bottom-6 left-0 right-0 text-center">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/20 rounded-full border border-yellow-500/30">
-                      <span className="text-yellow-400 text-xs font-semibold">SEALED</span>
-                    </div>
+                  <div className="absolute bottom-4 left-0 right-0 text-center">
+                    <motion.div
+                      className="inline-flex items-center gap-2 px-3 py-1.5 bg-yellow-500/20 rounded-full border border-yellow-500/30"
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      <span className="text-yellow-400 text-xs font-bold tracking-wide">TAP TO OPEN</span>
+                    </motion.div>
                   </div>
                 </div>
               </div>
 
               {/* Glow effect */}
               <motion.div
-                className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-yellow-400/20 via-orange-500/20 to-red-500/20 blur-xl -z-10"
-                animate={{ opacity: [0.5, 0.8, 0.5] }}
+                className="absolute -inset-4 rounded-2xl bg-gradient-to-r from-yellow-400/30 via-orange-500/30 to-red-500/30 blur-xl -z-10"
+                animate={{ opacity: [0.4, 0.8, 0.4], scale: [1, 1.05, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               />
             </motion.div>
-
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="text-muted-foreground"
-            >
-              Click to open your pack!
-            </motion.p>
           </motion.div>
         )}
 
-        {/* Opening Stage - Sparkles */}
+        {/* Opening Stage - Sparkles & Explosion */}
         {stage === "opening" && (
           <motion.div
             key="opening"
-            initial={{ opacity: 1 }}
-            className="relative w-72 h-96 mx-auto"
+            className="relative w-64 h-80 mx-auto"
           >
             {/* Exploding sparkles */}
-            <div className="absolute inset-0">
+            <div className="absolute inset-0 z-20">
               {sparkles.map((sparkle) => (
-                <Sparkle key={sparkle.id} delay={sparkle.delay} x={sparkle.x} y={sparkle.y} />
+                <Sparkle key={sparkle.id} delay={sparkle.delay} x={sparkle.x} y={sparkle.y} size={sparkle.size} />
               ))}
             </div>
 
-            {/* Pack tearing apart */}
+            {/* Pack bursting */}
             <motion.div
-              className="absolute inset-0 rounded-xl bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500"
-              initial={{ opacity: 1, scale: 1 }}
+              className="absolute inset-0"
+              initial={{ scale: 1, opacity: 1 }}
               animate={{
-                opacity: [1, 1, 0],
-                scale: [1, 1.1, 1.3],
-                rotate: [0, 5, -5],
+                scale: [1, 1.2, 1.5],
+                opacity: [1, 0.8, 0],
+                rotate: [0, 10, -10],
               }}
-              transition={{ duration: 0.8 }}
-            />
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              <div className="w-full h-full rounded-xl bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500" />
+            </motion.div>
 
             {/* Flash effect */}
             <motion.div
-              className="absolute inset-0 bg-white rounded-xl"
+              className="absolute inset-0 bg-white rounded-xl z-10"
               initial={{ opacity: 0 }}
               animate={{ opacity: [0, 1, 0] }}
-              transition={{ duration: 0.5, times: [0, 0.2, 1] }}
+              transition={{ duration: 0.6, times: [0, 0.3, 1] }}
             />
           </motion.div>
         )}
 
-        {/* Revealed Stage - Card appears */}
+        {/* Revealed Stage - Card with sparkles */}
         {stage === "revealed" && cardData && (
           <motion.div
             key="revealed"
-            initial={{ opacity: 0, scale: 0.5, rotateY: 180 }}
+            initial={{ opacity: 0, scale: 0.3, rotateY: 180 }}
             animate={{ opacity: 1, scale: 1, rotateY: 0 }}
             transition={{
               type: "spring",
-              stiffness: 200,
+              stiffness: 150,
               damping: 20,
-              duration: 0.8,
+              duration: 1,
             }}
             className="relative"
           >
-            {/* Extra sparkles around card */}
-            <motion.div
-              className="absolute -inset-8 pointer-events-none"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              {generateSparkles(20).map((sparkle) => (
+            {/* Continuous sparkles around card */}
+            <div className="absolute -inset-12 pointer-events-none z-10">
+              {continuousSparkles.map((sparkle) => (
                 <motion.div
-                  key={`reveal-${sparkle.id}`}
-                  className="absolute w-1 h-1 bg-yellow-300 rounded-full"
-                  style={{ left: `${sparkle.x}%`, top: `${sparkle.y}%` }}
+                  key={`cont-${sparkle.id}-${Math.random()}`}
+                  className="absolute bg-yellow-300 rounded-full"
+                  style={{ left: `${sparkle.x}%`, top: `${sparkle.y}%`, width: sparkle.size, height: sparkle.size }}
+                  initial={{ scale: 0, opacity: 0 }}
                   animate={{
-                    opacity: [0, 1, 0],
                     scale: [0, 1, 0],
+                    opacity: [0, 1, 0],
                   }}
                   transition={{
-                    duration: 1,
+                    duration: 1.5,
                     delay: sparkle.delay,
-                    repeat: 2,
                   }}
                 />
               ))}
-            </motion.div>
+            </div>
+
+            {/* Glowing backdrop */}
+            <motion.div
+              className="absolute -inset-8 rounded-3xl bg-gradient-to-r from-yellow-400/20 via-orange-500/20 to-red-500/20 blur-2xl -z-10"
+              animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.05, 1] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
 
             <PokemonCard
               score={cardData.score}
@@ -357,16 +370,26 @@ export function CardPackOpening({ isReady, onRevealComplete, cardData }: CardPac
               stage={cardData.stage}
               weakness={cardData.weakness}
               flavor={cardData.flavor}
+              compact
             />
 
-            <motion.p
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="mt-6 text-lg font-semibold text-foreground"
+              className="mt-6 space-y-4"
             >
-              You got: <span className="text-yellow-400">{cardData.archetypeName}</span>!
-            </motion.p>
+              <p className="text-lg font-semibold text-foreground">
+                You&apos;re a <span className="text-yellow-400">{cardData.archetypeName}</span>!
+              </p>
+
+              <Button
+                onClick={onRevealComplete}
+                className="h-12 px-8 bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white font-semibold hover:from-[#5558e3] hover:to-[#7c4fe0] transition-all shadow-lg shadow-[#6366f1]/25"
+              >
+                See Full Results →
+              </Button>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

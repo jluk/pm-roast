@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { RoastResult, DreamRole, DREAM_ROLES, PMElement } from "@/lib/types";
 import { generateShareUrl } from "@/lib/share";
-import { PokemonCard, PowerStats } from "@/components/PokemonCard";
+import { PokemonCard } from "@/components/PokemonCard";
 
 interface ResultsProps {
   result: RoastResult;
@@ -74,12 +74,12 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
       animate={{ opacity: 1 }}
       className="w-full max-w-3xl mx-auto space-y-8 pb-12"
     >
-      {/* Pokemon-Style Card + Power Stats */}
+      {/* Pokemon-Style Card - Centered */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1, type: "spring" }}
-        className="flex flex-col lg:flex-row items-center lg:items-start justify-center gap-6"
+        className="flex justify-center"
       >
         <PokemonCard
           score={result.careerScore}
@@ -92,14 +92,8 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
           stage={result.archetype.stage || "Senior"}
           weakness={result.archetype.weakness || "Meetings"}
           flavor={stripMarkdown(result.archetype.flavor || result.archetype.description)}
+          compact
         />
-        <div className="w-full max-w-[280px]">
-          <PowerStats
-            productSense={result.capabilities?.productSense || 75}
-            execution={result.capabilities?.execution || 70}
-            leadership={result.capabilities?.leadership || 65}
-          />
-        </div>
       </motion.div>
 
       {/* Share Buttons */}
@@ -237,9 +231,21 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.1 }}
       >
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-white">
+        <h3 className="text-xl font-semibold mb-2 flex items-center gap-2 text-white">
           <span>🎧</span> Required Listening
         </h3>
+        <p className="text-sm text-muted-foreground mb-4">
+          Episodes from{" "}
+          <a
+            href="https://www.youtube.com/@LennysPodcast"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#6366f1] hover:underline"
+          >
+            Lenny&apos;s Podcast
+          </a>
+          {" "}to level up your PM game
+        </p>
         <div className="grid gap-3">
           {result.podcastEpisodes.map((episode, index) => (
             <a
