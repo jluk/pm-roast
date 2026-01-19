@@ -219,9 +219,9 @@ export default function Home() {
                 </div>
 
                 <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-balance">
-                  Get your PM
+                  Get roasted.
                   <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-                    {" "}Trading Card
+                    {" "}Get your card.
                   </span>
                 </h1>
 
@@ -593,17 +593,7 @@ Experience:
       {/* Footer */}
       <footer className="border-t border-border/50 py-6">
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between text-xs text-muted-foreground">
-          <span>
-            Built by{" "}
-            <a
-              href="https://jluk.me"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-foreground hover:text-accent transition-colors"
-            >
-              Justin Luk
-            </a>
-          </span>
+          <span>Powered by Gemini</span>
           <a
             href="https://github.com/jluk/pm-roast"
             target="_blank"
