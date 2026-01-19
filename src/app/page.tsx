@@ -182,51 +182,27 @@ export default function Home() {
               exit={{ opacity: 0, y: -20 }}
               className="w-full"
             >
-              {/* Hero Section with Card */}
-              <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16 max-w-6xl mx-auto">
-                {/* Left side - Copy */}
-                <div className="flex-1 text-center lg:text-left space-y-6">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border text-xs text-muted-foreground">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#6366f1] animate-pulse" />
-                    Powered by 200+ PM interviews
-                  </div>
-
-                  <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-balance">
-                    Get your PM
-                    <span className="block bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
-                      Trading Card
-                    </span>
-                  </h1>
-
-                  <p className="text-lg text-muted-foreground max-w-lg mx-auto lg:mx-0 text-balance">
-                    Share your LinkedIn or resume. Get roasted by AI and receive a collectible card showing your true PM archetype.
-                  </p>
-
-                  {/* Stats */}
-                  <div className="flex flex-wrap justify-center lg:justify-start gap-6 pt-2">
-                    <div className="text-center lg:text-left">
-                      <p className="text-2xl font-bold text-white">10k+</p>
-                      <p className="text-xs text-muted-foreground">Cards Generated</p>
-                    </div>
-                    <div className="text-center lg:text-left">
-                      <p className="text-2xl font-bold text-white">9</p>
-                      <p className="text-xs text-muted-foreground">PM Archetypes</p>
-                    </div>
-                    <div className="text-center lg:text-left">
-                      <p className="text-2xl font-bold text-white">6</p>
-                      <p className="text-xs text-muted-foreground">Element Types</p>
-                    </div>
-                  </div>
+              {/* Hero Section - CTA First */}
+              <div className="max-w-4xl mx-auto text-center space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border text-xs text-muted-foreground">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#6366f1] animate-pulse" />
+                  Powered by 200+ PM interviews
                 </div>
 
-                {/* Right side - Hero Card */}
-                <div className="flex-shrink-0">
-                  <HeroCard />
-                </div>
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-balance">
+                  Get your PM
+                  <span className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 bg-clip-text text-transparent">
+                    {" "}Trading Card
+                  </span>
+                </h1>
+
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-balance">
+                  Share your LinkedIn and get roasted by AI. Receive a collectible Pokemon-style card showing your true PM archetype.
+                </p>
               </div>
 
-              {/* Input Card */}
-              <Card className="mt-16 w-full max-w-xl mx-auto p-6 bg-card border-border">
+              {/* Primary CTA - Input Card */}
+              <Card className="mt-10 w-full max-w-xl mx-auto p-6 bg-card border-2 border-[#6366f1]/30 shadow-xl shadow-[#6366f1]/10">
                 <AnimatePresence mode="wait">
                   {inputMode === "magic" ? (
                     <motion.div
@@ -460,18 +436,37 @@ Experience:
                 </AnimatePresence>
               </Card>
 
+              {/* Stats */}
+              <div className="mt-10 flex flex-wrap justify-center gap-8">
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-white">10k+</p>
+                  <p className="text-xs text-muted-foreground">Cards Generated</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-white">9</p>
+                  <p className="text-xs text-muted-foreground">PM Archetypes</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-3xl font-bold text-white">6</p>
+                  <p className="text-xs text-muted-foreground">Element Types</p>
+                </div>
+              </div>
+
               {/* Social proof */}
-              <div className="mt-12 text-center space-y-3">
-                <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                  Wisdom sourced from
-                </p>
+              <div className="mt-8 text-center">
                 <p className="text-sm text-muted-foreground">
-                  <span className="text-foreground font-medium">Lenny&apos;s Podcast</span> — 200+ episodes with PMs from
+                  Wisdom from <span className="text-foreground font-medium">Lenny&apos;s Podcast</span> — PMs from
                   <span className="text-foreground"> Airbnb</span>,
                   <span className="text-foreground"> Stripe</span>,
                   <span className="text-foreground"> Figma</span>,
                   <span className="text-foreground"> Linear</span>, and more
                 </p>
+              </div>
+
+              {/* Hero Card Preview */}
+              <div className="mt-16 flex flex-col items-center">
+                <p className="text-sm text-muted-foreground mb-6">Here&apos;s what you&apos;ll get:</p>
+                <HeroCard />
               </div>
 
               {/* Example Gallery */}
