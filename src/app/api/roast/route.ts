@@ -246,7 +246,7 @@ export async function POST(request: NextRequest) {
     if (!trimmedText || trimmedText.length < 100) {
       return NextResponse.json(
         {
-          error: "Not enough content to analyze. Please provide more details about your experience.",
+          error: "Not enough content to analyze. We need at least your job titles, companies, and key achievements to give you an accurate roast. Please provide more details.",
           errorCode: "INSUFFICIENT_DATA"
         },
         { status: 400 }
@@ -261,13 +261,26 @@ export async function POST(request: NextRequest) {
       'users', 'customers', 'metrics', 'shipped', 'developed', 'managed'
     ];
     const lowerText = trimmedText.toLowerCase();
-    const hasRelevantContent = meaningfulKeywords.some(keyword => lowerText.includes(keyword));
+    const matchedKeywords = meaningfulKeywords.filter(keyword => lowerText.includes(keyword));
 
-    if (!hasRelevantContent) {
+    // Require at least 2 relevant keywords to ensure we have real content
+    if (matchedKeywords.length < 2) {
       return NextResponse.json(
         {
-          error: "The content doesn't appear to contain PM/work experience. Please paste your LinkedIn profile or resume content.",
+          error: "We need more details about your PM experience to generate an accurate roast. Please include your job titles, companies you've worked at, and what you've built or shipped.",
           errorCode: "INVALID_CONTENT"
+        },
+        { status: 400 }
+      );
+    }
+
+    // Additional check: require minimum word count to prevent sparse inputs
+    const wordCount = trimmedText.split(/\s+/).length;
+    if (wordCount < 30) {
+      return NextResponse.json(
+        {
+          error: "Your profile is too brief for an accurate roast. Please add more details about your experience, achievements, and the products you've worked on.",
+          errorCode: "INSUFFICIENT_DATA"
         },
         { status: 400 }
       );
