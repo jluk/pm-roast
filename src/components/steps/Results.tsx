@@ -8,6 +8,59 @@ import { RoastResult, DreamRole, DREAM_ROLES } from "@/lib/types";
 import { generateShareUrl } from "@/lib/share";
 import { InteractiveCard } from "@/components/InteractiveCard";
 import { PMElement } from "@/components/PokemonCard";
+import { getCardRarity, CardRarity } from "@/components/HoloCard";
+
+// Rarity display info
+const RARITY_INFO: Record<CardRarity, {
+  label: string;
+  emoji: string;
+  color: string;
+  description: string;
+  percentile: string;
+}> = {
+  common: {
+    label: "Common",
+    emoji: "⚪",
+    color: "text-gray-400",
+    description: "You're just getting started. Everyone begins somewhere!",
+    percentile: "Bottom 40%",
+  },
+  uncommon: {
+    label: "Uncommon",
+    emoji: "🔵",
+    color: "text-blue-400",
+    description: "Solid foundation. You're building real PM skills.",
+    percentile: "Top 60%",
+  },
+  rare: {
+    label: "Rare",
+    emoji: "🟣",
+    color: "text-purple-400",
+    description: "Above average. You've got what it takes to level up.",
+    percentile: "Top 40%",
+  },
+  ultra: {
+    label: "Ultra Rare",
+    emoji: "💗",
+    color: "text-pink-400",
+    description: "Impressive. You're in the upper echelon of PMs.",
+    percentile: "Top 25%",
+  },
+  rainbow: {
+    label: "Rainbow Rare",
+    emoji: "🌈",
+    color: "text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400",
+    description: "Elite tier. Companies fight over PMs like you.",
+    percentile: "Top 15%",
+  },
+  gold: {
+    label: "Gold Crown",
+    emoji: "👑",
+    color: "text-yellow-400",
+    description: "Legendary. You're the PM other PMs aspire to become.",
+    percentile: "Top 5%",
+  },
+};
 
 interface ResultsProps {
   result: RoastResult;
@@ -69,6 +122,10 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
   // Only show first 4 roadmap phases
   const roadmapPhases = result.roadmap.slice(0, 4);
 
+  // Get rarity info
+  const rarity = getCardRarity(result.careerScore);
+  const rarityInfo = RARITY_INFO[rarity];
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -99,6 +156,25 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
         />
         <p className="text-xs text-muted-foreground">
           Click card to enlarge & flip
+        </p>
+      </motion.div>
+
+      {/* Rarity Info */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+        className="text-center space-y-2"
+      >
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-2xl">{rarityInfo.emoji}</span>
+          <span className={`text-xl font-bold ${rarityInfo.color}`}>
+            {rarityInfo.label} Card
+          </span>
+          <span className="text-sm text-muted-foreground">({rarityInfo.percentile})</span>
+        </div>
+        <p className="text-sm text-muted-foreground max-w-md mx-auto">
+          {rarityInfo.description}
         </p>
       </motion.div>
 

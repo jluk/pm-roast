@@ -8,42 +8,63 @@ const RARITY_STYLES: Record<CardRarity, {
   borderClass: string;
   background: string;
   innerBorderColor: string;
+  textPrimary: string;
+  textSecondary: string;
+  textMuted: string;
 }> = {
   common: {
-    borderColor: "#9ca3af", // gray
-    borderClass: "border-gray-400",
-    background: "linear-gradient(180deg, #f3f4f6 0%, #d1d5db 20%, #9ca3af 100%)",
-    innerBorderColor: "rgba(107, 114, 128, 0.2)",
+    borderColor: "#6b7280", // darker gray for better contrast
+    borderClass: "border-gray-500",
+    background: "linear-gradient(180deg, #f9fafb 0%, #e5e7eb 20%, #9ca3af 100%)",
+    innerBorderColor: "rgba(75, 85, 99, 0.3)",
+    textPrimary: "#1f2937", // gray-800
+    textSecondary: "#374151", // gray-700
+    textMuted: "#4b5563", // gray-600
   },
   uncommon: {
-    borderColor: "#3b82f6", // blue
-    borderClass: "border-blue-500",
-    background: "linear-gradient(180deg, #dbeafe 0%, #93c5fd 20%, #3b82f6 100%)",
-    innerBorderColor: "rgba(59, 130, 246, 0.2)",
+    borderColor: "#2563eb", // blue-600
+    borderClass: "border-blue-600",
+    background: "linear-gradient(180deg, #eff6ff 0%, #bfdbfe 20%, #3b82f6 100%)",
+    innerBorderColor: "rgba(37, 99, 235, 0.3)",
+    textPrimary: "#1e3a8a", // blue-900
+    textSecondary: "#1e40af", // blue-800
+    textMuted: "#1d4ed8", // blue-700
   },
   rare: {
-    borderColor: "#8b5cf6", // purple
-    borderClass: "border-purple-500",
-    background: "linear-gradient(180deg, #ede9fe 0%, #c4b5fd 20%, #8b5cf6 100%)",
-    innerBorderColor: "rgba(139, 92, 246, 0.2)",
+    borderColor: "#7c3aed", // violet-600
+    borderClass: "border-violet-600",
+    background: "linear-gradient(180deg, #f5f3ff 0%, #ddd6fe 20%, #8b5cf6 100%)",
+    innerBorderColor: "rgba(124, 58, 237, 0.3)",
+    textPrimary: "#4c1d95", // violet-900
+    textSecondary: "#5b21b6", // violet-800
+    textMuted: "#6d28d9", // violet-700
   },
   ultra: {
-    borderColor: "#ec4899", // pink
-    borderClass: "border-pink-500",
-    background: "linear-gradient(180deg, #fce7f3 0%, #f9a8d4 20%, #ec4899 100%)",
-    innerBorderColor: "rgba(236, 72, 153, 0.2)",
+    borderColor: "#db2777", // pink-600
+    borderClass: "border-pink-600",
+    background: "linear-gradient(180deg, #fdf2f8 0%, #fbcfe8 20%, #ec4899 100%)",
+    innerBorderColor: "rgba(219, 39, 119, 0.3)",
+    textPrimary: "#831843", // pink-900
+    textSecondary: "#9d174d", // pink-800
+    textMuted: "#be185d", // pink-700
   },
   rainbow: {
-    borderColor: "#a855f7", // purple for base, but will use gradient
+    borderColor: "#a855f7", // purple for base
     borderClass: "border-purple-500",
-    background: "linear-gradient(135deg, #fce7f3 0%, #dbeafe 25%, #d1fae5 50%, #fef3c7 75%, #fce7f3 100%)",
-    innerBorderColor: "rgba(168, 85, 247, 0.3)",
+    background: "linear-gradient(135deg, #fdf2f8 0%, #eff6ff 25%, #ecfdf5 50%, #fefce8 75%, #fdf2f8 100%)",
+    innerBorderColor: "rgba(168, 85, 247, 0.4)",
+    textPrimary: "#1f2937", // gray-800
+    textSecondary: "#374151", // gray-700
+    textMuted: "#4b5563", // gray-600
   },
   gold: {
-    borderColor: "#fbbf24", // gold
-    borderClass: "border-yellow-400",
-    background: "linear-gradient(180deg, #fef3c7 0%, #fde68a 20%, #fbbf24 100%)",
-    innerBorderColor: "rgba(217, 119, 6, 0.3)",
+    borderColor: "#d97706", // amber-600
+    borderClass: "border-amber-600",
+    background: "linear-gradient(180deg, #fffbeb 0%, #fde68a 20%, #f59e0b 100%)",
+    innerBorderColor: "rgba(180, 83, 9, 0.3)",
+    textPrimary: "#78350f", // amber-900
+    textSecondary: "#92400e", // amber-800
+    textMuted: "#b45309", // amber-700
   },
 };
 
@@ -142,7 +163,10 @@ export function PokemonCard({
         <div className={`flex items-center justify-between ${compact ? "px-3 py-2" : "px-4 py-3"}`}>
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <span className={compact ? "text-xl" : "text-2xl"} style={{ flexShrink: 0 }}>{archetypeEmoji}</span>
-            <h2 className={`font-black text-gray-800 leading-tight ${compact ? "text-xs" : "text-sm"}`}>
+            <h2
+              className={`font-black leading-tight ${compact ? "text-xs" : "text-sm"}`}
+              style={{ color: rarityStyle.textPrimary }}
+            >
               {archetypeName}
             </h2>
           </div>
@@ -150,8 +174,14 @@ export function PokemonCard({
             <span className={`font-black text-red-600 ${compact ? "text-lg" : "text-xl"}`}>
               {score}
             </span>
-            <span className={`font-bold text-gray-500 ${compact ? "text-xs" : "text-sm"}`}>/100</span>
-            <span className={`font-bold text-gray-600 ml-1 ${compact ? "text-xs" : "text-sm"}`}>HP</span>
+            <span
+              className={`font-bold ${compact ? "text-xs" : "text-sm"}`}
+              style={{ color: rarityStyle.textMuted }}
+            >/100</span>
+            <span
+              className={`font-bold ml-1 ${compact ? "text-xs" : "text-sm"}`}
+              style={{ color: rarityStyle.textSecondary }}
+            >HP</span>
             <EnergySymbol element={element} size={compact ? "sm" : "md"} />
           </div>
         </div>
@@ -196,14 +226,17 @@ export function PokemonCard({
           >
             {elementData.name} Type PM
           </div>
-          <span className={`text-gray-600 italic ${compact ? "text-xs" : "text-sm"}`}>
+          <span
+            className={`italic ${compact ? "text-xs" : "text-sm"}`}
+            style={{ color: rarityStyle.textSecondary }}
+          >
             {stage}
           </span>
         </div>
 
         {/* Moves Section - Always 2 moves */}
         <div
-          className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"} bg-white/60 rounded-lg border`}
+          className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"} bg-white/70 rounded-lg border`}
           style={{ borderColor: rarityStyle.innerBorderColor }}
         >
           {moves.slice(0, 2).map((move, index) => (
@@ -221,18 +254,27 @@ export function PokemonCard({
 
               {/* Move Name & Effect */}
               <div className="flex-1 min-w-0">
-                <span className={`font-bold text-gray-800 block truncate ${compact ? "text-xs" : "text-sm"}`}>
+                <span
+                  className={`font-bold block truncate ${compact ? "text-xs" : "text-sm"}`}
+                  style={{ color: rarityStyle.textPrimary }}
+                >
                   {move.name}
                 </span>
                 {move.effect && (
-                  <p className={`text-gray-600 leading-tight mt-0.5 line-clamp-1 ${compact ? "text-[10px]" : "text-xs"}`}>
+                  <p
+                    className={`leading-tight mt-0.5 line-clamp-1 ${compact ? "text-[10px]" : "text-xs"}`}
+                    style={{ color: rarityStyle.textMuted }}
+                  >
                     {move.effect}
                   </p>
                 )}
               </div>
 
               {/* Damage */}
-              <span className={`font-black text-gray-800 shrink-0 ${compact ? "text-sm" : "text-lg"}`}>
+              <span
+                className={`font-black shrink-0 ${compact ? "text-sm" : "text-lg"}`}
+                style={{ color: rarityStyle.textPrimary }}
+              >
                 {move.damage}
               </span>
             </div>
@@ -245,11 +287,17 @@ export function PokemonCard({
           style={{ backgroundColor: `${rarityStyle.borderColor}33` }}
         >
           <div className="flex items-center gap-2">
-            <span className={`text-gray-600 font-medium ${compact ? "text-xs" : "text-sm"}`}>weakness</span>
+            <span
+              className={`font-medium ${compact ? "text-xs" : "text-sm"}`}
+              style={{ color: rarityStyle.textSecondary }}
+            >weakness</span>
             <span className={`font-bold text-red-600 ${compact ? "text-xs" : "text-sm"}`}>{weakness}</span>
           </div>
 
-          <span className={`text-gray-500 font-semibold ${compact ? "text-xs" : "text-sm"}`}>
+          <span
+            className={`font-semibold ${compact ? "text-xs" : "text-sm"}`}
+            style={{ color: rarityStyle.textMuted }}
+          >
             pmroast.com
           </span>
         </div>
