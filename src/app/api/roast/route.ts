@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenAI } from "@google/genai";
 import { RoastResult, DreamRole, DREAM_ROLES, PMElement } from "@/lib/types";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const genAINew = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 // Dynamic import for pdf-parse (CommonJS module)
 async function parsePdf(buffer: Buffer): Promise<{ text: string }> {
@@ -68,19 +70,18 @@ async function generateArchetypeImage(
   profilePicUrl?: string | null
 ): Promise<string | null> {
   try {
-    const imageModel = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-exp",
-    });
-
     const elementSettings = ELEMENT_SETTINGS[element];
 
     // If we have a profile photo, use it for personalized generation
     if (profilePicUrl) {
       console.log("=== GENERATING PERSONALIZED IMAGE FROM PROFILE PHOTO ===");
+      console.log("Profile URL:", profilePicUrl);
 
       const profileImage = await fetchImageAsBase64(profilePicUrl);
 
       if (profileImage) {
+        console.log("Profile image fetched, size:", profileImage.data.length);
+
         const personalizedPrompt = `Transform this person's photo into a stylized trading card character illustration. The character represents the "${archetypeName}" PM archetype.
 
 Character personality: ${archetypeDescription}
@@ -100,37 +101,45 @@ Style requirements:
 - No text, labels, or words in the image
 - Dynamic composition with the character as the clear focus`;
 
-        const result = await imageModel.generateContent({
-          contents: [{
-            role: "user",
-            parts: [
+        try {
+          // Use new SDK for image generation with profile photo
+          const response = await genAINew.models.generateContent({
+            model: "gemini-2.0-flash-exp-image-generation",
+            contents: [
               {
-                inlineData: {
-                  mimeType: profileImage.mimeType,
-                  data: profileImage.data,
-                },
+                role: "user",
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: profileImage.mimeType,
+                      data: profileImage.data,
+                    },
+                  },
+                  { text: personalizedPrompt },
+                ],
               },
-              { text: personalizedPrompt },
             ],
-          }],
-          generationConfig: {
-            temperature: 1,
-          },
-        });
+            config: {
+              responseModalities: ["Text", "Image"],
+            },
+          });
 
-        const response = result.response;
-        const parts = response.candidates?.[0]?.content?.parts || [];
-
-        for (const part of parts) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const anyPart = part as any;
-          if (anyPart.inlineData) {
-            console.log("=== PERSONALIZED IMAGE GENERATED ===");
-            return `data:${anyPart.inlineData.mimeType};base64,${anyPart.inlineData.data}`;
+          // Check for image in response
+          if (response.candidates && response.candidates[0]?.content?.parts) {
+            for (const part of response.candidates[0].content.parts) {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const anyPart = part as any;
+              if (anyPart.inlineData) {
+                console.log("=== PERSONALIZED IMAGE GENERATED ===");
+                return `data:${anyPart.inlineData.mimeType};base64,${anyPart.inlineData.data}`;
+              }
+            }
           }
-        }
 
-        console.log("No personalized image generated, falling back to generic");
+          console.log("No personalized image in response, trying generic");
+        } catch (personalizedError) {
+          console.error("Personalized image generation failed:", personalizedError);
+        }
       }
     }
 
@@ -155,21 +164,28 @@ Style requirements:
 - Vibrant but professional color palette
 - The scene should tell a story about who this PM archetype is`;
 
-    const result = await imageModel.generateContent({
-      contents: [{ role: "user", parts: [{ text: imagePrompt }] }],
-      generationConfig: {
-        temperature: 1,
+    // Use new SDK with responseModalities for image generation
+    const response = await genAINew.models.generateContent({
+      model: "gemini-2.0-flash-exp-image-generation",
+      contents: imagePrompt,
+      config: {
+        responseModalities: ["Text", "Image"],
       },
     });
 
-    const response = result.response;
-    const parts = response.candidates?.[0]?.content?.parts || [];
+    console.log("Generic response received");
 
-    for (const part of parts) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const anyPart = part as any;
-      if (anyPart.inlineData) {
-        return `data:${anyPart.inlineData.mimeType};base64,${anyPart.inlineData.data}`;
+    // Check for image in response
+    if (response.candidates && response.candidates[0]?.content?.parts) {
+      console.log("Parts count:", response.candidates[0].content.parts.length);
+
+      for (const part of response.candidates[0].content.parts) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const anyPart = part as any;
+        if (anyPart.inlineData) {
+          console.log("=== GENERIC IMAGE GENERATED ===");
+          return `data:${anyPart.inlineData.mimeType};base64,${anyPart.inlineData.data}`;
+        }
       }
     }
 
@@ -177,6 +193,10 @@ Style requirements:
     return null;
   } catch (error) {
     console.error("Failed to generate archetype image:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
     return null;
   }
 }
