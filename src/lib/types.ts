@@ -7,34 +7,84 @@ export type DreamRole =
   | "vp-product"
   | "ic-senior";
 
-export const DREAM_ROLES: Record<DreamRole, { label: string; description: string }> = {
+export type RoleCategory = "executive" | "bigtech" | "startup" | "ic";
+
+export interface DreamRoleInfo {
+  label: string;
+  description: string;
+  category: RoleCategory;
+  emoji: string;
+}
+
+export const DREAM_ROLES: Record<DreamRole, DreamRoleInfo> = {
   founder: {
     label: "Founder / CEO",
     description: "Start my own company",
-  },
-  "cpo-startup": {
-    label: "CPO at Series B",
-    description: "Lead product at a hot startup",
-  },
-  "cpo-enterprise": {
-    label: "CPO at Enterprise",
-    description: "Lead product at scale",
-  },
-  "l6-faang": {
-    label: "L6 at FAANG",
-    description: "Staff PM at big tech",
-  },
-  "l7-faang": {
-    label: "L7+ at FAANG",
-    description: "Principal/Director at big tech",
+    category: "executive",
+    emoji: "🚀",
   },
   "vp-product": {
     label: "VP of Product",
     description: "Executive leadership",
+    category: "executive",
+    emoji: "👔",
+  },
+  "l7-faang": {
+    label: "L7+ at FAANG",
+    description: "Principal/Director at big tech",
+    category: "bigtech",
+    emoji: "🏢",
+  },
+  "l6-faang": {
+    label: "L6 at FAANG",
+    description: "Staff PM at big tech",
+    category: "bigtech",
+    emoji: "💼",
+  },
+  "cpo-startup": {
+    label: "CPO at Series B",
+    description: "Lead product at a hot startup",
+    category: "startup",
+    emoji: "🔥",
+  },
+  "cpo-enterprise": {
+    label: "CPO at Enterprise",
+    description: "Lead product at scale",
+    category: "startup",
+    emoji: "📈",
   },
   "ic-senior": {
     label: "Senior IC PM",
     description: "Deep craft, high impact",
+    category: "ic",
+    emoji: "🎯",
+  },
+};
+
+export const ROLE_CATEGORIES: Record<RoleCategory, { label: string; color: string; bgColor: string; borderColor: string }> = {
+  executive: {
+    label: "Executive Track",
+    color: "text-amber-400",
+    bgColor: "bg-amber-500/10",
+    borderColor: "border-amber-500/30",
+  },
+  bigtech: {
+    label: "Big Tech",
+    color: "text-blue-400",
+    bgColor: "bg-blue-500/10",
+    borderColor: "border-blue-500/30",
+  },
+  startup: {
+    label: "Startup",
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-500/10",
+    borderColor: "border-emerald-500/30",
+  },
+  ic: {
+    label: "IC Track",
+    color: "text-purple-400",
+    bgColor: "bg-purple-500/10",
+    borderColor: "border-purple-500/30",
   },
 };
 

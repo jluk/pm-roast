@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { DreamRole, DREAM_ROLES } from "@/lib/types";
+import { DreamRole, DREAM_ROLES, ROLE_CATEGORIES, RoleCategory } from "@/lib/types";
 
 interface GoalSelectorProps {
   selectedGoal: DreamRole | null;
@@ -12,6 +12,14 @@ interface GoalSelectorProps {
   onContinue: () => void;
   fileName?: string;
 }
+
+// Group roles by category in order of ambition
+const ROLE_ORDER: { category: RoleCategory; roles: DreamRole[] }[] = [
+  { category: "executive", roles: ["founder", "vp-product"] },
+  { category: "bigtech", roles: ["l7-faang", "l6-faang"] },
+  { category: "startup", roles: ["cpo-startup", "cpo-enterprise"] },
+  { category: "ic", roles: ["ic-senior"] },
+];
 
 export function GoalSelector({
   selectedGoal,
@@ -39,26 +47,64 @@ export function GoalSelector({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
-        {(Object.entries(DREAM_ROLES) as [DreamRole, { label: string; description: string }][]).map(
-          ([key, { label, description }]) => (
-            <Card
-              key={key}
-              onClick={() => onSelectGoal(key)}
-              className={`
-                p-4 cursor-pointer transition-all border-2
-                ${
-                  selectedGoal === key
-                    ? "border-[#6366f1] bg-[#6366f1]/5"
-                    : "border-border hover:border-muted-foreground"
-                }
-              `}
-            >
-              <p className="font-medium">{label}</p>
-              <p className="text-sm text-muted-foreground">{description}</p>
-            </Card>
-          )
-        )}
+      <div className="space-y-6 mb-8">
+        {ROLE_ORDER.map(({ category, roles }) => {
+          const categoryInfo = ROLE_CATEGORIES[category];
+          return (
+            <div key={category}>
+              {/* Category Header */}
+              <div className="flex items-center gap-2 mb-3">
+                <span className={`text-xs font-semibold uppercase tracking-wider ${categoryInfo.color}`}>
+                  {categoryInfo.label}
+                </span>
+                <div className="flex-1 h-px bg-border" />
+              </div>
+
+              {/* Roles in Category */}
+              <div className={`grid gap-3 ${roles.length === 1 ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
+                {roles.map((roleKey) => {
+                  const role = DREAM_ROLES[roleKey];
+                  const isSelected = selectedGoal === roleKey;
+
+                  return (
+                    <Card
+                      key={roleKey}
+                      onClick={() => onSelectGoal(roleKey)}
+                      className={`
+                        p-4 cursor-pointer transition-all border-2 group
+                        ${isSelected
+                          ? `${categoryInfo.borderColor} ${categoryInfo.bgColor} border-2`
+                          : "border-border hover:border-muted-foreground"
+                        }
+                      `}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="text-2xl">{role.emoji}</span>
+                        <div className="flex-1">
+                          <p className={`font-semibold ${isSelected ? categoryInfo.color : 'text-foreground'}`}>
+                            {role.label}
+                          </p>
+                          <p className="text-sm text-muted-foreground">{role.description}</p>
+                        </div>
+                        {isSelected && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className={`w-5 h-5 rounded-full ${categoryInfo.bgColor} flex items-center justify-center`}
+                          >
+                            <svg className={`w-3 h-3 ${categoryInfo.color}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                          </motion.div>
+                        )}
+                      </div>
+                    </Card>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       <div className="flex gap-3">
@@ -72,9 +118,9 @@ export function GoalSelector({
         <Button
           onClick={onContinue}
           disabled={!selectedGoal}
-          className="flex-1 h-12 bg-[#6366f1] text-white font-medium hover:bg-[#6366f1]/90 transition-all glow-hover disabled:opacity-50"
+          className="flex-1 h-14 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white font-bold text-lg hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all shadow-lg shadow-red-500/30 hover:shadow-red-500/50 hover:scale-[1.02] disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100"
         >
-          Roast Me
+          🔥 Roast Me
         </Button>
       </div>
     </motion.div>
