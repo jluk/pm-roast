@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { GoalSelector } from "@/components/steps/GoalSelector";
-import { AnalyzingLoader } from "@/components/steps/AnalyzingLoader";
+import { CardPackOpening } from "@/components/CardPackOpening";
 import { Results } from "@/components/steps/Results";
 import { ExampleGallery } from "@/components/ExampleGallery";
 import { Step, DreamRole, RoastResult } from "@/lib/types";
 import { HeroCard } from "@/components/InteractiveCard";
+import { PMElement } from "@/components/PokemonCard";
 
 type InputMode = "magic" | "manual";
 
@@ -99,11 +100,14 @@ export default function Home() {
     }
   };
 
+  const [isRoastReady, setIsRoastReady] = useState(false);
+
   const handleAnalyze = async () => {
     if (!dreamRole) return;
 
     setStep("analyzing");
     setError(null);
+    setIsRoastReady(false);
 
     try {
       const formData = new FormData();
@@ -128,11 +132,16 @@ export default function Home() {
 
       const data: RoastResult = await response.json();
       setResult(data);
-      setStep("results");
+      setIsRoastReady(true);
+      // Don't set step to results - CardPackOpening will handle the transition
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       setStep("error");
     }
+  };
+
+  const handlePackRevealComplete = () => {
+    setStep("results");
   };
 
   const handleStartOver = () => {
@@ -146,6 +155,7 @@ export default function Home() {
     setError(null);
     setInputSource("linkedin");
     setMagicLinkTried(false);
+    setIsRoastReady(false);
   };
 
   const getInputName = () => {
@@ -533,7 +543,23 @@ Experience:
           )}
 
           {step === "analyzing" && (
-            <AnalyzingLoader key="analyzing" />
+            <CardPackOpening
+              key="analyzing"
+              isReady={isRoastReady}
+              onRevealComplete={handlePackRevealComplete}
+              cardData={result ? {
+                score: result.careerScore,
+                archetypeName: result.archetype.name,
+                archetypeEmoji: result.archetype.emoji,
+                archetypeDescription: result.archetype.description,
+                archetypeImage: result.archetypeImage,
+                element: (result.archetype.element as PMElement) || "chaos",
+                moves: result.moves || [],
+                stage: result.archetype.stage,
+                weakness: result.archetype.weakness,
+                flavor: result.archetype.flavor,
+              } : undefined}
+            />
           )}
 
           {step === "results" && result && dreamRole && (
