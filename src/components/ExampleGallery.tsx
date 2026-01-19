@@ -198,10 +198,10 @@ function GalleryCard({ card, index }: { card: typeof EXAMPLE_CARDS[0]; index: nu
       transition={{ delay: index * 0.08 }}
       className="flex justify-center relative"
     >
-      {/* Special glow effect for ultra rare+ cards */}
+      {/* Special glow effect for ultra rare+ cards - pointer-events-none so clicks pass through */}
       {isUltraRare && (
         <motion.div
-          className={`absolute -inset-4 rounded-3xl blur-2xl ${
+          className={`absolute -inset-4 rounded-3xl blur-2xl pointer-events-none ${
             isRainbowOrGold
               ? "bg-gradient-to-r from-pink-500/40 via-purple-500/40 to-cyan-500/40"
               : "bg-pink-500/30"
@@ -218,9 +218,9 @@ function GalleryCard({ card, index }: { card: typeof EXAMPLE_CARDS[0]; index: nu
         />
       )}
 
-      {/* Sparkle effects for rainbow/gold cards */}
+      {/* Sparkle effects for rainbow/gold cards - pointer-events-none so clicks pass through */}
       {isRainbowOrGold && (
-        <>
+        <div className="pointer-events-none">
           <motion.div
             className="absolute -top-2 -left-2 w-3 h-3 bg-white rounded-full"
             animate={{
@@ -269,7 +269,7 @@ function GalleryCard({ card, index }: { card: typeof EXAMPLE_CARDS[0]; index: nu
               delay: 0.75,
             }}
           />
-        </>
+        </div>
       )}
 
       <div className="relative z-10">

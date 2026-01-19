@@ -46,8 +46,8 @@ export function OutputPreview() {
       >
         {/* Card Preview */}
         <div className="relative shrink-0">
-          {/* Glow effect */}
-          <div className="absolute -inset-4 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-blue-500/20 rounded-3xl blur-2xl" />
+          {/* Glow effect - pointer-events-none so clicks pass through */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-blue-500/20 rounded-3xl blur-2xl pointer-events-none" />
           <div className="relative">
             <PokemonCard
               score={SAMPLE_RESULT.score}

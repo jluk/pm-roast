@@ -111,7 +111,7 @@ export function InteractiveCard({
         />
       </motion.div>
 
-      {/* Modal Overlay */}
+      {/* Modal Overlay - z-[9999] ensures it's above everything */}
       <AnimatePresence>
         {isModalOpen && (
           <motion.div
@@ -119,7 +119,7 @@ export function InteractiveCard({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md"
             onClick={handleCloseModal}
           >
             {/* Close hint */}
@@ -258,7 +258,7 @@ export function HeroCard() {
       transition={{ delay: 0.2, type: "spring" }}
       className="relative"
     >
-      {/* Floating glow effect */}
+      {/* Floating glow effect - pointer-events-none so clicks pass through */}
       <motion.div
         animate={{
           opacity: [0.4, 0.7, 0.4],
@@ -269,7 +269,7 @@ export function HeroCard() {
           repeat: Infinity,
           ease: "easeInOut",
         }}
-        className="absolute inset-0 blur-3xl bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-yellow-500/30 rounded-3xl"
+        className="absolute inset-0 blur-3xl bg-gradient-to-r from-purple-500/30 via-pink-500/30 to-yellow-500/30 rounded-3xl pointer-events-none"
         style={{ transform: "scale(1.2)" }}
       />
 
