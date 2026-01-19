@@ -1,6 +1,51 @@
 "use client";
 
-import { HoloCard } from "./HoloCard";
+import { HoloCard, getCardRarity, CardRarity } from "./HoloCard";
+
+// Card styling based on rarity
+const RARITY_STYLES: Record<CardRarity, {
+  borderColor: string;
+  borderClass: string;
+  background: string;
+  innerBorderColor: string;
+}> = {
+  common: {
+    borderColor: "#9ca3af", // gray
+    borderClass: "border-gray-400",
+    background: "linear-gradient(180deg, #f3f4f6 0%, #d1d5db 20%, #9ca3af 100%)",
+    innerBorderColor: "rgba(107, 114, 128, 0.2)",
+  },
+  uncommon: {
+    borderColor: "#3b82f6", // blue
+    borderClass: "border-blue-500",
+    background: "linear-gradient(180deg, #dbeafe 0%, #93c5fd 20%, #3b82f6 100%)",
+    innerBorderColor: "rgba(59, 130, 246, 0.2)",
+  },
+  rare: {
+    borderColor: "#8b5cf6", // purple
+    borderClass: "border-purple-500",
+    background: "linear-gradient(180deg, #ede9fe 0%, #c4b5fd 20%, #8b5cf6 100%)",
+    innerBorderColor: "rgba(139, 92, 246, 0.2)",
+  },
+  ultra: {
+    borderColor: "#ec4899", // pink
+    borderClass: "border-pink-500",
+    background: "linear-gradient(180deg, #fce7f3 0%, #f9a8d4 20%, #ec4899 100%)",
+    innerBorderColor: "rgba(236, 72, 153, 0.2)",
+  },
+  rainbow: {
+    borderColor: "#a855f7", // purple for base, but will use gradient
+    borderClass: "border-purple-500",
+    background: "linear-gradient(135deg, #fce7f3 0%, #dbeafe 25%, #d1fae5 50%, #fef3c7 75%, #fce7f3 100%)",
+    innerBorderColor: "rgba(168, 85, 247, 0.3)",
+  },
+  gold: {
+    borderColor: "#fbbf24", // gold
+    borderClass: "border-yellow-400",
+    background: "linear-gradient(180deg, #fef3c7 0%, #fde68a 20%, #fbbf24 100%)",
+    innerBorderColor: "rgba(217, 119, 6, 0.3)",
+  },
+};
 
 // PM Element types with colors (like Pokemon types)
 export const PM_ELEMENTS = {
@@ -66,18 +111,32 @@ export function PokemonCard({
   compact = false,
 }: PokemonCardProps) {
   const elementData = PM_ELEMENTS[element];
+  const rarity = getCardRarity(score);
+  const rarityStyle = RARITY_STYLES[rarity];
 
   return (
-    <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"}>
+    <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"} rarity={rarity}>
       <div
-        className="relative rounded-xl overflow-hidden border-[6px] border-yellow-400 flex flex-col"
+        className={`relative rounded-xl overflow-hidden border-[6px] flex flex-col ${
+          rarity === "rainbow"
+            ? "border-transparent"
+            : ""
+        }`}
         style={{
-          background: "linear-gradient(180deg, #fef3c7 0%, #fde68a 20%, #fbbf24 100%)",
+          background: rarityStyle.background,
           aspectRatio: "2.5/3.5",
+          borderColor: rarity === "rainbow" ? undefined : rarityStyle.borderColor,
+          // Rainbow border using gradient
+          ...(rarity === "rainbow" && {
+            borderImage: "linear-gradient(135deg, #ec4899, #8b5cf6, #3b82f6, #22c55e, #eab308, #ec4899) 1",
+          }),
         }}
       >
         {/* Inner border effect */}
-        <div className="absolute inset-1 rounded-lg border-2 border-yellow-600/20 pointer-events-none z-10" />
+        <div
+          className="absolute inset-1 rounded-lg border-2 pointer-events-none z-10"
+          style={{ borderColor: rarityStyle.innerBorderColor }}
+        />
 
         {/* Header: Name + HP */}
         <div className={`flex items-center justify-between ${compact ? "px-3 py-2" : "px-4 py-3"}`}>
@@ -100,7 +159,8 @@ export function PokemonCard({
         {/* Image Frame with elemental background */}
         <div className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"}`}>
           <div
-            className={`relative rounded-lg overflow-hidden border-4 border-yellow-600/40 ${compact ? "h-36" : "h-52"}`}
+            className={`relative rounded-lg overflow-hidden border-4 ${compact ? "h-36" : "h-52"}`}
+            style={{ borderColor: `${rarityStyle.borderColor}66` }}
           >
             {/* Elemental gradient background */}
             <div className={`absolute inset-0 bg-gradient-to-br ${elementData.bgGradient}`} />
@@ -142,11 +202,15 @@ export function PokemonCard({
         </div>
 
         {/* Moves Section - Always 2 moves */}
-        <div className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"} bg-white/60 rounded-lg border border-yellow-600/20`}>
+        <div
+          className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"} bg-white/60 rounded-lg border`}
+          style={{ borderColor: rarityStyle.innerBorderColor }}
+        >
           {moves.slice(0, 2).map((move, index) => (
             <div
               key={index}
-              className={`flex items-start gap-2 border-b border-yellow-600/10 last:border-b-0 ${compact ? "px-3 py-1.5" : "px-4 py-2"}`}
+              className={`flex items-start gap-2 last:border-b-0 ${compact ? "px-3 py-1.5" : "px-4 py-2"}`}
+              style={{ borderBottomWidth: index === 0 ? 1 : 0, borderColor: rarityStyle.innerBorderColor }}
             >
               {/* Energy Cost */}
               <div className={`flex gap-0.5 shrink-0 ${compact ? "w-10" : "w-14"}`}>
@@ -177,7 +241,8 @@ export function PokemonCard({
 
         {/* Bottom: Weakness + Branding */}
         <div
-          className={`${compact ? "px-3 py-2" : "px-4 py-2"} flex items-center justify-between bg-yellow-200/50`}
+          className={`${compact ? "px-3 py-2" : "px-4 py-2"} flex items-center justify-between mt-auto`}
+          style={{ backgroundColor: `${rarityStyle.borderColor}33` }}
         >
           <div className="flex items-center gap-2">
             <span className={`text-gray-600 font-medium ${compact ? "text-xs" : "text-sm"}`}>weakness</span>
