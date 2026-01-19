@@ -144,7 +144,7 @@ export function PokemonCard({
           {moves.slice(0, compact ? 2 : 3).map((move, index) => (
             <div
               key={index}
-              className={`flex items-center gap-3 border-b border-yellow-600/10 last:border-b-0 ${compact ? "px-3 py-1.5" : "px-4 py-2.5"}`}
+              className={`flex items-start gap-3 border-b border-yellow-600/10 last:border-b-0 ${compact ? "px-3 py-2" : "px-4 py-2.5"}`}
             >
               {/* Energy Cost */}
               <div className={`flex gap-1 shrink-0 ${compact ? "w-12" : "w-16"}`}>
@@ -158,8 +158,8 @@ export function PokemonCard({
                 <span className={`font-bold text-gray-800 ${compact ? "text-xs" : "text-sm"}`}>
                   {move.name}
                 </span>
-                {move.effect && !compact && (
-                  <p className="text-xs text-gray-600 leading-tight mt-0.5">
+                {move.effect && (
+                  <p className={`text-gray-600 leading-tight mt-0.5 ${compact ? "text-[10px]" : "text-xs"}`}>
                     {move.effect}
                   </p>
                 )}

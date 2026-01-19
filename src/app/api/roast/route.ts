@@ -119,6 +119,13 @@ PM ELEMENT TYPES (choose the most fitting one):
 - "politics": PMs skilled at stakeholder management, influence
 - "vision": PMs with big ideas, product intuition, founder-like thinking
 
+MOVE GENERATION RULES (CRITICAL):
+- Each move MUST reference something specific from their actual profile (company, product, achievement)
+- Move names should be punny/clever references to their real work (e.g., if they worked on Ads, "Ad Nauseam")
+- The effect MUST be a funny one-liner explaining the move, based on their actual experience
+- Example: If profile says "launched billing system", move could be "Invoice Inferno" with effect "Bills stakeholders into submission. Revenue +30%."
+- NEVER use generic moves like "Scope Creep" - make them personal to THIS PM's history
+
 IMPORTANT FORMATTING RULES:
 - Keep ALL text concise. No markdown formatting anywhere.
 - Archetype name: SHORT (2-3 words max, like "Metric Monk" or "Chaos Navigator") - must fit on one line!
@@ -127,7 +134,7 @@ IMPORTANT FORMATTING RULES:
 - Archetype flavor: Pokédex-style description, max 100 chars, witty and observational.
 - Archetype stage: Based on their experience level (Junior, Mid-Level, Senior, Lead, Staff, Principal, L6, etc.)
 - Archetype weakness: ONE funny word that's their kryptonite (e.g., "Users", "Shipping", "Deadlines", "Meetings")
-- Moves: 2-3 funny PM "attacks" with SHORT names (max 15 chars), energy costs (1-3), damage (10-100), and optional effects.
+- Moves: 2-3 funny PM "attacks" based on THEIR ACTUAL WORK. Short names (max 15 chars), energy cost (1-3), damage (10-100), and REQUIRED funny effect (max 40 chars).
 - Gap items: specific and actionable, max 60 chars each.
 - Roadmap titles: max 20 chars.
 - Roadmap actions: max 40 chars each, plain text.
@@ -148,10 +155,10 @@ Your responses MUST be valid JSON with this exact structure (no markdown, no cod
   },
   "moves": [
     {
-      "name": "Funny attack name, max 20 chars",
+      "name": "Attack name referencing their work, max 15 chars",
       "energyCost": 1-3,
       "damage": 10-100,
-      "effect": "Optional funny effect, max 50 chars"
+      "effect": "REQUIRED funny one-liner about the move, max 40 chars"
     }
   ],
   "careerScore": 0-99,
@@ -321,12 +328,18 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
       roastResult.archetype.element = "chaos";
     }
 
-    // Ensure moves exist
+    // Ensure moves exist and all have effects
     if (!roastResult.moves || roastResult.moves.length === 0) {
       roastResult.moves = [
-        { name: "Scope Creep", energyCost: 1, damage: 30, effect: "Add 3 requirements mid-sprint." },
-        { name: "Stakeholder Dodge", energyCost: 2, damage: 50 },
+        { name: "Generic PM", energyCost: 1, damage: 30, effect: "Profile too vague to roast properly." },
+        { name: "Mystery Move", energyCost: 2, damage: 50, effect: "Nobody knows what they actually did." },
       ];
+    } else {
+      // Ensure all moves have effects
+      roastResult.moves = roastResult.moves.map(move => ({
+        ...move,
+        effect: move.effect || "A classic PM power move."
+      }));
     }
 
     // Ensure flavor exists
