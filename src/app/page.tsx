@@ -28,6 +28,7 @@ export default function Home() {
   const [isLoadingLinkedin, setIsLoadingLinkedin] = useState(false);
   const [inputSource, setInputSource] = useState<"linkedin" | "pdf" | "manual">("linkedin");
   const [magicLinkTried, setMagicLinkTried] = useState(false);
+  const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -72,6 +73,7 @@ export default function Home() {
 
       if (data.success && data.profileText && data.profileText.length >= 100) {
         setProfileText(data.profileText);
+        setProfilePicUrl(data.profilePicUrl || null);
         setInputSource("linkedin");
         setStep("goals");
       } else {
@@ -114,6 +116,11 @@ export default function Home() {
         formData.append("profileText", profileText);
       }
 
+      // Include profile picture URL if available (from LinkedIn)
+      if (profilePicUrl) {
+        formData.append("profilePicUrl", profilePicUrl);
+      }
+
       formData.append("dreamRole", dreamRole);
 
       const response = await fetch("/api/roast", {
@@ -141,6 +148,7 @@ export default function Home() {
     setFile(null);
     setLinkedinUrl("");
     setProfileText("");
+    setProfilePicUrl(null);
     setDreamRole(null);
     setResult(null);
     setError(null);

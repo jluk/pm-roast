@@ -28,6 +28,7 @@ export interface LinkedInProfileData {
   occupation: string | null;
   headline: string | null;
   summary: string | null;
+  profile_pic_url: string | null;
   experiences: LinkedInExperience[];
   education: LinkedInEducation[];
 }
@@ -36,6 +37,7 @@ export interface FetchLinkedInResult {
   success: boolean;
   data?: LinkedInProfileData;
   profileText?: string;
+  profilePicUrl?: string | null;
   error?: string;
   errorCode?: "NOT_FOUND" | "RATE_LIMITED" | "UNAUTHORIZED" | "UNKNOWN";
   isMock?: boolean;
@@ -47,6 +49,7 @@ const MOCK_PROFILE: LinkedInProfileData = {
   occupation: "Senior Product Manager at TechCorp",
   headline: "Building products that users love | Ex-Google, Ex-Meta",
   summary: "Product leader with 8+ years of experience shipping consumer and B2B products at scale. Passionate about user research, data-driven decision making, and building high-performing teams.",
+  profile_pic_url: null, // Mock profiles don't have photos
   experiences: [
     {
       title: "Senior Product Manager",
@@ -231,6 +234,7 @@ function mapLinkdAPIResponse(data: Record<string, unknown>): LinkedInProfileData
     occupation: (data.occupation || data.current_position || data.title || null) as string | null,
     headline: (data.headline || data.tagline || null) as string | null,
     summary: (data.summary || data.about || data.bio || null) as string | null,
+    profile_pic_url: (data.profile_pic_url || data.profile_picture_url || data.profilePicture || data.avatar || data.photo_url || data.image_url || null) as string | null,
     experiences: experiences.map((exp: Record<string, unknown>) => ({
       title: (exp.title || exp.position || exp.role || null) as string | null,
       company: (exp.company || exp.company_name || exp.companyName || exp.organization || null) as string | null,
@@ -267,6 +271,7 @@ export async function fetchLinkedInData(linkedinUrl: string): Promise<FetchLinke
       success: true,
       data: MOCK_PROFILE,
       profileText: profileToText(MOCK_PROFILE),
+      profilePicUrl: MOCK_PROFILE.profile_pic_url,
       isMock: true,
     };
   }
@@ -289,6 +294,7 @@ export async function fetchLinkedInData(linkedinUrl: string): Promise<FetchLinke
       success: true,
       data: mappedProfile,
       profileText: profileToText(mappedProfile),
+      profilePicUrl: mappedProfile.profile_pic_url,
     };
   } catch (error) {
     const axiosError = error as AxiosError;

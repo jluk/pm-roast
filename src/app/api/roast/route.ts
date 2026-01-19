@@ -39,12 +39,33 @@ const ELEMENT_SETTINGS: Record<PMElement, { bg: string; setting: string }> = {
   },
 };
 
-// Generate archetype image using Gemini showing person in context
+// Fetch image from URL and convert to base64
+async function fetchImageAsBase64(imageUrl: string): Promise<{ data: string; mimeType: string } | null> {
+  try {
+    const response = await fetch(imageUrl);
+    if (!response.ok) {
+      console.error("Failed to fetch profile image:", response.status);
+      return null;
+    }
+
+    const contentType = response.headers.get("content-type") || "image/jpeg";
+    const arrayBuffer = await response.arrayBuffer();
+    const base64 = Buffer.from(arrayBuffer).toString("base64");
+
+    return { data: base64, mimeType: contentType };
+  } catch (error) {
+    console.error("Error fetching profile image:", error);
+    return null;
+  }
+}
+
+// Generate archetype image using Gemini - with profile photo if available
 async function generateArchetypeImage(
   archetypeName: string,
   archetypeDescription: string,
   emoji: string,
-  element: PMElement
+  element: PMElement,
+  profilePicUrl?: string | null
 ): Promise<string | null> {
   try {
     const imageModel = genAI.getGenerativeModel({
@@ -52,6 +73,69 @@ async function generateArchetypeImage(
     });
 
     const elementSettings = ELEMENT_SETTINGS[element];
+
+    // If we have a profile photo, use it for personalized generation
+    if (profilePicUrl) {
+      console.log("=== GENERATING PERSONALIZED IMAGE FROM PROFILE PHOTO ===");
+
+      const profileImage = await fetchImageAsBase64(profilePicUrl);
+
+      if (profileImage) {
+        const personalizedPrompt = `Transform this person's photo into a stylized trading card character illustration. The character represents the "${archetypeName}" PM archetype.
+
+Character personality: ${archetypeDescription}
+
+TRANSFORMATION REQUIREMENTS:
+- Create a stylized illustration BASED ON this person - keep their general likeness, hair style, and distinctive features
+- Transform them into a vibrant, illustrated character (like a collectible card game portrait)
+- Place them ${elementSettings.setting}
+- Background should be a ${elementSettings.bg}
+
+Style requirements:
+- Semi-realistic illustrated style (like Hearthstone or trading card game art)
+- Vibrant colors with dramatic lighting
+- Professional but stylized appearance
+- The person should look heroic/confident in their PM role
+- Keep their face recognizable but stylized
+- No text, labels, or words in the image
+- Dynamic composition with the character as the clear focus`;
+
+        const result = await imageModel.generateContent({
+          contents: [{
+            role: "user",
+            parts: [
+              {
+                inlineData: {
+                  mimeType: profileImage.mimeType,
+                  data: profileImage.data,
+                },
+              },
+              { text: personalizedPrompt },
+            ],
+          }],
+          generationConfig: {
+            temperature: 1,
+          },
+        });
+
+        const response = result.response;
+        const parts = response.candidates?.[0]?.content?.parts || [];
+
+        for (const part of parts) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const anyPart = part as any;
+          if (anyPart.inlineData) {
+            console.log("=== PERSONALIZED IMAGE GENERATED ===");
+            return `data:${anyPart.inlineData.mimeType};base64,${anyPart.inlineData.data}`;
+          }
+        }
+
+        console.log("No personalized image generated, falling back to generic");
+      }
+    }
+
+    // Fallback: Generate generic archetype image without profile photo
+    console.log("=== GENERATING GENERIC ARCHETYPE IMAGE ===");
 
     const imagePrompt = `Generate a stylized illustration of a Product Manager character for a trading card. The character represents "${archetypeName}".
 
@@ -221,6 +305,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const profileText = formData.get("profileText") as string | null;
+    const profilePicUrl = formData.get("profilePicUrl") as string | null;
     const dreamRole = formData.get("dreamRole") as DreamRole;
 
     if (!dreamRole || !DREAM_ROLES[dreamRole]) {
@@ -385,13 +470,15 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
       roastResult.archetype.weakness = "Meetings";
     }
 
-    // Generate archetype image with elemental background
+    // Generate archetype image with elemental background (personalized if we have profile photo)
     console.log("=== GENERATING ARCHETYPE IMAGE ===");
+    console.log("Profile pic URL:", profilePicUrl || "not provided");
     const archetypeImage = await generateArchetypeImage(
       roastResult.archetype.name,
       roastResult.archetype.description,
       roastResult.archetype.emoji,
-      roastResult.archetype.element
+      roastResult.archetype.element,
+      profilePicUrl
     );
 
     if (archetypeImage) {

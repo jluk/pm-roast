@@ -28,6 +28,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         profileText: result.profileText,
+        profilePicUrl: result.profilePicUrl || null,
         data: result.data,
         isMock: result.isMock || false,
         message: result.isMock
