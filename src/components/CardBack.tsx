@@ -1,22 +1,23 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { HoloCard } from "./HoloCard";
 
 interface CardBackProps {
   compact?: boolean;
+  rarity?: "common" | "uncommon" | "rare" | "ultra" | "rainbow" | "gold";
 }
 
-export function CardBack({ compact = false }: CardBackProps) {
+export function CardBack({ compact = false, rarity = "rare" }: CardBackProps) {
   return (
-    <div
-      className={`relative rounded-xl overflow-hidden border-[6px] border-yellow-400 ${
-        compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"
-      }`}
-      style={{
-        background: "linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)",
-        aspectRatio: "2.5/3.5",
-      }}
-    >
+    <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"} rarity={rarity}>
+      <div
+        className="relative rounded-xl overflow-hidden border-[6px] border-yellow-400"
+        style={{
+          background: "linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)",
+          aspectRatio: "2.5/3.5",
+        }}
+      >
       {/* Decorative pattern */}
       <div className="absolute inset-0 opacity-20">
         <div
@@ -149,6 +150,7 @@ export function CardBack({ compact = false }: CardBackProps) {
       <div className="absolute top-4 right-4 w-6 h-6 border-r-2 border-t-2 border-yellow-500/30 rounded-tr" />
       <div className="absolute bottom-4 left-4 w-6 h-6 border-l-2 border-b-2 border-yellow-500/30 rounded-bl" />
       <div className="absolute bottom-4 right-4 w-6 h-6 border-r-2 border-b-2 border-yellow-500/30 rounded-br" />
-    </div>
+      </div>
+    </HoloCard>
   );
 }

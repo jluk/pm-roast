@@ -1,81 +1,82 @@
 "use client";
 
-import { HoloCard, getCardRarity, CardRarity } from "./HoloCard";
+import { HoloCard, getCardRarity } from "./HoloCard";
 
-// Card styling based on rarity
-const RARITY_STYLES: Record<CardRarity, {
-  borderColor: string;
-  borderClass: string;
-  background: string;
-  innerBorderColor: string;
-  textPrimary: string;
-  textSecondary: string;
-  textMuted: string;
-}> = {
-  common: {
-    borderColor: "#6b7280", // darker gray for better contrast
-    borderClass: "border-gray-500",
-    background: "linear-gradient(180deg, #f9fafb 0%, #e5e7eb 20%, #9ca3af 100%)",
-    innerBorderColor: "rgba(75, 85, 99, 0.3)",
-    textPrimary: "#1f2937", // gray-800
-    textSecondary: "#374151", // gray-700
-    textMuted: "#4b5563", // gray-600
-  },
-  uncommon: {
-    borderColor: "#2563eb", // blue-600
-    borderClass: "border-blue-600",
-    background: "linear-gradient(180deg, #eff6ff 0%, #bfdbfe 20%, #3b82f6 100%)",
-    innerBorderColor: "rgba(37, 99, 235, 0.3)",
-    textPrimary: "#1e3a8a", // blue-900
-    textSecondary: "#1e40af", // blue-800
-    textMuted: "#1d4ed8", // blue-700
-  },
-  rare: {
-    borderColor: "#7c3aed", // violet-600
-    borderClass: "border-violet-600",
-    background: "linear-gradient(180deg, #f5f3ff 0%, #ddd6fe 20%, #8b5cf6 100%)",
-    innerBorderColor: "rgba(124, 58, 237, 0.3)",
-    textPrimary: "#4c1d95", // violet-900
-    textSecondary: "#5b21b6", // violet-800
-    textMuted: "#6d28d9", // violet-700
-  },
-  ultra: {
-    borderColor: "#db2777", // pink-600
-    borderClass: "border-pink-600",
-    background: "linear-gradient(180deg, #fdf2f8 0%, #fbcfe8 20%, #ec4899 100%)",
-    innerBorderColor: "rgba(219, 39, 119, 0.3)",
-    textPrimary: "#831843", // pink-900
-    textSecondary: "#9d174d", // pink-800
-    textMuted: "#be185d", // pink-700
-  },
-  rainbow: {
-    borderColor: "#a855f7", // purple for base
-    borderClass: "border-purple-500",
-    background: "linear-gradient(135deg, #fdf2f8 0%, #eff6ff 25%, #ecfdf5 50%, #fefce8 75%, #fdf2f8 100%)",
-    innerBorderColor: "rgba(168, 85, 247, 0.4)",
-    textPrimary: "#1f2937", // gray-800
-    textSecondary: "#374151", // gray-700
-    textMuted: "#4b5563", // gray-600
-  },
-  gold: {
-    borderColor: "#d97706", // amber-600
-    borderClass: "border-amber-600",
-    background: "linear-gradient(180deg, #fffbeb 0%, #fde68a 20%, #f59e0b 100%)",
-    innerBorderColor: "rgba(180, 83, 9, 0.3)",
-    textPrimary: "#78350f", // amber-900
-    textSecondary: "#92400e", // amber-800
-    textMuted: "#b45309", // amber-700
-  },
-};
-
-// PM Element types with colors (like Pokemon types)
+// PM Element types with full card styling
 export const PM_ELEMENTS = {
-  data: { name: "Data", color: "#3b82f6", bgGradient: "from-blue-900 via-blue-800 to-cyan-900" },
-  chaos: { name: "Chaos", color: "#ef4444", bgGradient: "from-red-900 via-orange-800 to-yellow-900" },
-  strategy: { name: "Strategy", color: "#8b5cf6", bgGradient: "from-purple-900 via-indigo-800 to-violet-900" },
-  shipping: { name: "Shipping", color: "#22c55e", bgGradient: "from-green-900 via-emerald-800 to-teal-900" },
-  politics: { name: "Politics", color: "#f59e0b", bgGradient: "from-amber-900 via-yellow-800 to-orange-900" },
-  vision: { name: "Vision", color: "#ec4899", bgGradient: "from-pink-900 via-rose-800 to-fuchsia-900" },
+  data: {
+    name: "Data",
+    color: "#3b82f6",
+    bgGradient: "from-blue-900 via-blue-800 to-cyan-900",
+    // Card styling
+    borderColor: "#2563eb",
+    cardBackground: "linear-gradient(180deg, #eff6ff 0%, #bfdbfe 30%, #60a5fa 100%)",
+    innerBorderColor: "rgba(37, 99, 235, 0.3)",
+    textPrimary: "#1e3a8a",
+    textSecondary: "#1e40af",
+    textMuted: "#2563eb",
+    weaknessColor: "#1e3a8a", // dark blue for legibility
+  },
+  chaos: {
+    name: "Chaos",
+    color: "#ef4444",
+    bgGradient: "from-red-900 via-orange-800 to-yellow-900",
+    borderColor: "#dc2626",
+    cardBackground: "linear-gradient(180deg, #fef2f2 0%, #fecaca 30%, #f87171 100%)",
+    innerBorderColor: "rgba(220, 38, 38, 0.3)",
+    textPrimary: "#7f1d1d",
+    textSecondary: "#991b1b",
+    textMuted: "#b91c1c",
+    weaknessColor: "#7f1d1d", // dark red for legibility
+  },
+  strategy: {
+    name: "Strategy",
+    color: "#8b5cf6",
+    bgGradient: "from-purple-900 via-indigo-800 to-violet-900",
+    borderColor: "#7c3aed",
+    cardBackground: "linear-gradient(180deg, #f5f3ff 0%, #ddd6fe 30%, #a78bfa 100%)",
+    innerBorderColor: "rgba(124, 58, 237, 0.3)",
+    textPrimary: "#4c1d95",
+    textSecondary: "#5b21b6",
+    textMuted: "#6d28d9",
+    weaknessColor: "#4c1d95", // dark purple for legibility
+  },
+  shipping: {
+    name: "Shipping",
+    color: "#22c55e",
+    bgGradient: "from-green-900 via-emerald-800 to-teal-900",
+    borderColor: "#16a34a",
+    cardBackground: "linear-gradient(180deg, #f0fdf4 0%, #bbf7d0 30%, #4ade80 100%)",
+    innerBorderColor: "rgba(22, 163, 74, 0.3)",
+    textPrimary: "#14532d",
+    textSecondary: "#166534",
+    textMuted: "#15803d",
+    weaknessColor: "#14532d", // dark green for legibility
+  },
+  politics: {
+    name: "Politics",
+    color: "#f59e0b",
+    bgGradient: "from-amber-900 via-yellow-800 to-orange-900",
+    borderColor: "#d97706",
+    cardBackground: "linear-gradient(180deg, #fffbeb 0%, #fde68a 30%, #fbbf24 100%)",
+    innerBorderColor: "rgba(217, 119, 6, 0.3)",
+    textPrimary: "#78350f",
+    textSecondary: "#92400e",
+    textMuted: "#b45309",
+    weaknessColor: "#78350f", // dark amber for legibility
+  },
+  vision: {
+    name: "Vision",
+    color: "#ec4899",
+    bgGradient: "from-pink-900 via-rose-800 to-fuchsia-900",
+    borderColor: "#db2777",
+    cardBackground: "linear-gradient(180deg, #fdf2f8 0%, #fbcfe8 30%, #f472b6 100%)",
+    innerBorderColor: "rgba(219, 39, 119, 0.3)",
+    textPrimary: "#831843",
+    textSecondary: "#9d174d",
+    textMuted: "#be185d",
+    weaknessColor: "#831843", // dark pink for legibility
+  },
 } as const;
 
 export type PMElement = keyof typeof PM_ELEMENTS;
@@ -133,7 +134,6 @@ export function PokemonCard({
 }: PokemonCardProps) {
   const elementData = PM_ELEMENTS[element];
   const rarity = getCardRarity(score);
-  const rarityStyle = RARITY_STYLES[rarity];
 
   return (
     <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"} rarity={rarity}>
@@ -144,10 +144,10 @@ export function PokemonCard({
             : ""
         }`}
         style={{
-          background: rarityStyle.background,
+          background: elementData.cardBackground,
           aspectRatio: "2.5/3.5",
-          borderColor: rarity === "rainbow" ? undefined : rarityStyle.borderColor,
-          // Rainbow border using gradient
+          borderColor: rarity === "rainbow" ? undefined : elementData.borderColor,
+          // Rainbow border using gradient for highest rarity
           ...(rarity === "rainbow" && {
             borderImage: "linear-gradient(135deg, #ec4899, #8b5cf6, #3b82f6, #22c55e, #eab308, #ec4899) 1",
           }),
@@ -156,7 +156,7 @@ export function PokemonCard({
         {/* Inner border effect */}
         <div
           className="absolute inset-1 rounded-lg border-2 pointer-events-none z-10"
-          style={{ borderColor: rarityStyle.innerBorderColor }}
+          style={{ borderColor: elementData.innerBorderColor }}
         />
 
         {/* Header: Name + HP */}
@@ -165,7 +165,7 @@ export function PokemonCard({
             <span className={compact ? "text-xl" : "text-2xl"} style={{ flexShrink: 0 }}>{archetypeEmoji}</span>
             <h2
               className={`font-black leading-tight ${compact ? "text-xs" : "text-sm"}`}
-              style={{ color: rarityStyle.textPrimary }}
+              style={{ color: elementData.textPrimary }}
             >
               {archetypeName}
             </h2>
@@ -176,11 +176,11 @@ export function PokemonCard({
             </span>
             <span
               className={`font-bold ${compact ? "text-xs" : "text-sm"}`}
-              style={{ color: rarityStyle.textMuted }}
+              style={{ color: elementData.textMuted }}
             >/100</span>
             <span
               className={`font-bold ml-1 ${compact ? "text-xs" : "text-sm"}`}
-              style={{ color: rarityStyle.textSecondary }}
+              style={{ color: elementData.textSecondary }}
             >HP</span>
             <EnergySymbol element={element} size={compact ? "sm" : "md"} />
           </div>
@@ -190,7 +190,7 @@ export function PokemonCard({
         <div className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"}`}>
           <div
             className={`relative rounded-lg overflow-hidden border-4 ${compact ? "h-36" : "h-52"}`}
-            style={{ borderColor: `${rarityStyle.borderColor}66` }}
+            style={{ borderColor: `${elementData.borderColor}66` }}
           >
             {/* Elemental gradient background */}
             <div className={`absolute inset-0 bg-gradient-to-br ${elementData.bgGradient}`} />
@@ -228,7 +228,7 @@ export function PokemonCard({
           </div>
           <span
             className={`italic ${compact ? "text-xs" : "text-sm"}`}
-            style={{ color: rarityStyle.textSecondary }}
+            style={{ color: elementData.textSecondary }}
           >
             {stage}
           </span>
@@ -237,13 +237,13 @@ export function PokemonCard({
         {/* Moves Section - Always 2 moves */}
         <div
           className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"} bg-white/70 rounded-lg border`}
-          style={{ borderColor: rarityStyle.innerBorderColor }}
+          style={{ borderColor: elementData.innerBorderColor }}
         >
           {moves.slice(0, 2).map((move, index) => (
             <div
               key={index}
               className={`flex items-start gap-2 last:border-b-0 ${compact ? "px-3 py-1.5" : "px-4 py-2"}`}
-              style={{ borderBottomWidth: index === 0 ? 1 : 0, borderColor: rarityStyle.innerBorderColor }}
+              style={{ borderBottomWidth: index === 0 ? 1 : 0, borderColor: elementData.innerBorderColor }}
             >
               {/* Energy Cost */}
               <div className={`flex gap-0.5 shrink-0 ${compact ? "w-10" : "w-14"}`}>
@@ -256,14 +256,14 @@ export function PokemonCard({
               <div className="flex-1 min-w-0">
                 <span
                   className={`font-bold block ${compact ? "text-[11px] leading-tight" : "text-sm"}`}
-                  style={{ color: rarityStyle.textPrimary }}
+                  style={{ color: elementData.textPrimary }}
                 >
                   {move.name}
                 </span>
                 {move.effect && (
                   <p
                     className={`leading-tight mt-0.5 ${compact ? "text-[9px]" : "text-xs"}`}
-                    style={{ color: rarityStyle.textMuted }}
+                    style={{ color: elementData.textMuted }}
                   >
                     {move.effect}
                   </p>
@@ -273,7 +273,7 @@ export function PokemonCard({
               {/* Damage */}
               <span
                 className={`font-black shrink-0 ${compact ? "text-sm" : "text-lg"}`}
-                style={{ color: rarityStyle.textPrimary }}
+                style={{ color: elementData.textPrimary }}
               >
                 {move.damage}
               </span>
@@ -281,22 +281,40 @@ export function PokemonCard({
           ))}
         </div>
 
+        {/* Flavor Text / PM Descriptor */}
+        {archetypeDescription && (
+          <div
+            className={`${compact ? "mx-3 mb-2 px-2 py-1" : "mx-4 mb-3 px-3 py-2"} bg-white/50 rounded border`}
+            style={{ borderColor: elementData.innerBorderColor }}
+          >
+            <p
+              className={`italic text-center leading-tight ${compact ? "text-[9px]" : "text-xs"}`}
+              style={{ color: elementData.textSecondary }}
+            >
+              {archetypeDescription}
+            </p>
+          </div>
+        )}
+
         {/* Bottom: Weakness + Branding */}
         <div
           className={`${compact ? "px-3 py-2" : "px-4 py-2"} flex items-center justify-between mt-auto`}
-          style={{ backgroundColor: `${rarityStyle.borderColor}33` }}
+          style={{ backgroundColor: `${elementData.borderColor}33` }}
         >
           <div className="flex items-center gap-2">
             <span
               className={`font-medium ${compact ? "text-xs" : "text-sm"}`}
-              style={{ color: rarityStyle.textSecondary }}
+              style={{ color: elementData.textSecondary }}
             >weakness</span>
-            <span className={`font-bold text-red-600 ${compact ? "text-xs" : "text-sm"}`}>{weakness}</span>
+            <span
+              className={`font-bold ${compact ? "text-xs" : "text-sm"}`}
+              style={{ color: elementData.weaknessColor }}
+            >{weakness}</span>
           </div>
 
           <span
             className={`font-semibold ${compact ? "text-xs" : "text-sm"}`}
-            style={{ color: rarityStyle.textMuted }}
+            style={{ color: elementData.textMuted }}
           >
             pmroast.com
           </span>

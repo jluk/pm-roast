@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { GoalSelector } from "@/components/steps/GoalSelector";
 import { Results } from "@/components/steps/Results";
+import { AnalyzingLoader } from "@/components/steps/AnalyzingLoader";
 import { ExampleGallery } from "@/components/ExampleGallery";
 import { Step, DreamRole, RoastResult } from "@/lib/types";
 import { HeroCard } from "@/components/InteractiveCard";
@@ -538,15 +539,9 @@ Experience:
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="w-full max-w-lg mx-auto text-center py-12"
+              className="w-full max-w-lg mx-auto py-12"
             >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="w-16 h-16 mx-auto mb-6 rounded-full border-4 border-yellow-400 border-t-transparent"
-              />
-              <h2 className="text-xl font-bold mb-2">Generating your card...</h2>
-              <p className="text-muted-foreground">This takes about 10 seconds</p>
+              <AnalyzingLoader />
             </motion.div>
           )}
 

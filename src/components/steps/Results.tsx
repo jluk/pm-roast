@@ -196,33 +196,68 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
             </div>
           </div>
 
-          {/* Stats Display */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-muted-foreground">Career Score</span>
-              <span className="font-mono font-bold text-lg">{result.careerScore}/100</span>
+          {/* Score + Mini Roast */}
+          <div className="p-4 rounded-lg border border-border/50 bg-card/30">
+            {/* Career Score */}
+            <div className="space-y-2 mb-4">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-muted-foreground">Career Score</span>
+                <span className="font-mono font-bold text-lg">{result.careerScore}/100</span>
+              </div>
+              <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${result.careerScore}%` }}
+                  transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
+                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400"
+                />
+              </div>
             </div>
-            <div className="h-2 bg-secondary rounded-full overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${result.careerScore}%` }}
-                transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
-                className="h-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]"
-              />
+
+            {/* Mini Roast Quote */}
+            <div className="pt-3 border-t border-border/50">
+              <p className="text-sm text-gray-300 italic leading-relaxed">
+                &quot;{stripMarkdown(result.bangerQuote)}&quot;
+              </p>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            <Button
-              onClick={shareToTwitter}
-              className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#5558e3] hover:to-[#7c4fe0] text-white font-semibold"
+            {/* Share to X - Primary CTA with animated gradient border */}
+            <motion.div
+              className="relative group"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
             >
-              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-              Share on X
-            </Button>
+              {/* Animated gradient border */}
+              <div className="absolute -inset-[2px] rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 opacity-75 group-hover:opacity-100 blur-sm transition-opacity" />
+              <motion.div
+                className="absolute -inset-[2px] rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500"
+                animate={{
+                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+                style={{ backgroundSize: "200% 200%" }}
+              />
+              {/* Button content */}
+              <button
+                onClick={shareToTwitter}
+                className="relative w-full h-14 px-6 rounded-xl bg-black text-white font-bold text-base flex items-center justify-center gap-2 hover:bg-neutral-900 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                <span>Share Your Card on X</span>
+                <svg className="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </button>
+            </motion.div>
             <div className="flex gap-2">
               <Button
                 onClick={copyLink}
@@ -260,41 +295,83 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
         </motion.div>
       </div>
 
-      {/* Banger Quote */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="text-center px-4"
-      >
-        <p className="text-lg text-gray-200 italic">
-          &quot;{stripMarkdown(result.bangerQuote)}&quot;
-        </p>
-      </motion.div>
-
-      {/* The Roast */}
+      {/* The Roast - Fiery Section */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
+        className="relative"
       >
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-white">
-          <span>🔥</span> The Roast
-        </h3>
-        <Card className="p-6 space-y-4">
-          {result.roastBullets.map((bullet, index) => (
+        {/* Fire glow background */}
+        <div className="absolute -inset-4 bg-gradient-to-r from-orange-500/10 via-red-500/10 to-yellow-500/10 rounded-3xl blur-xl" />
+
+        <div className="relative">
+          {/* Header with fire animation */}
+          <div className="flex items-center gap-3 mb-4">
             <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 + index * 0.1 }}
-              className="flex gap-3"
+              animate={{
+                scale: [1, 1.2, 1],
+                rotate: [0, 5, -5, 0],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="text-3xl"
             >
-              <span className="text-[#6366f1] text-lg mt-0.5 shrink-0">•</span>
-              <p className="text-base text-gray-200">{stripMarkdown(bullet)}</p>
+              🔥
             </motion.div>
-          ))}
-        </Card>
+            <div>
+              <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-yellow-400 bg-clip-text text-transparent">
+                The Roast
+              </h3>
+              <p className="text-xs text-muted-foreground">Brutally honest observations</p>
+            </div>
+          </div>
+
+          {/* Roast card with fire border */}
+          <div className="relative">
+            {/* Animated fire border */}
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 opacity-60" />
+            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-b from-orange-500/50 to-transparent opacity-40" />
+
+            <Card className="relative p-6 bg-gradient-to-b from-neutral-900 to-neutral-950 border-0">
+              {/* Inner fire accent line */}
+              <div className="absolute top-0 left-6 right-6 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+
+              <div className="space-y-4">
+                {result.roastBullets.map((bullet, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.8 + index * 0.15 }}
+                    className="flex gap-4 items-start group"
+                  >
+                    <motion.span
+                      animate={{
+                        opacity: [0.5, 1, 0.5],
+                        scale: [0.9, 1.1, 0.9],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: index * 0.3,
+                      }}
+                      className="text-2xl shrink-0 mt-0.5"
+                    >
+                      {index === 0 ? "💀" : index === 1 ? "😬" : index === 2 ? "💅" : "🎯"}
+                    </motion.span>
+                    <p className="text-base text-gray-200 leading-relaxed group-hover:text-white transition-colors">
+                      {stripMarkdown(bullet)}
+                    </p>
+                  </motion.div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </div>
       </motion.div>
 
       {/* Gap Analysis - Numbered */}
