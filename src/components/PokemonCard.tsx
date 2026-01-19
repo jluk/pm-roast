@@ -255,14 +255,14 @@ export function PokemonCard({
               {/* Move Name & Effect */}
               <div className="flex-1 min-w-0">
                 <span
-                  className={`font-bold block truncate ${compact ? "text-xs" : "text-sm"}`}
+                  className={`font-bold block ${compact ? "text-[11px] leading-tight" : "text-sm"}`}
                   style={{ color: rarityStyle.textPrimary }}
                 >
                   {move.name}
                 </span>
                 {move.effect && (
                   <p
-                    className={`leading-tight mt-0.5 line-clamp-1 ${compact ? "text-[10px]" : "text-xs"}`}
+                    className={`leading-tight mt-0.5 ${compact ? "text-[9px]" : "text-xs"}`}
                     style={{ color: rarityStyle.textMuted }}
                   >
                     {move.effect}

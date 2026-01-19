@@ -130,103 +130,135 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="w-full max-w-3xl mx-auto space-y-8 pb-12"
+      className="w-full max-w-5xl mx-auto space-y-8 pb-12"
     >
-      {/* Pokemon-Style Card - Centered & Interactive */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.1, type: "spring" }}
-        className="flex flex-col items-center gap-2"
-      >
-        <InteractiveCard
-          score={result.careerScore}
-          archetypeName={stripMarkdown(result.archetype.name)}
-          archetypeEmoji={result.archetype.emoji}
-          archetypeDescription={stripMarkdown(result.archetype.description)}
-          archetypeImage={result.archetypeImage}
-          element={(result.archetype.element as PMElement) || "chaos"}
-          moves={result.moves || []}
-          stage={result.archetype.stage || "Senior"}
-          weakness={result.archetype.weakness || "Meetings"}
-          flavor={stripMarkdown(result.archetype.flavor || result.archetype.description)}
-          compact
-          enableFlip
-          enableModal
-        />
-        <p className="text-xs text-muted-foreground">
-          Click card to enlarge & flip
-        </p>
-      </motion.div>
-
-      {/* Rarity Info */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="text-center space-y-2"
-      >
-        <div className="flex items-center justify-center gap-2">
-          <span className="text-2xl">{rarityInfo.emoji}</span>
-          <span className={`text-xl font-bold ${rarityInfo.color}`}>
-            {rarityInfo.label} Card
-          </span>
-          <span className="text-sm text-muted-foreground">({rarityInfo.percentile})</span>
-        </div>
-        <p className="text-sm text-muted-foreground max-w-md mx-auto">
-          {rarityInfo.description}
-        </p>
-      </motion.div>
-
-      {/* Share & Make Another - Above the Fold */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-        className="flex flex-col items-center gap-3"
-      >
-        <div className="flex justify-center gap-3 flex-wrap">
-          <Button
-            onClick={shareToTwitter}
-            className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#5558e3] hover:to-[#7c4fe0] text-white font-semibold px-6"
-          >
-            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-            </svg>
-            Share on X
-          </Button>
-          <Button
-            onClick={copyLink}
-            variant="outline"
-          >
-            {copied ? (
-              <>
-                <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Copied!
-              </>
-            ) : (
-              <>
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Copy Link
-              </>
-            )}
-          </Button>
-        </div>
-        <Button
-          onClick={onStartOver}
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground"
+      {/* Hero Section - Card + Analysis Panel Side by Side */}
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-center lg:items-start justify-center">
+        {/* Card */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1, type: "spring" }}
+          className="flex flex-col items-center gap-2 shrink-0"
         >
-          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Make Another Card
-        </Button>
-      </motion.div>
+          <InteractiveCard
+            score={result.careerScore}
+            archetypeName={stripMarkdown(result.archetype.name)}
+            archetypeEmoji={result.archetype.emoji}
+            archetypeDescription={stripMarkdown(result.archetype.description)}
+            archetypeImage={result.archetypeImage}
+            element={(result.archetype.element as PMElement) || "chaos"}
+            moves={result.moves || []}
+            stage={result.archetype.stage || "Senior"}
+            weakness={result.archetype.weakness || "Meetings"}
+            flavor={stripMarkdown(result.archetype.flavor || result.archetype.description)}
+            compact
+            enableFlip
+            enableModal
+          />
+          <p className="text-xs text-muted-foreground">
+            Click card to enlarge & flip
+          </p>
+        </motion.div>
+
+        {/* Analysis Panel - Futuristic Style */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2, type: "spring" }}
+          className="flex-1 max-w-sm space-y-6"
+        >
+          {/* Scanning Header */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-widest">
+              <motion.div
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+                className="w-2 h-2 rounded-full bg-green-500"
+              />
+              Analysis Complete
+            </div>
+
+            {/* Rarity Badge */}
+            <div className="p-4 rounded-lg border border-border/50 bg-card/50 backdrop-blur">
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-3xl">{rarityInfo.emoji}</span>
+                <div>
+                  <div className={`text-lg font-bold ${rarityInfo.color}`}>
+                    {rarityInfo.label}
+                  </div>
+                  <div className="text-xs text-muted-foreground">{rarityInfo.percentile} of PMs</div>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {rarityInfo.description}
+              </p>
+            </div>
+          </div>
+
+          {/* Stats Display */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-muted-foreground">Career Score</span>
+              <span className="font-mono font-bold text-lg">{result.careerScore}/100</span>
+            </div>
+            <div className="h-2 bg-secondary rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${result.careerScore}%` }}
+                transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
+                className="h-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]"
+              />
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-3">
+            <Button
+              onClick={shareToTwitter}
+              className="w-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#5558e3] hover:to-[#7c4fe0] text-white font-semibold"
+            >
+              <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+              Share on X
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={copyLink}
+                variant="outline"
+                className="flex-1"
+              >
+                {copied ? (
+                  <>
+                    <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Copied!
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copy Link
+                  </>
+                )}
+              </Button>
+              <Button
+                onClick={onStartOver}
+                variant="outline"
+                className="flex-1"
+              >
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                New Card
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
 
       {/* Banger Quote */}
       <motion.div

@@ -147,7 +147,7 @@ IMPORTANT FORMATTING RULES:
 - Archetype flavor: Pokédex-style description, max 100 chars, witty and observational.
 - Archetype stage: Based on their experience level (Junior, Mid-Level, Senior, Lead, Staff, Principal, L6, etc.)
 - Archetype weakness: ONE funny word that's their kryptonite (e.g., "Users", "Shipping", "Deadlines", "Meetings")
-- Moves: 2-3 funny PM "attacks" based on THEIR ACTUAL WORK. Short names (max 15 chars), energy cost (1-3), damage (10-100), and REQUIRED funny effect (max 40 chars).
+- Moves: 2 funny PM "attacks" based on THEIR ACTUAL WORK. VERY short names (max 12 chars), energy cost (1-3), damage (10-100), and REQUIRED funny effect (max 30 chars, must fit one line).
 - Gap items: specific and actionable, max 60 chars each.
 - Roadmap titles: max 20 chars.
 - Roadmap actions: max 40 chars each, plain text.
@@ -168,10 +168,10 @@ Your responses MUST be valid JSON with this exact structure (no markdown, no cod
   },
   "moves": [
     {
-      "name": "Attack name referencing their work, max 15 chars",
+      "name": "Short attack name, max 12 chars",
       "energyCost": 1-3,
       "damage": 10-100,
-      "effect": "REQUIRED funny one-liner about the move, max 40 chars"
+      "effect": "Funny one-liner, max 30 chars"
     }
   ],
   "careerScore": 0-99,
