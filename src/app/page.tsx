@@ -11,6 +11,7 @@ import { AnalyzingLoader } from "@/components/steps/AnalyzingLoader";
 import { ExampleGallery } from "@/components/ExampleGallery";
 import { Step, DreamRole, RoastResult } from "@/lib/types";
 import { HeroCard } from "@/components/InteractiveCard";
+import { OutputPreview } from "@/components/OutputPreview";
 
 type InputMode = "magic" | "manual";
 
@@ -498,11 +499,8 @@ Experience:
                 </p>
               </div>
 
-              {/* Hero Card Preview */}
-              <div className="mt-16 flex flex-col items-center">
-                <p className="text-sm text-muted-foreground mb-6">Here&apos;s what you&apos;ll get:</p>
-                <HeroCard />
-              </div>
+              {/* Output Preview - Full experience preview */}
+              <OutputPreview />
 
               {/* Example Gallery */}
               <ExampleGallery />
