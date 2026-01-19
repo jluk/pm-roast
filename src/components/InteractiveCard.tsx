@@ -144,7 +144,7 @@ export function InteractiveCard({
                     stage={stage}
                     weakness={weakness}
                     flavor={flavor}
-                    compact={false}
+                    compact={compact}
                   />
                 </div>
 
@@ -157,7 +157,7 @@ export function InteractiveCard({
                     transform: "rotateY(180deg)",
                   }}
                 >
-                  <CardBack compact={false} />
+                  <CardBack compact={compact} />
                 </div>
               </motion.div>
             </motion.div>

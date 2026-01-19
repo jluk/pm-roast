@@ -34,7 +34,7 @@ interface PokemonCardProps {
   productSense?: number;
   execution?: number;
   leadership?: number;
-  flavor?: string; // Pokédex-style text
+  flavor?: string; // Pokédex-style text (unused but kept for API compatibility)
   compact?: boolean;
 }
 
@@ -70,7 +70,7 @@ export function PokemonCard({
   return (
     <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"}>
       <div
-        className="relative rounded-xl overflow-hidden border-[6px] border-yellow-400"
+        className="relative rounded-xl overflow-hidden border-[6px] border-yellow-400 flex flex-col"
         style={{
           background: "linear-gradient(180deg, #fef3c7 0%, #fde68a 20%, #fbbf24 100%)",
           aspectRatio: "2.5/3.5",
@@ -141,15 +141,15 @@ export function PokemonCard({
           </span>
         </div>
 
-        {/* Moves Section */}
+        {/* Moves Section - Always 2 moves */}
         <div className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"} bg-white/60 rounded-lg border border-yellow-600/20`}>
-          {moves.slice(0, compact ? 2 : 3).map((move, index) => (
+          {moves.slice(0, 2).map((move, index) => (
             <div
               key={index}
-              className={`flex items-start gap-3 border-b border-yellow-600/10 last:border-b-0 ${compact ? "px-3 py-2" : "px-4 py-2.5"}`}
+              className={`flex items-start gap-2 border-b border-yellow-600/10 last:border-b-0 ${compact ? "px-3 py-1.5" : "px-4 py-2"}`}
             >
               {/* Energy Cost */}
-              <div className={`flex gap-1 shrink-0 ${compact ? "w-12" : "w-16"}`}>
+              <div className={`flex gap-0.5 shrink-0 ${compact ? "w-10" : "w-14"}`}>
                 {Array.from({ length: Math.min(move.energyCost, 3) }).map((_, i) => (
                   <EnergySymbol key={i} element={element} size="sm" />
                 ))}
@@ -157,34 +157,23 @@ export function PokemonCard({
 
               {/* Move Name & Effect */}
               <div className="flex-1 min-w-0">
-                <span className={`font-bold text-gray-800 ${compact ? "text-xs" : "text-sm"}`}>
+                <span className={`font-bold text-gray-800 block truncate ${compact ? "text-xs" : "text-sm"}`}>
                   {move.name}
                 </span>
                 {move.effect && (
-                  <p className={`text-gray-600 leading-tight mt-0.5 ${compact ? "text-[10px]" : "text-xs"}`}>
+                  <p className={`text-gray-600 leading-tight mt-0.5 line-clamp-1 ${compact ? "text-[10px]" : "text-xs"}`}>
                     {move.effect}
                   </p>
                 )}
               </div>
 
               {/* Damage */}
-              <span className={`font-black text-gray-800 shrink-0 ${compact ? "text-base" : "text-xl"}`}>
+              <span className={`font-black text-gray-800 shrink-0 ${compact ? "text-sm" : "text-lg"}`}>
                 {move.damage}
               </span>
             </div>
           ))}
         </div>
-
-        {/* Pokédex Flavor Text */}
-        {flavor && (
-          <div className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"}`}>
-            <div className="bg-yellow-100/80 rounded-lg p-2 border border-yellow-600/20">
-              <p className={`text-gray-700 italic text-center leading-relaxed ${compact ? "text-[11px]" : "text-xs"}`}>
-                {flavor}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Bottom: Weakness + Branding */}
         <div
