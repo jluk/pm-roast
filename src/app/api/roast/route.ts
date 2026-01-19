@@ -13,31 +13,43 @@ async function parsePdf(buffer: Buffer): Promise<{ text: string }> {
   return pdfParse(buffer);
 }
 
-// Element settings for image generation - includes background style and typical settings
-const ELEMENT_SETTINGS: Record<PMElement, { bg: string; setting: string }> = {
+// Element settings for image generation - includes background style, setting, and creature type
+const ELEMENT_SETTINGS: Record<PMElement, { bg: string; setting: string; creature: string; colors: string }> = {
   data: {
-    bg: "blue-tinted office with glowing screens and data visualizations",
-    setting: "surrounded by multiple monitors showing dashboards and metrics"
+    bg: "glowing digital landscape with floating data streams and holographic charts",
+    setting: "analyzing glowing data orbs floating around them",
+    creature: "owl or fox with glowing digital patterns on fur/feathers",
+    colors: "blue, cyan, and electric purple"
   },
   chaos: {
-    bg: "busy startup environment with sticky notes and whiteboards everywhere",
-    setting: "in the middle of a hectic open office with people rushing around"
+    bg: "swirling vortex of colors with scattered papers and sticky notes flying",
+    setting: "juggling multiple glowing orbs while balancing on a spinning top",
+    creature: "energetic monkey or squirrel with wild fur and sparking energy",
+    colors: "red, orange, and electric yellow"
   },
   strategy: {
-    bg: "elegant executive boardroom with mahogany furniture",
-    setting: "at a whiteboard covered in frameworks and strategy diagrams"
+    bg: "ancient library with floating chess pieces and strategy maps",
+    setting: "contemplating a glowing 3D chess board",
+    creature: "wise elephant or tortoise with ancient runes on their skin",
+    colors: "deep purple, gold, and forest green"
   },
   shipping: {
-    bg: "modern tech office with deployment screens and green status lights",
-    setting: "celebrating a product launch with confetti or shipping notifications"
+    bg: "rocket launch pad with stars and deployment confetti",
+    setting: "riding a rocket or standing triumphantly on a launched product",
+    creature: "determined wolf or falcon with sleek aerodynamic features",
+    colors: "green, silver, and bright orange"
   },
   politics: {
-    bg: "corporate meeting room with glass walls and city skyline view",
-    setting: "in a stakeholder meeting with executives around a conference table"
+    bg: "grand throne room with multiple factions represented",
+    setting: "diplomatically mediating between different creature groups",
+    creature: "charismatic lion or peacock with regal bearing",
+    colors: "royal purple, gold, and deep red"
   },
   vision: {
-    bg: "futuristic innovation lab with prototypes and concept boards",
-    setting: "presenting a big vision on stage or at a product keynote"
+    bg: "cosmic dreamscape with nebulas and floating islands of ideas",
+    setting: "gazing into a crystal ball showing future possibilities",
+    creature: "mystical phoenix or dragon with ethereal glowing features",
+    colors: "iridescent rainbow, pink, and cosmic purple"
   },
 };
 
@@ -82,24 +94,34 @@ async function generateArchetypeImage(
       if (profileImage) {
         console.log("Profile image fetched, size:", profileImage.data.length);
 
-        const personalizedPrompt = `Transform this person's photo into a stylized trading card character illustration. The character represents the "${archetypeName}" PM archetype.
+        const personalizedPrompt = `Transform this person's photo into a Pokemon-style trading card character illustration. The character represents the "${archetypeName}" PM archetype.
 
 Character personality: ${archetypeDescription}
 
 TRANSFORMATION REQUIREMENTS:
 - Create a stylized illustration BASED ON this person - keep their general likeness, hair style, and distinctive features
-- Transform them into a vibrant, illustrated character (like a collectible card game portrait)
+- Transform them into an animated character (like a Studio Ghibli or Pokemon trainer style)
 - Place them ${elementSettings.setting}
 - Background should be a ${elementSettings.bg}
+- Primary colors: ${elementSettings.colors}
 
-Style requirements:
-- Semi-realistic illustrated style (like Hearthstone or trading card game art)
-- Vibrant colors with dramatic lighting
-- Professional but stylized appearance
-- The person should look heroic/confident in their PM role
-- Keep their face recognizable but stylized
-- No text, labels, or words in the image
-- Dynamic composition with the character as the clear focus`;
+COMPOSITION (CRITICAL):
+- The person must be CENTERED in the frame
+- Show from chest/shoulders up - classic trading card portrait
+- Face must be clearly visible, looking confident
+- Eyes should be slightly larger and more expressive (anime-influenced)
+
+ART STYLE (CRITICAL):
+- Hand-drawn watercolor illustration style like classic Pokemon cards
+- Soft edges with visible watercolor texture
+- Gentle color gradients and washes
+- Whimsical and heroic, suitable for a collectible card game
+- Keep their face recognizable but stylized in watercolor
+
+DO NOT:
+- Cut off the top of their head
+- Use photorealistic style
+- Add any text, labels, or words`;
 
         try {
           // Use new SDK for image generation with profile photo
@@ -143,26 +165,39 @@ Style requirements:
       }
     }
 
-    // Fallback: Generate generic archetype image without profile photo
-    console.log("=== GENERATING GENERIC ARCHETYPE IMAGE ===");
+    // Fallback: Generate Pokemon-style creature without profile photo
+    console.log("=== GENERATING POKEMON-STYLE CREATURE IMAGE ===");
 
-    const imagePrompt = `Generate a stylized illustration of a Product Manager character for a trading card. The character represents "${archetypeName}".
+    const imagePrompt = `Generate a Pokemon-style creature illustration for a trading card. The creature represents the "${archetypeName}" archetype.
 
-Character personality: ${archetypeDescription}
+Creature personality: ${archetypeDescription}
 
-SCENE REQUIREMENT (CRITICAL):
-Show the character ${elementSettings.setting}. The background should be a ${elementSettings.bg}.
+CREATURE DESIGN:
+- Create a cute but powerful creature inspired by a ${elementSettings.creature}
+- The creature should be ${elementSettings.setting}
+- Background: ${elementSettings.bg}
+- Primary colors: ${elementSettings.colors}
 
-Style requirements:
-- Illustrated character portrait showing a PERSON (not abstract or emoji)
-- The person should be in a realistic work environment doing their job
-- Semi-realistic or stylized illustration style (like editorial illustration)
-- Show the character's personality through their expression and body language
-- Professional attire appropriate for a tech PM
-- Dynamic composition with the character as the clear focus
-- No text, labels, or words in the image
-- Vibrant but professional color palette
-- The scene should tell a story about who this PM archetype is`;
+COMPOSITION (CRITICAL):
+- The creature must be CENTERED in the frame
+- Show the FULL creature from head to feet/tail - no cropping
+- The creature should take up 60-70% of the image
+- Face and eyes must be clearly visible and expressive
+- Portrait orientation, creature facing slightly toward viewer
+
+ART STYLE (CRITICAL):
+- Hand-drawn watercolor illustration style like classic Pokemon cards
+- Soft edges with visible watercolor texture and paper grain
+- Gentle color gradients and washes
+- Slightly cel-shaded with soft shadows
+- Whimsical and fantastical, suitable for a collectible card game
+- Expressive eyes that convey the creature's personality
+
+DO NOT:
+- Cut off any part of the creature
+- Use photorealistic style
+- Add any text, labels, or words
+- Make the creature too scary or aggressive`;
 
     // Use new SDK with responseModalities for image generation
     const response = await genAINew.models.generateContent({

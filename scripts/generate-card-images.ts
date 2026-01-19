@@ -15,31 +15,43 @@ console.log("API Key loaded:", process.env.GEMINI_API_KEY ? "Yes" : "No");
 
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
-// Element settings for image generation
-const ELEMENT_SETTINGS: Record<string, { bg: string; setting: string }> = {
+// Element settings for image generation - Pokemon style creatures
+const ELEMENT_SETTINGS: Record<string, { bg: string; setting: string; creature: string; colors: string }> = {
   data: {
-    bg: "blue-tinted office with glowing screens and data visualizations",
-    setting: "surrounded by multiple monitors showing dashboards and metrics",
+    bg: "glowing digital landscape with floating data streams and holographic charts",
+    setting: "analyzing glowing data orbs floating around them",
+    creature: "owl or fox with glowing digital patterns on fur/feathers",
+    colors: "blue, cyan, and electric purple",
   },
   chaos: {
-    bg: "busy startup environment with sticky notes and whiteboards everywhere",
-    setting: "in the middle of a hectic open office with people rushing around",
+    bg: "swirling vortex of colors with scattered papers and sticky notes flying",
+    setting: "juggling multiple glowing orbs while balancing on a spinning top",
+    creature: "energetic monkey or squirrel with wild fur and sparking energy",
+    colors: "red, orange, and electric yellow",
   },
   strategy: {
-    bg: "elegant executive boardroom with mahogany furniture",
-    setting: "at a whiteboard covered in frameworks and strategy diagrams",
+    bg: "ancient library with floating chess pieces and strategy maps",
+    setting: "contemplating a glowing 3D chess board",
+    creature: "wise elephant or tortoise with ancient runes on their skin",
+    colors: "deep purple, gold, and forest green",
   },
   shipping: {
-    bg: "modern tech office with deployment screens and green status lights",
-    setting: "celebrating a product launch with confetti or shipping notifications",
+    bg: "rocket launch pad with stars and deployment confetti",
+    setting: "riding a rocket or standing triumphantly on a launched product",
+    creature: "determined wolf or falcon with sleek aerodynamic features",
+    colors: "green, silver, and bright orange",
   },
   politics: {
-    bg: "corporate meeting room with glass walls and city skyline view",
-    setting: "in a stakeholder meeting with executives around a conference table",
+    bg: "grand throne room with multiple factions represented",
+    setting: "diplomatically mediating between different creature groups",
+    creature: "charismatic lion or peacock with regal bearing",
+    colors: "royal purple, gold, and deep red",
   },
   vision: {
-    bg: "futuristic innovation lab with prototypes and concept boards",
-    setting: "presenting a big vision on stage or at a product keynote",
+    bg: "cosmic dreamscape with nebulas and floating islands of ideas",
+    setting: "gazing into a crystal ball showing future possibilities",
+    creature: "mystical phoenix or dragon with ethereal glowing features",
+    colors: "iridescent rainbow, pink, and cosmic purple",
   },
 };
 
@@ -59,23 +71,36 @@ const CARDS = [
 async function generateImage(card: typeof CARDS[0]): Promise<Buffer | null> {
   const elementSettings = ELEMENT_SETTINGS[card.element];
 
-  const prompt = `Generate a stylized illustration of a Product Manager character for a trading card. The character represents "${card.name}".
+  const prompt = `Generate a Pokemon-style creature illustration for a trading card. The creature represents the "${card.name}" archetype.
 
-Character personality: ${card.description}
+Creature personality: ${card.description}
 
-SCENE REQUIREMENT (CRITICAL):
-Show the character ${elementSettings.setting}. The background should be a ${elementSettings.bg}.
+CREATURE DESIGN:
+- Create a cute but powerful creature inspired by a ${elementSettings.creature}
+- The creature should be ${elementSettings.setting}
+- Background: ${elementSettings.bg}
+- Primary colors: ${elementSettings.colors}
 
-Style requirements:
-- Illustrated character portrait showing a PERSON (not abstract or emoji)
-- Semi-realistic or stylized illustration style (like Hearthstone or trading card game art)
-- Vibrant colors with dramatic lighting
-- Professional but stylized appearance
-- Show the character's personality through their expression and body language
-- Professional attire appropriate for a tech PM
-- Dynamic composition with the character as the clear focus
-- No text, labels, or words in the image
-- The scene should tell a story about who this PM archetype is`;
+COMPOSITION (CRITICAL):
+- The creature must be CENTERED in the frame
+- Show the FULL creature from head to feet/tail - no cropping
+- The creature should take up 60-70% of the image
+- Face and eyes must be clearly visible and expressive
+- Portrait orientation, creature facing slightly toward viewer
+
+ART STYLE (CRITICAL):
+- Hand-drawn watercolor illustration style like classic Pokemon cards
+- Soft edges with visible watercolor texture and paper grain
+- Gentle color gradients and washes
+- Slightly cel-shaded with soft shadows
+- Whimsical and fantastical, suitable for a collectible card game
+- Expressive eyes that convey the creature's personality
+
+DO NOT:
+- Cut off any part of the creature
+- Use photorealistic style
+- Add any text, labels, or words
+- Make the creature too scary or aggressive`;
 
   try {
     console.log(`Generating image for: ${card.name}...`);
