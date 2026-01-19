@@ -4,9 +4,10 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { RoastResult, DreamRole, DREAM_ROLES, PMElement } from "@/lib/types";
+import { RoastResult, DreamRole, DREAM_ROLES } from "@/lib/types";
 import { generateShareUrl } from "@/lib/share";
-import { PokemonCard } from "@/components/PokemonCard";
+import { InteractiveCard } from "@/components/InteractiveCard";
+import { PMElement } from "@/components/PokemonCard";
 
 interface ResultsProps {
   result: RoastResult;
@@ -74,14 +75,14 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
       animate={{ opacity: 1 }}
       className="w-full max-w-3xl mx-auto space-y-8 pb-12"
     >
-      {/* Pokemon-Style Card - Centered */}
+      {/* Pokemon-Style Card - Centered & Interactive */}
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.1, type: "spring" }}
-        className="flex justify-center"
+        className="flex flex-col items-center gap-2"
       >
-        <PokemonCard
+        <InteractiveCard
           score={result.careerScore}
           archetypeName={stripMarkdown(result.archetype.name)}
           archetypeEmoji={result.archetype.emoji}
@@ -93,44 +94,61 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
           weakness={result.archetype.weakness || "Meetings"}
           flavor={stripMarkdown(result.archetype.flavor || result.archetype.description)}
           compact
+          enableFlip
+          enableModal
         />
+        <p className="text-xs text-muted-foreground">
+          Click card to enlarge & flip
+        </p>
       </motion.div>
 
-      {/* Share Buttons */}
+      {/* Share & Make Another - Above the Fold */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
-        className="flex justify-center gap-3"
+        className="flex flex-col items-center gap-3"
       >
+        <div className="flex justify-center gap-3 flex-wrap">
+          <Button
+            onClick={shareToTwitter}
+            className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#5558e3] hover:to-[#7c4fe0] text-white font-semibold px-6"
+          >
+            <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+            Share on X
+          </Button>
+          <Button
+            onClick={copyLink}
+            variant="outline"
+          >
+            {copied ? (
+              <>
+                <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Copied!
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                Copy Link
+              </>
+            )}
+          </Button>
+        </div>
         <Button
-          onClick={shareToTwitter}
-          className="bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:from-[#5558e3] hover:to-[#7c4fe0] text-white font-semibold px-6"
+          onClick={onStartOver}
+          variant="ghost"
+          className="text-muted-foreground hover:text-foreground"
         >
-          <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          Share on X
-        </Button>
-        <Button
-          onClick={copyLink}
-          variant="outline"
-        >
-          {copied ? (
-            <>
-              <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Copied!
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              Copy Link
-            </>
-          )}
+          Make Another Card
         </Button>
       </motion.div>
 
@@ -282,17 +300,6 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
         </div>
       </motion.div>
 
-      {/* Bottom Actions */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-        className="flex justify-center pt-4"
-      >
-        <Button variant="outline" onClick={onStartOver} size="lg">
-          Start Over
-        </Button>
-      </motion.div>
     </motion.div>
   );
 }
