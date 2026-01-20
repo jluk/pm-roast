@@ -9,6 +9,7 @@ interface RoastSummary {
   topRoast?: string;
   element?: string;
   userName?: string;
+  naturalPredator?: string;
 }
 
 interface CardBackProps {
@@ -134,6 +135,16 @@ export function CardBack({ compact = false, rarity = "rare", roastSummary }: Car
                   <span className="absolute -bottom-2 right-2 text-yellow-500/30 text-2xl font-serif">&rdquo;</span>
                 </div>
               </div>
+
+              {/* Natural Predator - Arch Nemesis */}
+              {roastSummary.naturalPredator && (
+                <div className="flex items-center justify-center gap-2 mt-2">
+                  <span className="text-red-400/70 text-[9px] uppercase tracking-wider">⚠️ Natural Predator:</span>
+                  <span className={`text-red-300/90 font-medium ${compact ? "text-[9px]" : "text-[10px]"}`}>
+                    {roastSummary.naturalPredator}
+                  </span>
+                </div>
+              )}
 
               {/* Pokeball divider */}
               <div className="flex items-center justify-center gap-2 my-3">

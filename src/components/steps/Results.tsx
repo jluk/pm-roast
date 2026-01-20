@@ -64,6 +64,7 @@ interface ResultsProps {
   result: RoastResult;
   dreamRole: DreamRole;
   onStartOver: () => void;
+  isSharePage?: boolean;
 }
 
 // Generate YouTube search URL for a podcast episode
@@ -83,7 +84,7 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
+export function Results({ result, dreamRole, onStartOver, isSharePage = false }: ResultsProps) {
   const [copied, setCopied] = useState(false);
 
   // Generate the shareable URL
@@ -92,8 +93,9 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
 
   // Update the browser URL to the unique share URL (without page reload)
   // Also store the image in sessionStorage so it persists if the page is refreshed
+  // Skip this on the share page since we're already on the share URL
   useEffect(() => {
-    if (typeof window !== "undefined" && shareUrl) {
+    if (typeof window !== "undefined" && shareUrl && !isSharePage) {
       // Extract the encoded data from the share URL to use as storage key
       const urlPath = shareUrl.replace(baseUrl, "");
       const encodedData = urlPath.replace("/share/", "");
@@ -110,11 +112,13 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
 
       window.history.pushState({ path: urlPath }, "", urlPath);
     }
-  }, [shareUrl, baseUrl, result.archetypeImage]);
+  }, [shareUrl, baseUrl, result.archetypeImage, isSharePage]);
 
   const shareToTwitter = () => {
     const archetype = stripMarkdown(result.archetype.name);
-    const text = `Just got roasted by PM AI. I'm "${archetype}" with a ${result.careerScore}/100 career score. 💀\n\nGet your roast:`;
+    const rarity = getCardRarity(result.careerScore);
+    const rarityLabel = RARITY_INFO[rarity].label;
+    const text = `PM Roast said I'm a "${archetype}" (${rarityLabel} card)\n\n"${result.bangerQuote}"\n\nBrutal but fair. What's your PM archetype?`;
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
       "_blank"
@@ -191,6 +195,7 @@ Get your PM card: ${shareUrl}
             enableModal
             userName={result.userName}
             bangerQuote={stripMarkdown(result.bangerQuote)}
+            naturalPredator={result.naturalPredator}
           />
           <p className="text-xs text-muted-foreground">
             Click card to enlarge & flip
@@ -281,7 +286,7 @@ Get your PM card: ${shareUrl}
                       <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                     </svg>
                     <p className="text-sm text-white/90 leading-relaxed">
-                      Just got roasted by PM AI. I&apos;m &quot;{stripMarkdown(result.archetype.name)}&quot; with a {result.careerScore}/100 career score. 💀
+                      PM Roast said I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; ({rarityInfo.label} card)<br /><br />&quot;{result.bangerQuote}&quot;<br /><br />Brutal but fair. What&apos;s your PM archetype?
                     </p>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-white/50 border-t border-white/10 pt-3">
@@ -314,196 +319,270 @@ Get your PM card: ${shareUrl}
               </button>
               <button
                 onClick={onStartOver}
-                className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors"
+                className={`flex-1 h-10 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+                  isSharePage
+                    ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#5558e3] hover:to-[#7c4fe0]"
+                    : "bg-white/[0.05] border border-white/10 text-white/70 hover:bg-white/[0.08]"
+                }`}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                New
+                {isSharePage ? (
+                  <>
+                    Get Your Own Roast
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    New
+                  </>
+                )}
               </button>
             </div>
           </div>
         </motion.div>
       </div>
 
-      {/* The Roast - Glassmorphism */}
+      {/* The Roast - Premium Glassmorphism */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
         className="relative"
       >
-        {/* Glow background */}
-        <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/20 rounded-2xl blur-xl opacity-50" />
+        {/* Subtle glow */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-pink-500/10 via-purple-500/10 to-pink-500/10 rounded-2xl blur-2xl" />
 
-        <div className="relative p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-2xl">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
-              <span className="text-xl">🔥</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">The Roast</h3>
-              <p className="text-xs text-white/50">Brutally honest observations</p>
-            </div>
-          </div>
+        <div className="relative rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] overflow-hidden">
+          {/* Gradient accent line */}
+          <div className="h-[2px] bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500" />
 
-          {/* Roast bullets */}
-          <div className="space-y-3">
-            {result.roastBullets.map((bullet, index) => (
+          <div className="px-8 py-8">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-8">
+              {/* Custom fire icon */}
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500/20 to-orange-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-pink-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.5 1.5-4.5 3-6.5s3-4.5 3-7.5c0 0 1 2 2 4 .5-1 1-2 1-3 2.5 3.5 5 6.5 5 13 0 3.866-3.134 7-7 7zm0-2c2.761 0 5-2.239 5-5 0-2.5-1.5-5-3-7-.5 1-1 2-2 3-.5-1-1-2-1.5-3-1 1.5-2.5 3.5-2.5 7 0 2.761 2.239 5 5 5z"/>
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-white">The Roast</h3>
+            </div>
+
+            {/* Roast bullets with custom icons */}
+            <div className="space-y-6">
+              {result.roastBullets.map((bullet, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.8 + index * 0.1 }}
+                  className="flex gap-4 items-start"
+                >
+                  {/* Custom SVG icons in neon palette */}
+                  <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${
+                    index === 0 ? "bg-pink-500/15" :
+                    index === 1 ? "bg-purple-500/15" :
+                    index === 2 ? "bg-cyan-500/15" : "bg-indigo-500/15"
+                  }`}>
+                    {index === 0 ? (
+                      <svg className="w-3.5 h-3.5 text-pink-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                      </svg>
+                    ) : index === 1 ? (
+                      <svg className="w-3.5 h-3.5 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                      </svg>
+                    ) : index === 2 ? (
+                      <svg className="w-3.5 h-3.5 text-cyan-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                      </svg>
+                    ) : (
+                      <svg className="w-3.5 h-3.5 text-indigo-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                      </svg>
+                    )}
+                  </div>
+                  <p className="text-[15px] text-white/85 leading-relaxed">
+                    {stripMarkdown(bullet)}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Natural Predator */}
+            {result.naturalPredator && (
               <motion.div
-                key={index}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.8 + index * 0.1 }}
-                className="flex gap-3 items-start p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-colors"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.1 }}
+                className="mt-8 pt-6 border-t border-white/[0.06]"
               >
-                <span className="text-lg shrink-0">
-                  {index === 0 ? "💀" : index === 1 ? "😬" : index === 2 ? "💅" : "🎯"}
-                </span>
-                <p className="text-sm text-white/80 leading-relaxed">
-                  {stripMarkdown(bullet)}
-                </p>
+                <div className="flex items-start gap-4">
+                  <div className="w-6 h-6 rounded-md bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg className="w-3.5 h-3.5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase tracking-wider text-red-400/70 font-medium mb-1">Natural Predator</p>
+                    <p className="text-[15px] text-white/80 italic">
+                      &ldquo;{result.naturalPredator}&rdquo;
+                    </p>
+                  </div>
+                </div>
               </motion.div>
-            ))}
+            )}
           </div>
         </div>
       </motion.div>
 
-      {/* Growth Plan - Glassmorphism */}
+      {/* Growth Plan - Premium Glassmorphism */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.9 }}
         className="relative"
       >
-        {/* Glow background */}
-        <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-50" />
+        {/* Subtle glow */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-purple-500/10 via-indigo-500/10 to-purple-500/10 rounded-2xl blur-2xl" />
 
-        <div className="relative p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-2xl">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
-              <span className="text-xl">🚀</span>
+        <div className="relative rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] overflow-hidden">
+          {/* Gradient accent line */}
+          <div className="h-[2px] bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500" />
+
+          <div className="px-8 py-8">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-2">
+              {/* Custom rocket icon */}
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2.5c0 0-4 4-4 9.5 0 2.5 1 4.5 2 6l2-2 2 2c1-1.5 2-3.5 2-6 0-5.5-4-9.5-4-9.5zm0 11c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm-3 7l1.5-1.5c.5.3 1 .5 1.5.5s1-.2 1.5-.5L15 20.5c-.8.3-1.6.5-2.5.5h-1c-.9 0-1.7-.2-2.5-.5z"/>
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-white">Your Growth Plan</h3>
             </div>
+            <p className="text-sm text-white/50 mb-8 ml-11">
+              Path to <span className="text-white/70">{DREAM_ROLES[dreamRole].emoji} {DREAM_ROLES[dreamRole].label}</span>
+            </p>
+
+            {/* Growth Chips - modern indigo/slate style with hover glow */}
+            <div className="mb-8">
+              <p className="text-xs uppercase tracking-wider text-white/40 mb-4">Growth Areas</p>
+              <div className="flex flex-wrap gap-2">
+                {result.gaps.map((gap, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1.5 text-sm bg-slate-800/80 text-slate-200 rounded-lg border border-slate-700/50 hover:border-purple-500/50 hover:shadow-[0_0_12px_rgba(168,85,247,0.15)] transition-all duration-200 cursor-default"
+                  >
+                    {stripMarkdown(gap)}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="h-px bg-white/[0.06] mb-8" />
+
+            {/* Roadmap */}
             <div>
-              <h3 className="text-lg font-semibold text-white">Your Growth Plan</h3>
-              <p className="text-xs text-white/50">Gaps to address & roadmap to level up</p>
-            </div>
-          </div>
-
-          {/* Gaps as pills */}
-          <div className="mb-6">
-            <p className="text-xs uppercase tracking-wider text-white/40 mb-3">Skill Gaps</p>
-            <div className="flex flex-wrap gap-2">
-              {result.gaps.map((gap, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1.5 text-xs font-medium bg-orange-500/10 text-orange-300 border border-orange-500/20 rounded-full backdrop-blur-sm"
-                >
-                  {stripMarkdown(gap)}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Divider */}
-          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-6" />
-
-          {/* Roadmap */}
-          <div>
-            <p className="text-xs uppercase tracking-wider text-white/40 mb-4">4-Phase Roadmap</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {roadmapPhases.map((phase, index) => (
-                <div
-                  key={index}
-                  className="p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-colors"
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="w-6 h-6 rounded-full bg-[#6366f1]/20 flex items-center justify-center text-[#6366f1] text-xs font-bold">
+              <p className="text-xs uppercase tracking-wider text-white/40 mb-6">4-Phase Roadmap</p>
+              <div className="space-y-6">
+                {roadmapPhases.map((phase, index) => (
+                  <div key={index} className="flex gap-4">
+                    <span className="w-7 h-7 rounded-full bg-gradient-to-br from-purple-500/30 to-indigo-500/30 flex items-center justify-center text-purple-300 text-sm font-bold shrink-0 mt-0.5 border border-purple-500/20">
                       {index + 1}
                     </span>
-                    <p className="font-medium text-white text-sm">{stripMarkdown(phase.title)}</p>
+                    <div className="flex-1">
+                      <p className="font-medium text-white text-[15px] mb-2">{stripMarkdown(phase.title)}</p>
+                      <ul className="space-y-1.5">
+                        {phase.actions.slice(0, 2).map((action, actionIndex) => (
+                          <li key={actionIndex} className="text-sm text-white/60 flex gap-2">
+                            <span className="text-purple-400/70 shrink-0">→</span>
+                            <span>{stripMarkdown(action)}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                  <ul className="space-y-1 ml-8">
-                    {phase.actions.slice(0, 2).map((action, actionIndex) => (
-                      <li key={actionIndex} className="text-xs text-white/60 flex gap-2">
-                        <span className="text-[#6366f1] shrink-0">→</span>
-                        <span>{stripMarkdown(action)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Required Listening - Glassmorphism */}
+      {/* Required Listening - Premium Glassmorphism */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.0 }}
         className="relative"
       >
-        {/* Glow background */}
-        <div className="absolute -inset-2 bg-gradient-to-r from-red-500/15 via-pink-500/15 to-red-500/15 rounded-2xl blur-xl opacity-50" />
+        {/* Subtle glow */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-red-500/10 via-pink-500/10 to-red-500/10 rounded-2xl blur-2xl" />
 
-        <div className="relative p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-2xl">
-          {/* Header */}
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-pink-500/20 flex items-center justify-center">
-              <span className="text-xl">🎧</span>
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-white">Required Listening</h3>
-              <p className="text-xs text-white/50">
-                Episodes from{" "}
-                <a
-                  href="https://www.youtube.com/@LennysPodcast"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[#6366f1] hover:underline"
-                >
-                  Lenny&apos;s Podcast
-                </a>
-              </p>
-            </div>
-          </div>
+        <div className="relative rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/[0.08] overflow-hidden">
+          {/* Gradient accent line */}
+          <div className="h-[2px] bg-gradient-to-r from-red-500 via-pink-500 to-purple-500" />
 
-          {/* Episodes */}
-          <div className="space-y-3">
-            {result.podcastEpisodes.map((episode, index) => (
+          <div className="px-8 py-8">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-2">
+              {/* Custom headphones icon */}
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-red-500/20 to-pink-500/20 flex items-center justify-center">
+                <svg className="w-5 h-5 text-pink-400" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 1c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7c0-4.97-4.03-9-9-9z"/>
+                </svg>
+              </div>
+              <h3 className="text-xl font-semibold text-white">Required Listening</h3>
+            </div>
+            <p className="text-sm text-white/50 mb-8 ml-11">
+              Episodes from{" "}
               <a
-                key={index}
-                href={getYouTubeSearchUrl(episode.title, episode.guest)}
+                href="https://www.youtube.com/@LennysPodcast"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block group"
+                className="text-pink-400 hover:underline"
               >
-                <div className="flex gap-4 p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] hover:border-white/10 transition-all">
+                Lenny&apos;s Podcast
+              </a>
+            </p>
+
+            {/* Episodes - no nested boxes */}
+            <div className="space-y-6">
+              {result.podcastEpisodes.map((episode, index) => (
+                <a
+                  key={index}
+                  href={getYouTubeSearchUrl(episode.title, episode.guest)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex gap-4 group"
+                >
                   {/* YouTube icon */}
-                  <div className="w-12 h-12 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0 group-hover:bg-red-500/20 transition-colors">
-                    <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0 group-hover:bg-red-500/20 transition-colors">
+                    <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-white text-sm group-hover:text-[#6366f1] transition-colors">
+                    <p className="font-medium text-white text-[15px] group-hover:text-pink-400 transition-colors mb-0.5">
                       {stripMarkdown(episode.title)}
                     </p>
-                    <p className="text-xs text-white/50">with {stripMarkdown(episode.guest)}</p>
-                    <p className="text-xs text-[#6366f1]/80 mt-1">{stripMarkdown(episode.reason)}</p>
+                    <p className="text-sm text-white/50">with {stripMarkdown(episode.guest)}</p>
+                    <p className="text-sm text-white/60 mt-1">{stripMarkdown(episode.reason)}</p>
                   </div>
-                  <div className="flex items-center text-white/30 group-hover:text-[#6366f1] transition-colors">
+                  <div className="flex items-center text-white/30 group-hover:text-pink-400 transition-colors shrink-0">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                   </div>
-                </div>
-              </a>
-            ))}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </motion.div>

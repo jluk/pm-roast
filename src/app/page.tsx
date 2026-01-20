@@ -24,10 +24,11 @@ export default function Home() {
   const [inputMode, setInputMode] = useState<InputMode>("magic");
   const [urlType, setUrlType] = useState<UrlType>("linkedin");
   const [linkedinUrl, setLinkedinUrl] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
   const [profileText, setProfileText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [dreamRole, setDreamRole] = useState<DreamRole | null>(null);
+  const [dreamRole, setDreamRole] = useState<DreamRole | null>("founder");
   const [result, setResult] = useState<RoastResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingLinkedin, setIsLoadingLinkedin] = useState(false);
@@ -74,7 +75,7 @@ export default function Home() {
   };
 
   const handleMagicLinkSubmit = async () => {
-    if (!linkedinUrl || !dreamRole) return;
+    if (!currentUrl || !dreamRole) return;
 
     setIsLoadingLinkedin(true);
     setError(null);
@@ -85,7 +86,7 @@ export default function Home() {
         const response = await fetch("/api/website", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: linkedinUrl }),
+          body: JSON.stringify({ url: currentUrl }),
         });
 
         const data = await response.json();
@@ -103,14 +104,14 @@ export default function Home() {
         if (data.profileText) {
           setProfileText(data.profileText);
         } else {
-          setProfileText(`Website: ${linkedinUrl}\n\nPlease paste your bio, work experience, and achievements below:`);
+          setProfileText(`Website: ${currentUrl}\n\nPlease paste your bio, work experience, and achievements below:`);
         }
         if (data.message) {
           setError(data.message);
         }
       } catch {
         setInputMode("manual");
-        setProfileText(`Website: ${linkedinUrl}\n\nPlease paste your bio, work experience, and achievements below:`);
+        setProfileText(`Website: ${currentUrl}\n\nPlease paste your bio, work experience, and achievements below:`);
         setError("Could not fetch website. Please paste your content manually.");
       } finally {
         setIsLoadingLinkedin(false);
@@ -123,7 +124,7 @@ export default function Home() {
       const response = await fetch("/api/linkedin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: linkedinUrl }),
+        body: JSON.stringify({ url: currentUrl }),
       });
 
       const data = await response.json();
@@ -285,10 +286,11 @@ export default function Home() {
     setInputMode("magic");
     setFile(null);
     setLinkedinUrl("");
+    setWebsiteUrl("");
     setProfileText("");
     setProfilePicUrl(null);
     setUseProfilePic(true);
-    setDreamRole(null);
+    setDreamRole("founder");
     setResult(null);
     setError(null);
     setInputSource("linkedin");
@@ -298,14 +300,17 @@ export default function Home() {
 
   const canSubmitManual = profileText.trim().length >= 50 || file !== null;
 
+  // Get the current URL based on selected tab
+  const currentUrl = urlType === "linkedin" ? linkedinUrl : websiteUrl;
+
   // Check if URL is valid (LinkedIn or website based on urlType)
   const isValidUrl = useMemo(() => {
-    const url = linkedinUrl.trim();
+    const url = currentUrl.trim();
     if (urlType === "linkedin") {
       return LINKEDIN_URL_REGEX.test(url);
     }
     return WEBSITE_URL_REGEX.test(url);
-  }, [linkedinUrl, urlType]);
+  }, [currentUrl, urlType]);
 
   return (
     <main className="min-h-screen flex flex-col">
@@ -412,11 +417,11 @@ export default function Home() {
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-4"
                     >
-                      {/* Input Type Toggle */}
+                      {/* Input Type Toggle - preserves input when switching tabs */}
                       <div className="flex justify-center">
                         <div className="inline-flex bg-white/10 rounded-lg p-0.5">
                           <button
-                            onClick={() => { setUrlType("linkedin"); setLinkedinUrl(""); setFile(null); }}
+                            onClick={() => setUrlType("linkedin")}
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                               urlType === "linkedin"
                                 ? "bg-white/20 text-white"
@@ -426,7 +431,7 @@ export default function Home() {
                             LinkedIn
                           </button>
                           <button
-                            onClick={() => { setUrlType("website"); setLinkedinUrl(""); setFile(null); }}
+                            onClick={() => setUrlType("website")}
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                               urlType === "website"
                                 ? "bg-white/20 text-white"
@@ -436,7 +441,7 @@ export default function Home() {
                             Website
                           </button>
                           <button
-                            onClick={() => { setUrlType("resume"); setLinkedinUrl(""); }}
+                            onClick={() => setUrlType("resume")}
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                               urlType === "resume"
                                 ? "bg-white/20 text-white"
@@ -509,8 +514,8 @@ export default function Home() {
                           <input
                             type="url"
                             placeholder={urlType === "linkedin" ? "linkedin.com/in/yourprofile" : "yourwebsite.com"}
-                            value={linkedinUrl}
-                            onChange={(e) => setLinkedinUrl(e.target.value)}
+                            value={currentUrl}
+                            onChange={(e) => urlType === "linkedin" ? setLinkedinUrl(e.target.value) : setWebsiteUrl(e.target.value)}
                             className={`w-full h-12 pl-11 bg-white/10 backdrop-blur-sm border rounded-lg text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/50 focus:border-transparent transition-all ${
                               isValidUrl ? "border-green-500/50 pr-10" : "border-white/20 pr-4"
                             }`}
@@ -539,23 +544,19 @@ export default function Home() {
                               <p className="text-xs text-white/60 text-center">
                                 What&apos;s your dream role?
                               </p>
-                              <div className="grid grid-cols-2 gap-1.5">
+                              <div className="flex flex-wrap justify-center gap-1.5">
                                 {(Object.entries(DREAM_ROLES) as [DreamRole, typeof DREAM_ROLES[DreamRole]][]).map(([key, role]) => (
                                   <button
                                     key={key}
                                     onClick={() => setDreamRole(key)}
-                                    className={`h-9 px-2 rounded-lg transition-all ${
+                                    className={`px-2.5 py-1.5 rounded-full transition-all text-[11px] font-medium whitespace-nowrap ${
                                       dreamRole === key
-                                        ? "bg-[#6366f1]/30 border-[#6366f1] border"
-                                        : "bg-white/5 border-white/10 border hover:bg-white/10"
+                                        ? "bg-[#6366f1]/30 border-[#6366f1] border text-white"
+                                        : "bg-white/5 border-white/10 border hover:bg-white/10 text-white/70 hover:text-white/90"
                                     }`}
                                   >
-                                    <div className="flex items-center gap-1 w-full">
-                                      <span className="text-sm shrink-0">{role.emoji}</span>
-                                      <span className={`text-[11px] font-medium whitespace-nowrap truncate ${dreamRole === key ? "text-white" : "text-white/80"}`}>
-                                        {role.label}
-                                      </span>
-                                    </div>
+                                    <span className={`mr-1 ${dreamRole === key ? "" : "grayscale opacity-60"}`}>{role.emoji}</span>
+                                    {role.label}
                                   </button>
                                 ))}
                               </div>
@@ -563,25 +564,6 @@ export default function Home() {
                           </motion.div>
                         )}
                       </AnimatePresence>
-
-                      {/* Use Profile Picture Toggle - only show for LinkedIn/Website */}
-                      {urlType !== "resume" && (
-                        <label className="flex items-center gap-2 cursor-pointer group">
-                          <div className="relative">
-                            <input
-                              type="checkbox"
-                              checked={useProfilePic}
-                              onChange={(e) => setUseProfilePic(e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-9 h-5 bg-white/10 border border-white/20 rounded-full peer-checked:bg-[#6366f1] peer-checked:border-[#6366f1] transition-all" />
-                            <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
-                          </div>
-                          <span className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
-                            Use my photo for card
-                          </span>
-                        </label>
-                      )}
 
                       {/* Submit Button */}
                       <Button
@@ -604,27 +586,37 @@ export default function Home() {
                         )}
                       </Button>
 
-                      {/* Social Proof Ticker */}
-                      <p className="text-[10px] text-white/50 text-center">
-                        {roastCount.toLocaleString()} PMs roasted. 0 PRDs harmed.
-                      </p>
-
-                      {/* Manual Fallback Link */}
-                      <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                          <div className="w-full border-t border-white/10" />
-                        </div>
-                        <div className="relative flex justify-center text-xs">
-                          <span className="bg-transparent px-2 text-white/40">or</span>
-                        </div>
+                      {/* Bottom row: photo toggle + manual link */}
+                      <div className="flex items-center justify-between text-[10px]">
+                        {/* Use Profile Picture Toggle - compact */}
+                        {urlType !== "resume" ? (
+                          <label className="flex items-center gap-1.5 cursor-pointer group">
+                            <input
+                              type="checkbox"
+                              checked={useProfilePic}
+                              onChange={(e) => setUseProfilePic(e.target.checked)}
+                              className="w-3 h-3 rounded border-white/30 bg-white/10 text-[#6366f1] focus:ring-0 focus:ring-offset-0"
+                            />
+                            <span className="text-white/40 group-hover:text-white/60 transition-colors">
+                              Use photo if available
+                            </span>
+                          </label>
+                        ) : (
+                          <span />
+                        )}
+                        {/* Manual fallback */}
+                        <button
+                          onClick={() => setInputMode("manual")}
+                          className="text-white/40 hover:text-white/70 transition-colors"
+                        >
+                          Enter manually
+                        </button>
                       </div>
 
-                      <button
-                        onClick={() => setInputMode("manual")}
-                        className="w-full py-2 text-sm text-white/50 hover:text-white/80 transition-colors"
-                      >
-                        Enter info manually instead
-                      </button>
+                      {/* Social Proof Ticker */}
+                      <p className="text-[10px] text-white/40 text-center">
+                        {roastCount.toLocaleString()} PMs roasted
+                      </p>
                     </motion.div>
                   ) : (
                     <motion.div
@@ -719,23 +711,19 @@ export default function Home() {
                               <p className="text-xs text-white/60 text-center">
                                 What&apos;s your dream role?
                               </p>
-                              <div className="grid grid-cols-2 gap-1.5">
+                              <div className="flex flex-wrap justify-center gap-1.5">
                                 {(Object.entries(DREAM_ROLES) as [DreamRole, typeof DREAM_ROLES[DreamRole]][]).map(([key, role]) => (
                                   <button
                                     key={key}
                                     onClick={() => setDreamRole(key)}
-                                    className={`h-9 px-2 rounded-lg transition-all ${
+                                    className={`px-2.5 py-1.5 rounded-full transition-all text-[11px] font-medium whitespace-nowrap ${
                                       dreamRole === key
-                                        ? "bg-[#6366f1]/30 border-[#6366f1] border"
-                                        : "bg-white/5 border-white/10 border hover:bg-white/10"
+                                        ? "bg-[#6366f1]/30 border-[#6366f1] border text-white"
+                                        : "bg-white/5 border-white/10 border hover:bg-white/10 text-white/70 hover:text-white/90"
                                     }`}
                                   >
-                                    <div className="flex items-center gap-1 w-full">
-                                      <span className="text-sm shrink-0">{role.emoji}</span>
-                                      <span className={`text-[11px] font-medium whitespace-nowrap truncate ${dreamRole === key ? "text-white" : "text-white/80"}`}>
-                                        {role.label}
-                                      </span>
-                                    </div>
+                                    <span className={`mr-1 ${dreamRole === key ? "" : "grayscale opacity-60"}`}>{role.emoji}</span>
+                                    {role.label}
                                   </button>
                                 ))}
                               </div>

@@ -124,6 +124,9 @@ export interface RoastResult {
 
   // Honest reaction to their dream role
   dreamRoleReaction: string;
+
+  // Natural predator - their arch-nemesis (person or concept they fear)
+  naturalPredator: string;
 }
 
 export type Step = "upload" | "analyzing" | "results";

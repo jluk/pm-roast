@@ -23,6 +23,7 @@ interface InteractiveCardProps {
   enableModal?: boolean;
   userName?: string;
   bangerQuote?: string;
+  naturalPredator?: string;
 }
 
 export function InteractiveCard({
@@ -40,6 +41,7 @@ export function InteractiveCard({
   enableModal = true,
   userName,
   bangerQuote,
+  naturalPredator,
 }: InteractiveCardProps) {
   const { openModal, isOpen } = useCardModal();
 
@@ -59,9 +61,10 @@ export function InteractiveCard({
         compact,
         userName,
         bangerQuote,
+        naturalPredator,
       });
     }
-  }, [enableModal, isOpen, openModal, score, archetypeName, archetypeEmoji, archetypeDescription, archetypeImage, element, moves, stage, weakness, flavor, compact, userName, bangerQuote]);
+  }, [enableModal, isOpen, openModal, score, archetypeName, archetypeEmoji, archetypeDescription, archetypeImage, element, moves, stage, weakness, flavor, compact, userName, bangerQuote, naturalPredator]);
 
   return (
     <div

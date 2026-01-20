@@ -1,3 +1,5 @@
+import { RoastResult, DreamRole, PMElement, PMMove } from "./types";
+
 // Shareable card data - includes all fields needed to reconstruct the full results
 export interface ShareableCard {
   s: number; // careerScore
@@ -20,6 +22,60 @@ export interface ShareableCard {
   g?: string[]; // gaps
   rm?: { t: string; a: string[] }[]; // roadmap (title, actions)
   pe?: { t: string; g: string; r: string }[]; // podcastEpisodes (title, guest, reason)
+  u?: string; // userName
+  np?: string; // naturalPredator
+}
+
+// Convert ShareableCard back to RoastResult for reusing the Results component
+export function shareableCardToRoastResult(card: ShareableCard): RoastResult {
+  // Reconstruct moves
+  const moves: PMMove[] = card.m ? card.m.map(m => ({
+    name: m.n,
+    energyCost: m.c,
+    damage: m.d,
+    effect: m.e,
+  })) : [];
+
+  // Reconstruct roadmap
+  const roadmap = card.rm ? card.rm.map((r, i) => ({
+    month: i + 1,
+    title: r.t,
+    actions: r.a,
+  })) : [];
+
+  // Reconstruct podcast episodes
+  const podcastEpisodes = card.pe ? card.pe.map(p => ({
+    title: p.t,
+    guest: p.g,
+    reason: p.r,
+  })) : [];
+
+  return {
+    careerScore: card.s,
+    archetype: {
+      name: card.n,
+      emoji: card.e,
+      description: card.d,
+      element: card.el as PMElement,
+      stage: card.st || "Senior",
+      weakness: card.w || "Meetings",
+      flavor: card.f || card.d,
+    },
+    moves,
+    capabilities: {
+      productSense: card.ps,
+      execution: card.ex,
+      leadership: card.ld,
+    },
+    roastBullets: card.rb || [],
+    gaps: card.g || [],
+    roadmap,
+    podcastEpisodes,
+    bangerQuote: card.q,
+    dreamRoleReaction: card.rr,
+    userName: card.u,
+    naturalPredator: card.np || "",
+  };
 }
 
 // Encode card data for URL (handles UTF-8/Unicode)
@@ -85,6 +141,8 @@ export function generateShareUrl(
     gaps?: string[];
     roadmap?: { title: string; actions: string[] }[];
     podcastEpisodes?: { title: string; guest: string; reason: string }[];
+    userName?: string;
+    naturalPredator?: string;
   },
   dreamRole: string
 ): string {
@@ -130,6 +188,8 @@ export function generateShareUrl(
     g: (result.gaps || []).slice(0, 4).map(g => g.slice(0, 60)),
     rm: compressedRoadmap,
     pe: compressedPodcasts,
+    u: result.userName?.slice(0, 50),
+    np: result.naturalPredator?.slice(0, 80),
   };
 
   const encoded = encodeCardData(card);

@@ -292,6 +292,58 @@ DO NOT:
   }
 }
 
+// Dream role requirements - what it takes to reach each role
+const DREAM_ROLE_REQUIREMENTS: Record<DreamRole, { skills: string[]; experience: string; redFlags: string[]; greenFlags: string[] }> = {
+  founder: {
+    skills: ["0-to-1 product building", "fundraising/pitching", "team building", "market intuition", "resilience", "wearing multiple hats"],
+    experience: "Prior startup experience, shipped products from scratch, comfortable with extreme ambiguity and risk",
+    redFlags: ["Only big company experience", "Never shipped a 0-to-1 product", "Risk-averse career moves", "No side projects"],
+    greenFlags: ["Previous founder experience", "Built products from scratch", "Entrepreneurial side projects", "Comfortable with failure"]
+  },
+  "vp-product": {
+    skills: ["Org building", "executive communication", "cross-functional leadership", "strategy at scale", "hiring/mentoring PMs", "board-level storytelling"],
+    experience: "Led multiple PM teams (10+), shipped products at scale (millions of users), managed managers, influenced company strategy",
+    redFlags: ["Never managed managers", "No experience at scale", "Only IC work", "Haven't built PM teams"],
+    greenFlags: ["Built PM orgs from scratch", "Led cross-company initiatives", "Experience at multiple stages", "Track record of developing PMs"]
+  },
+  cpo: {
+    skills: ["Company-wide product vision", "board communication", "P&L ownership", "market positioning", "M&A product strategy", "building world-class PM orgs"],
+    experience: "VP-level experience, owned significant business outcomes ($100M+), reported to CEO, shaped company direction",
+    redFlags: ["No VP experience", "Never owned P&L", "No board exposure", "Limited strategic scope"],
+    greenFlags: ["VP of Product experience", "Owned major revenue lines", "CEO-level relationship", "Industry thought leadership"]
+  },
+  "director-faang": {
+    skills: ["Technical depth", "stakeholder management at scale", "navigating big company politics", "L6→L7 performance narratives", "cross-org influence"],
+    experience: "Staff PM or Senior PM at top-tier company, owned major product areas, navigated promo process, influenced cross-functional teams",
+    redFlags: ["No big tech experience", "Only small company scope", "Lacks technical depth", "Poor at internal politics"],
+    greenFlags: ["Current Staff PM at big tech", "Led major launches", "Strong promo narrative", "Cross-org influence"]
+  },
+  "staff-faang": {
+    skills: ["Technical excellence", "IC leadership", "driving alignment without authority", "strong PM fundamentals", "deep domain expertise"],
+    experience: "Senior PM with strong track record, demonstrated IC impact at scale, owned significant features/products",
+    redFlags: ["Junior PM experience only", "No measurable impact", "Weak technical skills", "Poor cross-functional collaboration"],
+    greenFlags: ["Senior PM at good companies", "Clear impact metrics", "Technical credibility", "Strong IC brand"]
+  },
+  "senior-pm": {
+    skills: ["PM fundamentals", "stakeholder management", "data-driven decisions", "shipping consistently", "user research basics"],
+    experience: "2-4 years PM experience, owned features end-to-end, worked with eng/design, shipped multiple times",
+    redFlags: ["Brand new to PM", "Never shipped anything", "No cross-functional experience", "Lacks PM vocabulary"],
+    greenFlags: ["Shipped multiple features", "Clear PM growth trajectory", "Good stakeholder feedback", "Data literacy"]
+  },
+  vc: {
+    skills: ["Pattern recognition across startups", "market analysis", "founder evaluation", "network building", "deal sourcing", "portfolio support"],
+    experience: "Operating experience at successful startups, strong network, track record of good judgment calls, content/thought leadership",
+    redFlags: ["No operating experience", "Weak network", "No content presence", "Never evaluated startups"],
+    greenFlags: ["Successful operator background", "Strong founder network", "Visible thought leadership", "Angel investing experience"]
+  },
+  "cult-leader": {
+    skills: ["Content creation", "personal branding", "community building", "hot takes that land", "consistent publishing", "engagement farming"],
+    experience: "Built audience in some capacity, unique POV, content that resonates, willingness to be public",
+    redFlags: ["No content presence", "Generic takes", "Shy about self-promotion", "No unique angle"],
+    greenFlags: ["Growing audience", "Viral content history", "Unique perspective", "Consistent publishing cadence"]
+  }
+};
+
 const SYSTEM_PROMPT = `You are a savage AI comedian who's spent way too much time on Tech Twitter, Product Hunt, Blind, and r/ProductManagement. You've absorbed 200+ episodes of Lenny's Podcast and know what separates elite PMs from the rest.
 
 You're a roast comic who specializes in tech industry humor. Your jokes land because they're SPECIFIC to the person you're roasting - you find the unique absurdity in THEIR career, THEIR buzzwords, THEIR specific company history. Generic jokes are lazy. Your roasts reference THEIR actual experience.
@@ -355,24 +407,33 @@ MOVE GENERATION RULES (CRITICAL):
 - NEVER use generic moves like "Scope Creep" - make them personal to THIS PM's history
 - Vary your damage numbers - use different values across the range (15, 28, 35, 42, 55, 63, 78, 85, 92, etc.) - NOT always 40, 50, or 47
 
+DREAM ROLE GAP ANALYSIS (CRITICAL - THIS IS THE CORE OF YOUR ROAST):
+- You will be told their dream role. Your ENTIRE analysis should be framed around the gap between where they are NOW and what that dream role REQUIRES.
+- The gaps should be the specific skills/experience they're MISSING to reach their dream role, not generic PM gaps.
+- The roadmap should be a realistic path to close that gap - what they actually need to DO to get there.
+- At least 1-2 roast bullets should mock the mismatch between their aspiration and their current profile.
+- The bangerQuote should often reference their dream role delusion or the gap they need to close.
+- dreamRoleReaction is your sarcastic verdict on their chances - be brutally honest about the gap.
+
 FORMATTING RULES:
 - Keep ALL text concise. No markdown formatting anywhere.
 - Archetype name: 2-3 words, MUST reference something specific from their profile (their company, product area, or role)
-- Roast bullets: MUST reference specific things from their profile. These appear on the webpage, not the card - can be longer sentences.
+- Roast bullets: MUST reference specific things from their profile. At least 1-2 should roast their dream role gap/delusion. These appear on the webpage, not the card - can be longer sentences.
 - Archetype description: A punchy roast about them, 1 sentence, around 60-80 chars ideal.
 - Archetype flavor: Nature-doc style observation, 1 sentence, around 60-80 chars ideal.
 - Archetype stage: Junior|Mid|Senior|Lead|Staff|Principal
 - Archetype weakness: ONE word only
 - Moves: 2 attacks. Names should be 2-3 words (like Pokemon moves). Energy 1-2. Damage 10-100. Effect is a funny quip, around 30-50 chars ideal.
-- Gap items: specific and actionable based on their ACTUAL gaps. Max 60 chars each.
-- Roadmap: personalized advice for THIS person. Max 20 char titles, max 40 char actions.
-- bangerQuote: THE MOST IMPORTANT FIELD. Must be a quotable roast that references THEIR specific career. Screenshot-worthy. Max 140 chars. Use "you" not names.
-- dreamRoleReaction: Sarcastic take on whether they can actually achieve their dream role based on their profile. Max 80 chars.
+- Gap items: MUST be skills/experience they need FOR THEIR SPECIFIC DREAM ROLE, not generic PM gaps. Be specific about what the dream role requires that they're missing. Max 60 chars each.
+- Roadmap: A 4-month plan specifically designed to move them TOWARD THEIR DREAM ROLE. Each month should address a specific gap between current state and dream role requirements. Max 20 char titles, max 40 char actions.
+- bangerQuote: THE MOST IMPORTANT FIELD. Must be a quotable roast that references THEIR specific career AND ideally their dream role gap. Screenshot-worthy. Max 140 chars. Use "you" not names.
+- dreamRoleReaction: Sarcastic verdict on their dream role chances. Reference specific gaps. Be brutally honest. Max 80 chars.
+- naturalPredator: Their arch-nemesis - the person or concept that strikes fear in their PM heart. Should be funny and specific to their archetype/element. Examples: "An Engineer with a valid technical concern", "A designer with an opinion", "A 4:45 PM Friday bug report", "A stakeholder who actually read the PRD". Max 60 chars.
 
 Your responses MUST be valid JSON with this exact structure (no markdown, no code blocks, just raw JSON):
 {
   "userName": "Their first name only extracted from profile (just first name, not full name). Leave empty string if not found.",
-  "roastBullets": ["3-4 roasts that reference SPECIFIC things from their profile, max 80 chars each"],
+  "roastBullets": ["3-4 roasts, at least 1-2 MUST mock the gap between their current state and dream role aspirations, max 80 chars each"],
   "archetype": {
     "name": "2-3 word name that references their specific career/company (NO 'The' prefix)",
     "description": "A punchy roast about them, 1 sentence, 60-80 chars",
@@ -396,18 +457,19 @@ Your responses MUST be valid JSON with this exact structure (no markdown, no cod
     "execution": 0-99,
     "leadership": 0-99
   },
-  "gaps": ["3-4 skill gaps specific to them, max 60 chars each"],
+  "gaps": ["3-4 SPECIFIC skills/experience they're MISSING to reach their DREAM ROLE (not generic PM gaps), max 60 chars each"],
   "roadmap": [
-    {"month": 1, "title": "max 20 chars", "actions": ["2 personalized actions, max 40 chars each"]},
-    {"month": 2, "title": "max 20 chars", "actions": ["2 personalized actions, max 40 chars each"]},
-    {"month": 3, "title": "max 20 chars", "actions": ["2 personalized actions, max 40 chars each"]},
-    {"month": 4, "title": "max 20 chars", "actions": ["2 personalized actions, max 40 chars each"]}
+    {"month": 1, "title": "max 20 chars", "actions": ["2 actions specifically to close gap to DREAM ROLE, max 40 chars each"]},
+    {"month": 2, "title": "max 20 chars", "actions": ["2 actions specifically to close gap to DREAM ROLE, max 40 chars each"]},
+    {"month": 3, "title": "max 20 chars", "actions": ["2 actions specifically to close gap to DREAM ROLE, max 40 chars each"]},
+    {"month": 4, "title": "max 20 chars", "actions": ["2 actions specifically to close gap to DREAM ROLE, max 40 chars each"]}
   ],
   "podcastEpisodes": [
-    {"title": "REAL Lenny's Podcast episode", "guest": "Guest name", "reason": "Why relevant to THEM, max 50 chars"}
+    {"title": "REAL Lenny's Podcast episode", "guest": "Guest name", "reason": "Why relevant to THEIR path to DREAM ROLE, max 50 chars"}
   ],
-  "bangerQuote": "Screenshot-worthy roast that references THEIR specific career. Max 140 chars.",
-  "dreamRoleReaction": "Sarcastic take on their dream role chances. Max 80 chars."
+  "bangerQuote": "Screenshot-worthy roast, ideally referencing gap between current state and dream role. Max 140 chars.",
+  "dreamRoleReaction": "Brutally honest verdict on their dream role chances given the gap. Reference what's missing. Max 80 chars.",
+  "naturalPredator": "Their arch-nemesis - funny person/concept they fear. Max 60 chars."
 }`;
 
 export async function POST(request: NextRequest) {
@@ -467,15 +529,37 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    const roleReqs = DREAM_ROLE_REQUIREMENTS[dreamRole];
+
     const prompt = `${SYSTEM_PROMPT}
 
-Analyze the following PM's profile/resume and provide a brutally honest roast. Their dream role is: ${DREAM_ROLES[dreamRole].label} (${DREAM_ROLES[dreamRole].description}).
+Analyze the following PM's profile/resume and provide a brutally honest roast.
 
-IMPORTANT: Your entire analysis MUST be based ONLY on the information below. Reference specific companies, roles, and achievements mentioned. Do not invent details.
+=== THEIR DREAM ROLE ===
+Dream Role: ${DREAM_ROLES[dreamRole].label} (${DREAM_ROLES[dreamRole].description})
+
+What this role REQUIRES:
+- Key skills needed: ${roleReqs.skills.join(", ")}
+- Experience bar: ${roleReqs.experience}
+- Red flags for this role: ${roleReqs.redFlags.join(", ")}
+- Green flags for this role: ${roleReqs.greenFlags.join(", ")}
+
+Your job is to analyze the GAP between their current profile and these requirements. The roast, gaps, and roadmap should ALL be framed around this specific dream role.
+=== END DREAM ROLE ===
+
+IMPORTANT: Your entire analysis MUST be based ONLY on the profile information below. Reference specific companies, roles, and achievements mentioned. Do not invent details.
 
 === START OF PROFILE ===
 ${resumeText}
 === END OF PROFILE ===
+
+ANALYSIS INSTRUCTIONS:
+1. Compare their profile to the dream role requirements above
+2. Identify which red flags apply to them and which green flags they're missing
+3. Your gaps should be the specific skills/experience MISSING for that dream role
+4. Your roadmap should be a realistic path to close the gap to that specific dream role
+5. At least 1-2 roast bullets should mock the gap between their aspiration and reality
+6. The dreamRoleReaction should be a brutally honest take on their chances given the gap
 
 Based ONLY on the profile above, generate your roast. If the profile mentions working at Google, reference Google. If they were at a startup, reference that. Every roast bullet and observation must tie back to something in their actual profile.
 
@@ -677,6 +761,11 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
     // Ensure weakness exists
     if (!roastResult.archetype.weakness) {
       roastResult.archetype.weakness = "Meetings";
+    }
+
+    // Ensure naturalPredator exists
+    if (!roastResult.naturalPredator) {
+      roastResult.naturalPredator = "An engineer with a valid technical concern";
     }
 
     // Generate archetype image with elemental background (personalized if we have profile photo)
