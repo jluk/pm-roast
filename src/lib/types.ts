@@ -1,18 +1,16 @@
 export type DreamRole =
   | "founder"
-  | "cpo-startup"
-  | "cpo-enterprise"
-  | "l6-faang"
-  | "l7-faang"
   | "vp-product"
-  | "ic-senior";
-
-export type RoleCategory = "executive" | "bigtech" | "startup" | "ic";
+  | "cpo"
+  | "director-faang"
+  | "staff-faang"
+  | "senior-pm"
+  | "vc"
+  | "cult-leader";
 
 export interface DreamRoleInfo {
   label: string;
   description: string;
-  category: RoleCategory;
   emoji: string;
 }
 
@@ -20,71 +18,42 @@ export const DREAM_ROLES: Record<DreamRole, DreamRoleInfo> = {
   founder: {
     label: "Founder / CEO",
     description: "Start my own company",
-    category: "executive",
     emoji: "🚀",
   },
   "vp-product": {
     label: "VP of Product",
-    description: "Executive leadership",
-    category: "executive",
+    description: "Lead product org at scale",
     emoji: "👔",
   },
-  "l7-faang": {
-    label: "L7+ at FAANG",
-    description: "Principal/Director at big tech",
-    category: "bigtech",
-    emoji: "🏢",
-  },
-  "l6-faang": {
-    label: "L6 at FAANG",
-    description: "Staff PM at big tech",
-    category: "bigtech",
-    emoji: "💼",
-  },
-  "cpo-startup": {
-    label: "CPO at Series B",
-    description: "Lead product at a hot startup",
-    category: "startup",
-    emoji: "🔥",
-  },
-  "cpo-enterprise": {
-    label: "CPO at Enterprise",
-    description: "Lead product at scale",
-    category: "startup",
-    emoji: "📈",
-  },
-  "ic-senior": {
-    label: "Senior IC PM",
-    description: "Deep craft, high impact",
-    category: "ic",
+  cpo: {
+    label: "CPO",
+    description: "Chief Product Officer",
     emoji: "🎯",
   },
-};
-
-export const ROLE_CATEGORIES: Record<RoleCategory, { label: string; color: string; bgColor: string; borderColor: string }> = {
-  executive: {
-    label: "Executive Track",
-    color: "text-amber-400",
-    bgColor: "bg-amber-500/10",
-    borderColor: "border-amber-500/30",
+  "director-faang": {
+    label: "Director at Big Tech",
+    description: "L7+ / Director level",
+    emoji: "🏢",
   },
-  bigtech: {
-    label: "Big Tech",
-    color: "text-blue-400",
-    bgColor: "bg-blue-500/10",
-    borderColor: "border-blue-500/30",
+  "staff-faang": {
+    label: "Staff PM at Big Tech",
+    description: "L6 / Staff level",
+    emoji: "💼",
   },
-  startup: {
-    label: "Startup",
-    color: "text-emerald-400",
-    bgColor: "bg-emerald-500/10",
-    borderColor: "border-emerald-500/30",
+  "senior-pm": {
+    label: "Senior PM",
+    description: "Level up to senior",
+    emoji: "📈",
   },
-  ic: {
-    label: "IC Track",
-    color: "text-purple-400",
-    bgColor: "bg-purple-500/10",
-    borderColor: "border-purple-500/30",
+  vc: {
+    label: "VC Partner",
+    description: "Judge others' PRDs for a living",
+    emoji: "💰",
+  },
+  "cult-leader": {
+    label: "Thought Leader",
+    description: "Mass LinkedIn following",
+    emoji: "🧠",
   },
 };
 
@@ -102,6 +71,9 @@ export interface PMMove {
 export interface RoastResult {
   // The biting roast bullets
   roastBullets: string[];
+
+  // User's name extracted from profile
+  userName?: string;
 
   // The archetype assignment
   archetype: {
@@ -154,4 +126,4 @@ export interface RoastResult {
   dreamRoleReaction: string;
 }
 
-export type Step = "upload" | "goals" | "analyzing" | "results" | "error";
+export type Step = "upload" | "analyzing" | "results";

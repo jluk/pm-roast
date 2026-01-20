@@ -1,4 +1,4 @@
-// Shareable card data - includes all fields needed to reconstruct the card
+// Shareable card data - includes all fields needed to reconstruct the full results
 export interface ShareableCard {
   s: number; // careerScore
   n: string; // archetype name
@@ -15,6 +15,11 @@ export interface ShareableCard {
   dr: string; // dreamRole
   q: string; // bangerQuote
   rr: string; // dreamRoleReaction
+  // Additional fields for full results page reconstruction
+  rb?: string[]; // roastBullets
+  g?: string[]; // gaps
+  rm?: { t: string; a: string[] }[]; // roadmap (title, actions)
+  pe?: { t: string; g: string; r: string }[]; // podcastEpisodes (title, guest, reason)
 }
 
 // Encode card data for URL (handles UTF-8/Unicode)
@@ -76,33 +81,55 @@ export function generateShareUrl(
     capabilities?: { productSense: number; execution: number; leadership: number };
     bangerQuote: string;
     dreamRoleReaction: string;
+    roastBullets?: string[];
+    gaps?: string[];
+    roadmap?: { title: string; actions: string[] }[];
+    podcastEpisodes?: { title: string; guest: string; reason: string }[];
   },
   dreamRole: string
 ): string {
   // Compress moves for URL
-  const compressedMoves: ShareableMove[] = (result.moves || []).slice(0, 3).map(m => ({
+  const compressedMoves: ShareableMove[] = (result.moves || []).slice(0, 2).map(m => ({
     n: m.name.slice(0, 20),
-    c: m.energyCost,
+    c: Math.min(m.energyCost, 2),
     d: m.damage,
-    ...(m.effect ? { e: m.effect.slice(0, 40) } : {}),
+    ...(m.effect ? { e: m.effect.slice(0, 50) } : {}),
+  }));
+
+  // Compress roadmap
+  const compressedRoadmap = (result.roadmap || []).slice(0, 4).map(r => ({
+    t: r.title.slice(0, 20),
+    a: r.actions.slice(0, 2).map(a => a.slice(0, 40)),
+  }));
+
+  // Compress podcast episodes
+  const compressedPodcasts = (result.podcastEpisodes || []).slice(0, 3).map(p => ({
+    t: p.title.slice(0, 50),
+    g: p.guest.slice(0, 30),
+    r: p.reason.slice(0, 40),
   }));
 
   const card: ShareableCard = {
     s: result.careerScore,
     n: result.archetype.name.slice(0, 30),
     e: result.archetype.emoji,
-    d: result.archetype.description.slice(0, 80),
+    d: result.archetype.description.slice(0, 95),
     el: result.archetype.element || "chaos",
     st: result.archetype.stage || "Senior",
     w: result.archetype.weakness || "Meetings",
-    f: (result.archetype.flavor || result.archetype.description).slice(0, 80),
+    f: (result.archetype.flavor || result.archetype.description).slice(0, 95),
     m: compressedMoves,
     ps: result.capabilities?.productSense || 70,
     ex: result.capabilities?.execution || 70,
     ld: result.capabilities?.leadership || 70,
     dr: dreamRole,
-    q: result.bangerQuote.slice(0, 100),
-    rr: result.dreamRoleReaction.slice(0, 60),
+    q: result.bangerQuote.slice(0, 140),
+    rr: result.dreamRoleReaction.slice(0, 80),
+    // Full results data
+    rb: (result.roastBullets || []).slice(0, 4).map(b => b.slice(0, 80)),
+    g: (result.gaps || []).slice(0, 4).map(g => g.slice(0, 60)),
+    rm: compressedRoadmap,
+    pe: compressedPodcasts,
   };
 
   const encoded = encodeCardData(card);

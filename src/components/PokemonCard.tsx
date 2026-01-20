@@ -103,6 +103,7 @@ interface PokemonCardProps {
   leadership?: number;
   flavor?: string; // Pokédex-style text (unused but kept for API compatibility)
   compact?: boolean;
+  userName?: string; // User's actual name for personalized cards
 }
 
 function EnergySymbol({ element, size = "sm" }: { element: PMElement; size?: "sm" | "md" }) {
@@ -131,9 +132,13 @@ export function PokemonCard({
   weakness = "Meetings",
   flavor,
   compact = false,
+  userName,
 }: PokemonCardProps) {
   const elementData = PM_ELEMENTS[element];
   const rarity = getCardRarity(score);
+
+  // Display name: use userName if available, otherwise archetype name
+  const displayName = userName || archetypeName;
 
   return (
     <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"} rarity={rarity}>
@@ -163,12 +168,22 @@ export function PokemonCard({
         <div className={`flex items-center justify-between ${compact ? "px-3 py-2" : "px-4 py-3"}`}>
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <span className={compact ? "text-xl" : "text-2xl"} style={{ flexShrink: 0 }}>{archetypeEmoji}</span>
-            <h2
-              className={`font-black leading-tight ${compact ? "text-xs" : "text-sm"}`}
-              style={{ color: elementData.textPrimary }}
-            >
-              {archetypeName}
-            </h2>
+            <div className="min-w-0">
+              <h2
+                className={`font-black leading-tight ${compact ? "text-xs" : "text-sm"}`}
+                style={{ color: elementData.textPrimary }}
+              >
+                {displayName}
+              </h2>
+              {userName && (
+                <p
+                  className={`leading-tight opacity-80 ${compact ? "text-[9px]" : "text-[10px]"}`}
+                  style={{ color: elementData.textSecondary }}
+                >
+                  {archetypeName}
+                </p>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-1 shrink-0 ml-2">
             <span className={`font-black text-red-600 ${compact ? "text-lg" : "text-xl"}`}>
@@ -253,16 +268,16 @@ export function PokemonCard({
               </div>
 
               {/* Move Name & Effect */}
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 overflow-hidden">
                 <span
-                  className={`font-bold block ${compact ? "text-[11px] leading-tight" : "text-sm"}`}
+                  className={`font-bold block truncate ${compact ? "text-[11px] leading-tight" : "text-sm"}`}
                   style={{ color: elementData.textPrimary }}
                 >
                   {move.name}
                 </span>
                 {move.effect && (
                   <p
-                    className={`leading-tight mt-0.5 ${compact ? "text-[9px]" : "text-xs"}`}
+                    className={`leading-tight mt-0.5 line-clamp-2 ${compact ? "text-[9px]" : "text-xs"}`}
                     style={{ color: elementData.textMuted }}
                   >
                     {move.effect}
@@ -284,11 +299,11 @@ export function PokemonCard({
         {/* Flavor Text / PM Descriptor */}
         {archetypeDescription && (
           <div
-            className={`${compact ? "mx-3 mb-2 px-2 py-1" : "mx-4 mb-3 px-3 py-2"} bg-white/50 rounded border`}
+            className={`${compact ? "mx-3 mb-2 px-2 py-1.5" : "mx-4 mb-3 px-3 py-2"} bg-white/50 rounded border overflow-hidden`}
             style={{ borderColor: elementData.innerBorderColor }}
           >
             <p
-              className={`italic text-center leading-tight ${compact ? "text-[9px]" : "text-xs"}`}
+              className={`italic text-center leading-snug line-clamp-2 ${compact ? "text-[10px]" : "text-xs"}`}
               style={{ color: elementData.textSecondary }}
             >
               {archetypeDescription}

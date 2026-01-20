@@ -6,16 +6,17 @@ import { PokemonCard, PMElement } from "./PokemonCard";
 // Sample data - the "Your PM Card" preview style
 const SAMPLE_RESULT = {
   score: 85,
-  archetypeName: "Your PM Card",
-  archetypeEmoji: "🎯",
-  archetypeDescription: "Discover your PM archetype and get roasted by AI.",
-  element: "vision" as PMElement,
+  archetypeName: "Your Inner PM",
+  archetypeEmoji: "❓",
+  archetypeDescription: "What unhinged PM energy do you radiate? Let AI expose the truth.",
+  element: "chaos" as PMElement,
   stage: "???",
   weakness: "???",
   moves: [
-    { name: "Get Roasted", energyCost: 1, damage: 99, effect: "Reveal your true PM nature." },
-    { name: "Share Results", energyCost: 2, damage: 50, effect: "Flex on LinkedIn." },
+    { name: "Get Roasted", energyCost: 1, damage: 99, effect: "Reveal your true PM archetype." },
+    { name: "Post on X", energyCost: 2, damage: 50, effect: "Let the timeline judge you." },
   ],
+  archetypeImage: "/cards/your-pm-card.png",
 };
 
 export function OutputPreview() {
@@ -54,6 +55,7 @@ export function OutputPreview() {
               archetypeName={SAMPLE_RESULT.archetypeName}
               archetypeEmoji={SAMPLE_RESULT.archetypeEmoji}
               archetypeDescription={SAMPLE_RESULT.archetypeDescription}
+              archetypeImage={SAMPLE_RESULT.archetypeImage}
               element={SAMPLE_RESULT.element}
               moves={SAMPLE_RESULT.moves}
               stage={SAMPLE_RESULT.stage}

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { domToPng } from "modern-screenshot";
+import { useCallback, useState } from "react";
+import { motion } from "framer-motion";
 import { PokemonCard, PMElement, PMMove } from "./PokemonCard";
 import { CardBack } from "./CardBack";
 import { getCardRarity } from "./HoloCard";
+import { useCardModal } from "./CardModalContext";
 
 interface InteractiveCardProps {
   score: number;
@@ -21,6 +21,8 @@ interface InteractiveCardProps {
   compact?: boolean;
   enableFlip?: boolean;
   enableModal?: boolean;
+  userName?: string;
+  bangerQuote?: string;
 }
 
 export function InteractiveCard({
@@ -35,197 +37,55 @@ export function InteractiveCard({
   weakness,
   flavor,
   compact = false,
-  enableFlip = true,
   enableModal = true,
+  userName,
+  bangerQuote,
 }: InteractiveCardProps) {
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const modalCardRef = useRef<HTMLDivElement>(null);
-  const rarity = getCardRarity(score);
+  const { openModal, isOpen } = useCardModal();
 
   const handleClick = useCallback(() => {
-    if (enableModal && !isModalOpen) {
-      setIsModalOpen(true);
-    }
-  }, [enableModal, isModalOpen]);
-
-  const handleModalClick = useCallback(() => {
-    if (enableFlip) {
-      setIsFlipped(!isFlipped);
-    }
-  }, [enableFlip, isFlipped]);
-
-  const handleCloseModal = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsModalOpen(false);
-    setIsFlipped(false);
-  }, []);
-
-  const handleDownload = useCallback(async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!modalCardRef.current || isDownloading) return;
-
-    setIsDownloading(true);
-    try {
-      const dataUrl = await domToPng(modalCardRef.current, {
-        scale: 2,
-        quality: 1,
+    if (enableModal && !isOpen) {
+      openModal({
+        score,
+        archetypeName,
+        archetypeEmoji,
+        archetypeDescription,
+        archetypeImage,
+        element,
+        moves,
+        stage,
+        weakness,
+        flavor,
+        compact,
+        userName,
+        bangerQuote,
       });
-
-      const link = document.createElement("a");
-      link.download = `pm-card-${archetypeName.toLowerCase().replace(/\s+/g, "-")}.png`;
-      link.href = dataUrl;
-      link.click();
-    } catch (error) {
-      console.error("Failed to download card:", error);
-    } finally {
-      setIsDownloading(false);
     }
-  }, [archetypeName, isDownloading]);
+  }, [enableModal, isOpen, openModal, score, archetypeName, archetypeEmoji, archetypeDescription, archetypeImage, element, moves, stage, weakness, flavor, compact, userName, bangerQuote]);
 
   return (
-    <>
-      {/* Regular Card (clickable to open modal) */}
-      <motion.div
-        ref={cardRef}
-        onClick={handleClick}
-        className="cursor-pointer"
-        whileHover={{ scale: 1.08, y: -12 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      >
-        <PokemonCard
-          score={score}
-          archetypeName={archetypeName}
-          archetypeEmoji={archetypeEmoji}
-          archetypeDescription={archetypeDescription}
-          archetypeImage={archetypeImage}
-          element={element}
-          moves={moves}
-          stage={stage}
-          weakness={weakness}
-          flavor={flavor}
-          compact={compact}
-        />
-      </motion.div>
-
-      {/* Modal Overlay - z-[9999] ensures it's above everything */}
-      <AnimatePresence>
-        {isModalOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md"
-            onClick={handleCloseModal}
-          >
-            {/* Close hint */}
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="absolute top-8 left-1/2 -translate-x-1/2 text-white/60 text-sm flex items-center gap-2"
-            >
-              <span>Click card to flip</span>
-              <span className="text-white/40">|</span>
-              <span>Click outside to close</span>
-            </motion.div>
-
-            {/* Flippable Card Container */}
-            <motion.div
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.5, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleModalClick();
-              }}
-              className="cursor-pointer"
-              style={{ perspective: "1000px" }}
-            >
-              <motion.div
-                animate={{ rotateY: isFlipped ? 180 : 0 }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                style={{ transformStyle: "preserve-3d" }}
-                className="relative"
-              >
-                {/* Front of card */}
-                <div
-                  ref={modalCardRef}
-                  style={{
-                    backfaceVisibility: "hidden",
-                    WebkitBackfaceVisibility: "hidden",
-                  }}
-                >
-                  <PokemonCard
-                    score={score}
-                    archetypeName={archetypeName}
-                    archetypeEmoji={archetypeEmoji}
-                    archetypeDescription={archetypeDescription}
-                    archetypeImage={archetypeImage}
-                    element={element}
-                    moves={moves}
-                    stage={stage}
-                    weakness={weakness}
-                    flavor={flavor}
-                    compact={compact}
-                  />
-                </div>
-
-                {/* Back of card */}
-                <div
-                  className="absolute top-0 left-0"
-                  style={{
-                    backfaceVisibility: "hidden",
-                    WebkitBackfaceVisibility: "hidden",
-                    transform: "rotateY(180deg)",
-                  }}
-                >
-                  <CardBack compact={compact} rarity={rarity} />
-                </div>
-              </motion.div>
-            </motion.div>
-
-            {/* Action buttons */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-3"
-            >
-              {/* Download button */}
-              <button
-                onClick={handleDownload}
-                disabled={isDownloading}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white text-sm font-medium disabled:opacity-50"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                {isDownloading ? "Saving..." : "Download Card"}
-              </button>
-            </motion.div>
-
-            {/* Close button */}
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              onClick={handleCloseModal}
-              className="absolute top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-            >
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+    <motion.div
+      onClick={handleClick}
+      className="cursor-pointer"
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+    >
+      <PokemonCard
+        score={score}
+        archetypeName={archetypeName}
+        archetypeEmoji={archetypeEmoji}
+        archetypeDescription={archetypeDescription}
+        archetypeImage={archetypeImage}
+        element={element}
+        moves={moves}
+        stage={stage}
+        weakness={weakness}
+        flavor={flavor}
+        compact={compact}
+        userName={userName}
+      />
+    </motion.div>
   );
 }
 
@@ -233,20 +93,21 @@ export function InteractiveCard({
 export function HeroCard() {
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // Example hero card data
+  // Example hero card data - matches gallery style
   const heroData = {
     score: 85,
-    emoji: "🎯",
+    emoji: "✨",
     name: "Your PM Card",
-    description: "Discover your PM archetype and get roasted by AI.",
+    description: "Discover your archetype. Get brutally roasted. Share the results.",
     element: "vision" as PMElement,
     stage: "???",
     weakness: "???",
     moves: [
       { name: "Get Roasted", energyCost: 1, damage: 99, effect: "Reveal your true PM nature." },
-      { name: "Share Results", energyCost: 2, damage: 50, effect: "Flex on LinkedIn." },
+      { name: "Share Card", energyCost: 2, damage: 50, effect: "Post to X and LinkedIn." },
     ],
-    flavor: "Your personalized PM trading card awaits. Are you ready?",
+    flavor: "Your personalized trading card awaits. Are you ready?",
+    archetypeImage: "/cards/your-pm-card.png",
   };
 
   const rarity = getCardRarity(heroData.score);
@@ -299,12 +160,13 @@ export function HeroCard() {
               archetypeName={heroData.name}
               archetypeEmoji={heroData.emoji}
               archetypeDescription={heroData.description}
+              archetypeImage={heroData.archetypeImage}
               element={heroData.element}
               moves={heroData.moves}
               stage={heroData.stage}
               weakness={heroData.weakness}
               flavor={heroData.flavor}
-              compact={false}
+              compact
             />
           </div>
 
@@ -317,7 +179,7 @@ export function HeroCard() {
               transform: "rotateY(180deg)",
             }}
           >
-            <CardBack compact={false} rarity={rarity} />
+            <CardBack compact rarity={rarity} />
           </div>
         </motion.div>
       </motion.div>

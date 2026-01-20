@@ -1,9 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { RoastResult, DreamRole, DREAM_ROLES } from "@/lib/types";
 import { generateShareUrl } from "@/lib/share";
 import { InteractiveCard } from "@/components/InteractiveCard";
@@ -92,11 +90,48 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const shareUrl = generateShareUrl(baseUrl, result, dreamRole);
 
+  // Update the browser URL to the unique share URL (without page reload)
+  // Also store the image in sessionStorage so it persists if the page is refreshed
+  useEffect(() => {
+    if (typeof window !== "undefined" && shareUrl) {
+      // Extract the encoded data from the share URL to use as storage key
+      const urlPath = shareUrl.replace(baseUrl, "");
+      const encodedData = urlPath.replace("/share/", "");
+
+      // Store the generated image in sessionStorage if available
+      if (result.archetypeImage) {
+        try {
+          sessionStorage.setItem(`pm-roast-image-${encodedData}`, result.archetypeImage);
+        } catch (e) {
+          // Storage might be full or disabled, ignore
+          console.warn("Could not store image in sessionStorage:", e);
+        }
+      }
+
+      window.history.pushState({ path: urlPath }, "", urlPath);
+    }
+  }, [shareUrl, baseUrl, result.archetypeImage]);
+
   const shareToTwitter = () => {
     const archetype = stripMarkdown(result.archetype.name);
     const text = `Just got roasted by PM AI. I'm "${archetype}" with a ${result.careerScore}/100 career score. 💀\n\nGet your roast:`;
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
+      "_blank"
+    );
+  };
+
+  const shareToLinkedIn = () => {
+    const archetype = stripMarkdown(result.archetype.name);
+    const text = `I just got roasted by PM AI and discovered I'm "${archetype}" with a ${result.careerScore}/100 career score! 🔥
+
+This AI career coach analyzes your PM profile and creates a personalized trading card based on your experience. It's brutally honest... but also gives you a roadmap to level up.
+
+Get your PM card: ${shareUrl}
+
+#ProductManagement #AI #CareerGrowth`;
+    window.open(
+      `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
       "_blank"
     );
   };
@@ -133,8 +168,8 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
       className="w-full max-w-5xl mx-auto space-y-8 pb-12"
     >
       {/* Hero Section - Card + Analysis Panel Side by Side */}
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-center lg:items-start justify-center">
-        {/* Card */}
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-center lg:items-start justify-center">
+        {/* Card - Full Size */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -152,336 +187,324 @@ export function Results({ result, dreamRole, onStartOver }: ResultsProps) {
             stage={result.archetype.stage || "Senior"}
             weakness={result.archetype.weakness || "Meetings"}
             flavor={stripMarkdown(result.archetype.flavor || result.archetype.description)}
-            compact
             enableFlip
             enableModal
+            userName={result.userName}
+            bangerQuote={stripMarkdown(result.bangerQuote)}
           />
           <p className="text-xs text-muted-foreground">
             Click card to enlarge & flip
           </p>
         </motion.div>
 
-        {/* Analysis Panel - Futuristic Style */}
+        {/* Analysis Panel - Glassmorphism - Matched to card height */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.2, type: "spring" }}
-          className="flex-1 max-w-sm space-y-6"
+          className="flex-1 w-full max-w-md space-y-5"
         >
-          {/* Scanning Header */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-xs text-muted-foreground uppercase tracking-widest">
-              <motion.div
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="w-2 h-2 rounded-full bg-green-500"
-              />
-              Analysis Complete
-            </div>
+          {/* Status indicator */}
+          <div className="flex items-center gap-2 text-sm text-white/50 uppercase tracking-widest">
+            <motion.div
+              animate={{ opacity: [0.5, 1, 0.5] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-2.5 h-2.5 rounded-full bg-green-500"
+            />
+            Analysis Complete
+          </div>
 
-            {/* Rarity Badge */}
-            <div className="p-4 rounded-lg border border-border/50 bg-card/50 backdrop-blur">
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-3xl">{rarityInfo.emoji}</span>
+          {/* Main panel with glow */}
+          <div className="relative">
+            <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-lg opacity-60" />
+
+            <div className="relative p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-2xl space-y-5">
+              {/* Rarity Badge */}
+              <div className="flex items-center gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/5">
+                <span className="text-4xl">{rarityInfo.emoji}</span>
                 <div>
                   <div className={`text-lg font-bold ${rarityInfo.color}`}>
                     {rarityInfo.label}
                   </div>
-                  <div className="text-xs text-muted-foreground">{rarityInfo.percentile} of PMs</div>
+                  <div className="text-sm text-white/40">{rarityInfo.percentile} of PMs</div>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {rarityInfo.description}
-              </p>
-            </div>
-          </div>
 
-          {/* Score + Mini Roast */}
-          <div className="p-4 rounded-lg border border-border/50 bg-card/30">
-            {/* Career Score */}
-            <div className="space-y-2 mb-4">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-muted-foreground">Career Score</span>
-                <span className="font-mono font-bold text-lg">{result.careerScore}/100</span>
+              {/* Career Score */}
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-base text-white/50">Career Score</span>
+                  <span className="font-mono font-bold text-3xl text-white">{result.careerScore}<span className="text-lg text-white/40">/100</span></span>
+                </div>
+                <div className="h-3 bg-white/5 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${result.careerScore}%` }}
+                    transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
+                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400"
+                  />
+                </div>
               </div>
-              <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${result.careerScore}%` }}
-                  transition={{ delay: 0.5, duration: 1, ease: "easeOut" }}
-                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400"
-                />
-              </div>
-            </div>
 
-            {/* Mini Roast Quote */}
-            <div className="pt-3 border-t border-border/50">
-              <p className="text-sm text-gray-300 italic leading-relaxed">
-                &quot;{stripMarkdown(result.bangerQuote)}&quot;
-              </p>
+              {/* Mini Roast Quote */}
+              <div className="pt-4 border-t border-white/5">
+                <p className="text-base text-white/80 italic leading-relaxed">
+                  &quot;{stripMarkdown(result.bangerQuote)}&quot;
+                </p>
+              </div>
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="space-y-3">
-            {/* Share to X - Primary CTA with animated gradient border */}
-            <motion.div
-              className="relative group"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              {/* Animated gradient border */}
-              <div className="absolute -inset-[2px] rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 opacity-75 group-hover:opacity-100 blur-sm transition-opacity" />
-              <motion.div
-                className="absolute -inset-[2px] rounded-xl bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500"
-                animate={{
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "linear",
-                }}
-                style={{ backgroundSize: "200% 200%" }}
-              />
-              {/* Button content */}
-              <button
+            {/* Share to X - Primary CTA with hover preview */}
+            <div className="relative group">
+              <motion.button
                 onClick={shareToTwitter}
-                className="relative w-full h-14 px-6 rounded-xl bg-black text-white font-bold text-base flex items-center justify-center gap-2 hover:bg-neutral-900 transition-colors"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full h-12 px-6 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
-                <span>Share Your Card on X</span>
-                <svg className="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </button>
-            </motion.div>
+                <span>Share on X</span>
+              </motion.button>
+
+              {/* Tweet preview tooltip - appears below button on hover */}
+              <div className="absolute top-full left-0 right-0 mt-3 opacity-0 group-hover:opacity-100 transition-all duration-200 pointer-events-none -translate-y-2 group-hover:translate-y-0 z-10">
+                {/* Arrow pointing up */}
+                <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 bg-black/95 border-l border-t border-white/20 transform rotate-45" />
+                <div className="p-4 rounded-xl bg-black/95 border border-white/20 shadow-2xl backdrop-blur-sm">
+                  <div className="flex items-start gap-3 mb-3">
+                    <svg className="w-5 h-5 text-white/60 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                    </svg>
+                    <p className="text-sm text-white/90 leading-relaxed">
+                      Just got roasted by PM AI. I&apos;m &quot;{stripMarkdown(result.archetype.name)}&quot; with a {result.careerScore}/100 career score. 💀
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-white/50 border-t border-white/10 pt-3">
+                    <span className="px-2 py-0.5 rounded bg-white/10">Preview</span>
+                    <span>Click button to post</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="flex gap-2">
-              <Button
+              <button
                 onClick={copyLink}
-                variant="outline"
-                className="flex-1"
+                className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors"
               >
                 {copied ? (
                   <>
-                    <svg className="w-4 h-4 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     Copied!
                   </>
                 ) : (
                   <>
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                     </svg>
-                    Copy Link
+                    Copy
                   </>
                 )}
-              </Button>
-              <Button
+              </button>
+              <button
                 onClick={onStartOver}
-                variant="outline"
-                className="flex-1"
+                className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors"
               >
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-                New Card
-              </Button>
+                New
+              </button>
             </div>
           </div>
         </motion.div>
       </div>
 
-      {/* The Roast - Fiery Section */}
+      {/* The Roast - Glassmorphism */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
         className="relative"
       >
-        {/* Fire glow background */}
-        <div className="absolute -inset-4 bg-gradient-to-r from-orange-500/10 via-red-500/10 to-yellow-500/10 rounded-3xl blur-xl" />
+        {/* Glow background */}
+        <div className="absolute -inset-2 bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/20 rounded-2xl blur-xl opacity-50" />
 
-        <div className="relative">
-          {/* Header with fire animation */}
-          <div className="flex items-center gap-3 mb-4">
-            <motion.div
-              animate={{
-                scale: [1, 1.2, 1],
-                rotate: [0, 5, -5, 0],
-              }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut",
-              }}
-              className="text-3xl"
-            >
-              🔥
-            </motion.div>
+        <div className="relative p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-2xl">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500/20 to-red-500/20 flex items-center justify-center">
+              <span className="text-xl">🔥</span>
+            </div>
             <div>
-              <h3 className="text-2xl font-bold bg-gradient-to-r from-orange-400 via-red-400 to-yellow-400 bg-clip-text text-transparent">
-                The Roast
-              </h3>
-              <p className="text-xs text-muted-foreground">Brutally honest observations</p>
+              <h3 className="text-lg font-semibold text-white">The Roast</h3>
+              <p className="text-xs text-white/50">Brutally honest observations</p>
             </div>
           </div>
 
-          {/* Roast card with fire border */}
-          <div className="relative">
-            {/* Animated fire border */}
-            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-r from-orange-500 via-red-500 to-yellow-500 opacity-60" />
-            <div className="absolute -inset-[1px] rounded-xl bg-gradient-to-b from-orange-500/50 to-transparent opacity-40" />
-
-            <Card className="relative p-6 bg-gradient-to-b from-neutral-900 to-neutral-950 border-0">
-              {/* Inner fire accent line */}
-              <div className="absolute top-0 left-6 right-6 h-[2px] bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
-
-              <div className="space-y-4">
-                {result.roastBullets.map((bullet, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.8 + index * 0.15 }}
-                    className="flex gap-4 items-start group"
-                  >
-                    <motion.span
-                      animate={{
-                        opacity: [0.5, 1, 0.5],
-                        scale: [0.9, 1.1, 0.9],
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        delay: index * 0.3,
-                      }}
-                      className="text-2xl shrink-0 mt-0.5"
-                    >
-                      {index === 0 ? "💀" : index === 1 ? "😬" : index === 2 ? "💅" : "🎯"}
-                    </motion.span>
-                    <p className="text-base text-gray-200 leading-relaxed group-hover:text-white transition-colors">
-                      {stripMarkdown(bullet)}
-                    </p>
-                  </motion.div>
-                ))}
-              </div>
-            </Card>
+          {/* Roast bullets */}
+          <div className="space-y-3">
+            {result.roastBullets.map((bullet, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.8 + index * 0.1 }}
+                className="flex gap-3 items-start p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-colors"
+              >
+                <span className="text-lg shrink-0">
+                  {index === 0 ? "💀" : index === 1 ? "😬" : index === 2 ? "💅" : "🎯"}
+                </span>
+                <p className="text-sm text-white/80 leading-relaxed">
+                  {stripMarkdown(bullet)}
+                </p>
+              </motion.div>
+            ))}
           </div>
         </div>
       </motion.div>
 
-      {/* Gap Analysis - Numbered */}
+      {/* Growth Plan - Glassmorphism */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.9 }}
+        className="relative"
       >
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-white">
-          <span>📊</span> What&apos;s Missing
-        </h3>
-        <Card className="p-6 border-orange-500/20 bg-orange-500/5">
-          <div className="space-y-4">
-            {result.gaps.map((gap, index) => (
-              <div key={index} className="flex gap-4 items-start">
-                <span className="w-7 h-7 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm font-bold shrink-0">
-                  {index + 1}
-                </span>
-                <p className="text-base text-gray-200 pt-0.5">{stripMarkdown(gap)}</p>
-              </div>
-            ))}
+        {/* Glow background */}
+        <div className="absolute -inset-2 bg-gradient-to-r from-purple-500/20 via-indigo-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-50" />
+
+        <div className="relative p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-2xl">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
+              <span className="text-xl">🚀</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white">Your Growth Plan</h3>
+              <p className="text-xs text-white/50">Gaps to address & roadmap to level up</p>
+            </div>
           </div>
-        </Card>
+
+          {/* Gaps as pills */}
+          <div className="mb-6">
+            <p className="text-xs uppercase tracking-wider text-white/40 mb-3">Skill Gaps</p>
+            <div className="flex flex-wrap gap-2">
+              {result.gaps.map((gap, index) => (
+                <span
+                  key={index}
+                  className="px-3 py-1.5 text-xs font-medium bg-orange-500/10 text-orange-300 border border-orange-500/20 rounded-full backdrop-blur-sm"
+                >
+                  {stripMarkdown(gap)}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Divider */}
+          <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent mb-6" />
+
+          {/* Roadmap */}
+          <div>
+            <p className="text-xs uppercase tracking-wider text-white/40 mb-4">4-Phase Roadmap</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {roadmapPhases.map((phase, index) => (
+                <div
+                  key={index}
+                  className="p-4 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] transition-colors"
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="w-6 h-6 rounded-full bg-[#6366f1]/20 flex items-center justify-center text-[#6366f1] text-xs font-bold">
+                      {index + 1}
+                    </span>
+                    <p className="font-medium text-white text-sm">{stripMarkdown(phase.title)}</p>
+                  </div>
+                  <ul className="space-y-1 ml-8">
+                    {phase.actions.slice(0, 2).map((action, actionIndex) => (
+                      <li key={actionIndex} className="text-xs text-white/60 flex gap-2">
+                        <span className="text-[#6366f1] shrink-0">→</span>
+                        <span>{stripMarkdown(action)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
       </motion.div>
 
-      {/* Roadmap - 4 Phases */}
+      {/* Required Listening - Glassmorphism */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.0 }}
+        className="relative"
       >
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-white">
-          <span>🗺️</span> Your Roadmap to Top 1%
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {roadmapPhases.map((phase, index) => (
-            <Card key={index} className="p-5">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-full bg-[#6366f1]/20 flex items-center justify-center shrink-0">
-                  <span className="text-[#6366f1] font-bold text-sm">P{index + 1}</span>
-                </div>
-                <p className="font-semibold text-white text-sm">{stripMarkdown(phase.title)}</p>
-              </div>
-              <ul className="space-y-2">
-                {phase.actions.slice(0, 2).map((action, actionIndex) => (
-                  <li key={actionIndex} className="text-sm text-gray-300 flex gap-2">
-                    <span className="text-[#6366f1] shrink-0">→</span>
-                    <span>{stripMarkdown(action)}</span>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-          ))}
-        </div>
-      </motion.div>
+        {/* Glow background */}
+        <div className="absolute -inset-2 bg-gradient-to-r from-red-500/15 via-pink-500/15 to-red-500/15 rounded-2xl blur-xl opacity-50" />
 
-      {/* Recommended Episodes - Clickable with Thumbnails */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.1 }}
-      >
-        <h3 className="text-xl font-semibold mb-2 flex items-center gap-2 text-white">
-          <span>🎧</span> Required Listening
-        </h3>
-        <p className="text-sm text-muted-foreground mb-4">
-          Episodes from{" "}
-          <a
-            href="https://www.youtube.com/@LennysPodcast"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[#6366f1] hover:underline"
-          >
-            Lenny&apos;s Podcast
-          </a>
-          {" "}to level up your PM game
-        </p>
-        <div className="grid gap-3">
-          {result.podcastEpisodes.map((episode, index) => (
-            <a
-              key={index}
-              href={getYouTubeSearchUrl(episode.title, episode.guest)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block group"
-            >
-              <Card className="p-4 hover:border-[#6366f1]/50 hover:bg-[#6366f1]/5 transition-all cursor-pointer">
-                <div className="flex gap-4">
-                  {/* YouTube Thumbnail Placeholder */}
-                  <div className="w-24 h-16 bg-red-600/20 rounded-lg flex items-center justify-center shrink-0 group-hover:bg-red-600/30 transition-colors">
-                    <svg className="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+        <div className="relative p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-2xl">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500/20 to-pink-500/20 flex items-center justify-center">
+              <span className="text-xl">🎧</span>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-white">Required Listening</h3>
+              <p className="text-xs text-white/50">
+                Episodes from{" "}
+                <a
+                  href="https://www.youtube.com/@LennysPodcast"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[#6366f1] hover:underline"
+                >
+                  Lenny&apos;s Podcast
+                </a>
+              </p>
+            </div>
+          </div>
+
+          {/* Episodes */}
+          <div className="space-y-3">
+            {result.podcastEpisodes.map((episode, index) => (
+              <a
+                key={index}
+                href={getYouTubeSearchUrl(episode.title, episode.guest)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block group"
+              >
+                <div className="flex gap-4 p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] hover:border-white/10 transition-all">
+                  {/* YouTube icon */}
+                  <div className="w-12 h-12 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0 group-hover:bg-red-500/20 transition-colors">
+                    <svg className="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                     </svg>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-white group-hover:text-[#6366f1] transition-colors">
+                    <p className="font-medium text-white text-sm group-hover:text-[#6366f1] transition-colors">
                       {stripMarkdown(episode.title)}
                     </p>
-                    <p className="text-sm text-gray-400">with {stripMarkdown(episode.guest)}</p>
-                    <p className="text-sm text-[#6366f1] mt-1">{stripMarkdown(episode.reason)}</p>
+                    <p className="text-xs text-white/50">with {stripMarkdown(episode.guest)}</p>
+                    <p className="text-xs text-[#6366f1]/80 mt-1">{stripMarkdown(episode.reason)}</p>
                   </div>
-                  <div className="flex items-center text-gray-500 group-hover:text-[#6366f1] transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="flex items-center text-white/30 group-hover:text-[#6366f1] transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                   </div>
                 </div>
-              </Card>
-            </a>
-          ))}
+              </a>
+            ))}
+          </div>
         </div>
       </motion.div>
 

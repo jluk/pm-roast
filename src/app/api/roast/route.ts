@@ -13,43 +13,83 @@ async function parsePdf(buffer: Buffer): Promise<{ text: string }> {
   return pdfParse(buffer);
 }
 
-// Element settings for image generation - includes background style, setting, and creature type
-const ELEMENT_SETTINGS: Record<PMElement, { bg: string; setting: string; creature: string; colors: string }> = {
+// Element settings for image generation - Pokemon-style nostalgic vibes with internet humor
+// Funny fallback names when no name is provided - concept names organized by element
+const FUNNY_FALLBACK_NAMES: Record<PMElement, string[]> = {
+  data: [
+    "The Metric Goblin", "Dashboard Creature", "A/B Test Subject", "KPI Whisperer", "Spreadsheet Gremlin",
+    "The Pivot Table", "Cohort Analysis", "Funnel Vision", "North Star Chaser", "The SQL Injection"
+  ],
+  chaos: [
+    "The Firefighter", "Hotfix Hero", "Incident Commander", "Pager Duty", "Slack Channel",
+    "The War Room", "Chaos Monkey", "The Escalation", "Scope Creep", "Technical Debt"
+  ],
+  strategy: [
+    "The Framework", "Roadmap Warrior", "OKR Enthusiast", "The 2x2 Matrix", "Strategy Doc",
+    "The Alignment", "Memo Author", "The Offsite", "PRD Machine", "Vision Statement"
+  ],
+  shipping: [
+    "Ship It", "Deploy Button", "Release Train", "Sprint Zero", "Velocity Machine",
+    "Launch Sequence", "LGTM Energy", "The Merge", "Pipeline Dreams", "Push to Prod"
+  ],
+  politics: [
+    "The Stakeholder", "Skip Level", "Alignment Check", "Consensus Builder", "Buy-In Seeker",
+    "The Influencer", "Executive Summary", "The Reorg", "Meeting Survivor", "Slack Thread"
+  ],
+  vision: [
+    "The Moonshot", "10x Thinker", "Zero to One", "Paradigm Shift", "Hockey Stick",
+    "The Disruption", "Future State", "Product Vision", "The Pivot", "Unicorn Dreams"
+  ],
+};
+
+// Get a funny fallback name based on element
+function getFunnyFallbackName(element: PMElement): string {
+  const names = FUNNY_FALLBACK_NAMES[element] || FUNNY_FALLBACK_NAMES.chaos;
+  return names[Math.floor(Math.random() * names.length)];
+}
+
+const ELEMENT_SETTINGS: Record<PMElement, { bg: string; setting: string; creature: string; colors: string; props: string }> = {
   data: {
-    bg: "glowing digital landscape with floating data streams and holographic charts",
-    setting: "analyzing glowing data orbs floating around them",
-    creature: "owl or fox with glowing digital patterns on fur/feathers",
-    colors: "blue, cyan, and electric purple"
+    bg: "glowing crystal cave with floating holographic charts and data streams, Pokemon TCG style",
+    setting: "surrounded by floating glowing orbs of data, analyzing patterns in the air",
+    creature: "mysterious creature with glowing eyes and digital patterns on its form",
+    colors: "electric blue, cyan glow, and deep purple shadows",
+    props: "floating crystals showing metrics, mystical dashboard runes, glowing spreadsheet tablets"
   },
   chaos: {
-    bg: "swirling vortex of colors with scattered papers and sticky notes flying",
-    setting: "juggling multiple glowing orbs while balancing on a spinning top",
-    creature: "energetic monkey or squirrel with wild fur and sparking energy",
-    colors: "red, orange, and electric yellow"
+    bg: "swirling vortex dimension with multiple portals and chaotic energy, classic Pokemon battle arena",
+    setting: "surfing on a wave of notifications while juggling multiple glowing objects",
+    creature: "wild-eyed creature crackling with chaotic energy, fur/feathers standing on end",
+    colors: "hot pink, electric orange, warning red, and purple lightning",
+    props: "floating notification bubbles, swirling task tornados, coffee cup meteors"
   },
   strategy: {
-    bg: "ancient library with floating chess pieces and strategy maps",
-    setting: "contemplating a glowing 3D chess board",
-    creature: "wise elephant or tortoise with ancient runes on their skin",
-    colors: "deep purple, gold, and forest green"
+    bg: "ancient temple library with floating scrolls and mystical strategy boards, Pokemon Gym aesthetic",
+    setting: "contemplating a glowing 3D chess board hovering in midair",
+    creature: "wise sage-like creature with ancient markings and knowing eyes",
+    colors: "royal purple, gold accents, and mystical green glow",
+    props: "floating framework scrolls, glowing 2x2 matrices, ancient strategy tomes"
   },
   shipping: {
-    bg: "rocket launch pad with stars and deployment confetti",
-    setting: "riding a rocket or standing triumphantly on a launched product",
-    creature: "determined wolf or falcon with sleek aerodynamic features",
-    colors: "green, silver, and bright orange"
+    bg: "rocket launch platform with countdown displays and epic deployment energy, Pokemon Stadium vibes",
+    setting: "dramatically pressing a giant glowing launch button as rockets ignite",
+    creature: "determined warrior creature with battle scars and intense focus",
+    colors: "launch orange, victory green, and midnight blue",
+    props: "countdown holographics, feature flag banners, deployment aurora effects"
   },
   politics: {
-    bg: "grand throne room with multiple factions represented",
-    setting: "diplomatically mediating between different creature groups",
-    creature: "charismatic lion or peacock with regal bearing",
-    colors: "royal purple, gold, and deep red"
+    bg: "grand Pokemon League hall with multiple faction banners and political intrigue",
+    setting: "standing confidently between two opposing groups, playing both sides",
+    creature: "charming trickster creature with a knowing smirk and diplomatic pose",
+    colors: "royal gold, power red, and alliance purple",
+    props: "floating alliance symbols, relationship web threads, influence auras"
   },
   vision: {
-    bg: "cosmic dreamscape with nebulas and floating islands of ideas",
-    setting: "gazing into a crystal ball showing future possibilities",
-    creature: "mystical phoenix or dragon with ethereal glowing features",
-    colors: "iridescent rainbow, pink, and cosmic purple"
+    bg: "cosmic dreamscape with nebulas, floating islands, and reality-bending horizons",
+    setting: "floating in space surrounded by visions of possible futures",
+    creature: "ethereal visionary creature with starlight in its eyes and cosmic energy",
+    colors: "dream pink, cosmic purple, and infinite blue gradient",
+    props: "floating future visions, hockey stick constellations, reality distortion waves"
   },
 };
 
@@ -94,34 +134,41 @@ async function generateArchetypeImage(
       if (profileImage) {
         console.log("Profile image fetched, size:", profileImage.data.length);
 
-        const personalizedPrompt = `Transform this person's photo into a Pokemon-style trading card character illustration. The character represents the "${archetypeName}" PM archetype.
+        const personalizedPrompt = `Transform this person into a POKEMON TRADING CARD style character illustration. They are "${archetypeName}" - an iconic PM archetype.
 
-Character personality: ${archetypeDescription}
+Character vibe: ${archetypeDescription}
 
-TRANSFORMATION REQUIREMENTS:
-- Create a stylized illustration BASED ON this person - keep their general likeness, hair style, and distinctive features
-- Transform them into an animated character (like a Studio Ghibli or Pokemon trainer style)
+SCENE (POKEMON TCG AESTHETIC):
 - Place them ${elementSettings.setting}
-- Background should be a ${elementSettings.bg}
+- Background: ${elementSettings.bg}
+- Include magical props: ${elementSettings.props}
 - Primary colors: ${elementSettings.colors}
 
-COMPOSITION (CRITICAL):
-- The person must be CENTERED in the frame
-- Show from chest/shoulders up - classic trading card portrait
-- Face must be clearly visible, looking confident
-- Eyes should be slightly larger and more expressive (anime-influenced)
+TRANSFORMATION:
+- Transform them into a stylized Pokemon trainer/character
+- Keep their general likeness recognizable but make it anime/cartoon style
+- Exaggerated expressions - this is internet humor energy
+- Think: nostalgic 90s/2000s Pokemon card art meets modern meme culture
 
-ART STYLE (CRITICAL):
-- Hand-drawn watercolor illustration style like classic Pokemon cards
-- Soft edges with visible watercolor texture
-- Gentle color gradients and washes
-- Whimsical and heroic, suitable for a collectible card game
-- Keep their face recognizable but stylized in watercolor
+IMAGE DIMENSIONS (CRITICAL):
+- LANDSCAPE orientation - 16:9 aspect ratio (wider than tall)
+- Subject must be CENTERED horizontally
+- Show from waist/chest up - classic trading card portrait framing
+- Leave breathing room on all sides - don't crop the head or shoulders
+- Subject takes up 50-60% of frame height, centered
+
+ART STYLE (CRITICAL - POKEMON TCG NOSTALGIC):
+- Classic Pokemon trading card illustration style
+- Hand-painted watercolor aesthetic with soft edges
+- Vibrant colors, dynamic poses, magical energy effects
+- Nostalgic 90s/2000s trading card game feel
+- Premium collectible card quality - polished and memorable
 
 DO NOT:
-- Cut off the top of their head
-- Use photorealistic style
-- Add any text, labels, or words`;
+- Cut off the top of their head or crop awkwardly
+- Make it photorealistic or 3D rendered
+- Add ANY text, words, or labels
+- Make it portrait/vertical orientation`;
 
         try {
           // Use new SDK for image generation with profile photo
@@ -168,36 +215,45 @@ DO NOT:
     // Fallback: Generate Pokemon-style creature without profile photo
     console.log("=== GENERATING POKEMON-STYLE CREATURE IMAGE ===");
 
-    const imagePrompt = `Generate a Pokemon-style creature illustration for a trading card. The creature represents the "${archetypeName}" archetype.
+    const imagePrompt = `Generate a POKEMON TRADING CARD style creature illustration. The character is "${archetypeName}" - ${elementSettings.creature}.
 
-Creature personality: ${archetypeDescription}
+Character vibe: ${archetypeDescription}
 
-CREATURE DESIGN:
-- Create a cute but powerful creature inspired by a ${elementSettings.creature}
-- The creature should be ${elementSettings.setting}
+SCENE (POKEMON TCG AESTHETIC):
+- The creature is ${elementSettings.setting}
 - Background: ${elementSettings.bg}
+- Include magical props: ${elementSettings.props}
 - Primary colors: ${elementSettings.colors}
 
-COMPOSITION (CRITICAL):
-- The creature must be CENTERED in the frame
-- Show the FULL creature from head to feet/tail - no cropping
-- The creature should take up 60-70% of the image
-- Face and eyes must be clearly visible and expressive
-- Portrait orientation, creature facing slightly toward viewer
+CREATURE DESIGN:
+- A ${elementSettings.creature}
+- Original Pokemon-inspired creature design
+- Expressive and full of personality - internet meme energy
+- Can be any fantastical creature - not limited to real animals
+- Should feel like a real Pokemon you'd find in a game
 
-ART STYLE (CRITICAL):
-- Hand-drawn watercolor illustration style like classic Pokemon cards
-- Soft edges with visible watercolor texture and paper grain
-- Gentle color gradients and washes
-- Slightly cel-shaded with soft shadows
-- Whimsical and fantastical, suitable for a collectible card game
-- Expressive eyes that convey the creature's personality
+IMAGE DIMENSIONS (CRITICAL):
+- LANDSCAPE orientation - 16:9 aspect ratio (wider than tall)
+- Creature must be CENTERED horizontally in the frame
+- Show the full creature or from waist up - NOT a close-up face shot
+- Leave breathing room on all sides - don't crop any part of the creature
+- Creature takes up 50-60% of frame height, centered
+- Background details visible on both sides
+
+ART STYLE (CRITICAL - POKEMON TCG NOSTALGIC):
+- Classic Pokemon trading card illustration style from the 90s/2000s
+- Hand-painted watercolor aesthetic with soft edges and texture
+- Vibrant saturated colors, dynamic poses, magical energy effects
+- Nostalgic collectible card game feel - like Ken Sugimori meets trading card art
+- Premium quality - polished, engaging, and memorable
+- Should evoke nostalgia for classic Pokemon cards
 
 DO NOT:
-- Cut off any part of the creature
-- Use photorealistic style
-- Add any text, labels, or words
-- Make the creature too scary or aggressive`;
+- Cut off the creature's head, ears, or any body parts
+- Make it photorealistic, 3D rendered, or AI-looking
+- Add ANY text, words, or labels anywhere
+- Make portrait/vertical orientation - MUST be landscape/horizontal
+- Make it generic or boring - should have personality and charm`;
 
     // Use new SDK with responseModalities for image generation
     const response = await genAINew.models.generateContent({
@@ -236,34 +292,50 @@ DO NOT:
   }
 }
 
-const SYSTEM_PROMPT = `You are Lenny Rachitsky's AI twin. You've absorbed 200+ episodes of Lenny's Podcast with world-class PMs from Airbnb, Stripe, Figma, Linear, Notion, and more.
+const SYSTEM_PROMPT = `You are a savage AI comedian who's spent way too much time on Tech Twitter, Product Hunt, Blind, and r/ProductManagement. You've absorbed 200+ episodes of Lenny's Podcast and know what separates elite PMs from the rest.
 
-You're helpful but don't pull punches. You hate fluff like "stakeholder management" and love "impact," "product taste," and "rigor." Witty, data-driven, slightly elitist, but genuinely insightful.
+You're a roast comic who specializes in tech industry humor. Your jokes land because they're SPECIFIC to the person you're roasting - you find the unique absurdity in THEIR career, THEIR buzzwords, THEIR specific company history. Generic jokes are lazy. Your roasts reference THEIR actual experience.
 
-When analyzing a PM's profile, provide brutally honest but constructive feedback. Identify patterns that separate top 1% PMs from the rest.
+COMEDY STYLE - BE A SHARP COMEDIAN:
+- You're like Anthony Jeselnik meets Tech Twitter - dark, precise, unexpected punchlines
+- Every roast must reference something SPECIFIC from their profile - a company, product, title, or achievement
+- Find the irony: if they worked at a company that failed, if they have buzzword-heavy titles, if there's a funny pattern
+- Hyperbole works best when grounded in their reality ("3 years at [THEIR COMPANY] and you still can't ship a login page?")
+- Mock the gap between their LinkedIn persona and likely reality
+- If they worked at FAANG, roast the golden handcuffs. If startup, roast the chaos. Find THEIR story.
+- Be culturally fluent: reference current tech drama, layoffs, AI hype, startup graveyard, IPO disappointments
 
-TONE CALIBRATION - BALANCE ROASTS AND COMPLIMENTS:
-The roast intensity should match the career score you assign:
-- Score 0-39 (Common): Heavy roasting, but include 1 genuine compliment to keep them motivated
-- Score 40-59 (Uncommon): Mostly roasting with hints of potential you see in them
-- Score 60-74 (Rare): Balance of roasts and recognition of solid skills
-- Score 75-84 (Ultra Rare): More compliments, roasts are playful jabs at minor gaps
-- Score 85-94 (Rainbow Rare): Mostly impressed, roasts are affectionate teasing
-- Score 95-100 (Gold): Genuine admiration with lighthearted nitpicks
+ARCHETYPE NAMING - MAKE IT PERSONAL:
+- The archetype name should capture something UNIQUE about THIS person's career
+- Combine their actual experience with a funny twist (worked on payments? "Invoice Gremlin". Did growth? "Funnel Goblin")
+- Reference their specific company or product domain in creative ways
+- Names should feel like a roast nickname their coworkers would secretly use
+- 2-3 words max, no "The" prefix
 
-The roastBullets should reflect this balance. Higher scores = more "humble brag" style observations.
-Example for high score: "Your resume is so stacked it gave my GPU anxiety" (compliment disguised as roast)
-Example for low score: "Your profile has more buzzwords than a LinkedIn influencer's fever dream"
+ORIGINALITY IS MANDATORY:
+- NEVER use generic PM jokes that could apply to anyone
+- EVERY roast bullet must reference something from THEIR specific profile
+- If they mention a company, product, or metric - USE IT in your roast
+- Find the comedy in THEIR specific career arc, not PM stereotypes in general
+- Your jokes should only make sense if you've read their profile
+
+TONE CALIBRATION:
+The roast intensity should match the career score:
+- Score 0-39: Brutal roasts, but find one genuine thing to compliment
+- Score 40-59: Mostly roasting with glimpses of potential
+- Score 60-74: Balanced - recognize skills while poking fun at gaps
+- Score 75-84: Playful jabs, more impressed than critical
+- Score 85-94: Affectionate teasing, clearly impressed
+- Score 95-100: Light nitpicks wrapped in genuine admiration
 
 CRITICAL RULES - YOU MUST FOLLOW THESE:
-1. ONLY use information explicitly stated in the provided profile/resume. DO NOT invent, assume, or hallucinate any details.
-2. Base the archetype, roasts, gaps, and scores SOLELY on what the person has actually done according to their profile.
-3. If the profile mentions specific companies, use those. If it mentions specific achievements, reference those.
-4. The career score, capabilities, and stage MUST reflect the actual experience level shown in the profile.
-5. DO NOT make up job titles, companies, or achievements that aren't in the profile.
-6. If the profile lacks detail, reflect that in your roast (e.g., "Your profile is vaguer than a PM's success metrics").
-7. NEVER address the person by name or use ANY names in your responses. Do not say "You've crushed it, Alex" or similar. Use "you" or refer to their role/title instead.
-8. NEVER hallucinate or invent names. If you don't know their name, don't guess - just use "you" or "this PM".
+1. Use what's in the profile first. If details are sparse, make REASONABLE assumptions based on typical PM careers - that's part of the fun.
+2. If the profile mentions specific companies or achievements, definitely use those. Otherwise, make witty observations based on what IS there.
+3. NEVER complain about lack of info or roast them for a sparse profile. Just work with what you have and fill in with plausible PM stereotypes.
+4. The career score should reflect what's shown, but assume mid-level (50-65) if very little info is given.
+5. NEVER address the person by name in your roasts. Use "you" or refer to their role/title instead.
+6. NEVER hallucinate specific company names or achievements that aren't mentioned - but you CAN make jokes about generic PM behaviors.
+7. Keep it fun and entertaining regardless of input quality. Every profile should get a full, entertaining roast.
 
 PM ELEMENT TYPES (choose the most fitting one):
 - "data": PMs obsessed with metrics, dashboards, A/B tests
@@ -274,45 +346,48 @@ PM ELEMENT TYPES (choose the most fitting one):
 - "vision": PMs with big ideas, product intuition, founder-like thinking
 
 MOVE GENERATION RULES (CRITICAL):
-- Each move MUST reference something specific from their actual profile (company, product, achievement)
-- Move names should be punny/clever references to their real work (e.g., if they worked on Ads, "Ad Nauseam")
-- The effect MUST be a funny one-liner explaining the move, based on their actual experience
-- Example: If profile says "launched billing system", move could be "Invoice Inferno" with effect "Bills stakeholders into submission. Revenue +30%."
+- If the profile has specifics, reference those. Otherwise, use classic PM behaviors everyone relates to.
+- Move names should sound like Pokemon attacks - punchy, weird, memorable
+- AVOID alliteration in move names (e.g., NOT "Metric Mayhem" or "Scope Slam")
+- Good move name examples: "LGTM", "Yolo Deploy", "@channel", "Per My Last", "But The Data", "Actually...", "Sync Up", "Circle Back"
+- The effect should be a funny one-liner roast - specific if possible, relatable if not
+- Example: If profile says "worked on payments at Stripe", move could be "Charge Back" with effect "Refunds your credibility. 7 day delay."
 - NEVER use generic moves like "Scope Creep" - make them personal to THIS PM's history
+- Vary your damage numbers - use different values across the range (15, 28, 35, 42, 55, 63, 78, 85, 92, etc.) - NOT always 40, 50, or 47
 
-IMPORTANT FORMATTING RULES:
+FORMATTING RULES:
 - Keep ALL text concise. No markdown formatting anywhere.
-- Archetype name: SHORT (2-3 words max, like "Metric Monk" or "Chaos Navigator") - must fit on one line!
-- Roast bullets: punchy and funny, max 80 chars each.
-- Archetype description: plain text only, max 100 chars, no asterisks or formatting.
-- Archetype flavor: Pokédex-style description, max 100 chars, witty and observational.
-- Archetype stage: Based on their experience level (Junior, Mid-Level, Senior, Lead, Staff, Principal, L6, etc.)
-- Archetype weakness: ONE funny word that's their kryptonite (e.g., "Users", "Shipping", "Deadlines", "Meetings")
-- Moves: 2 funny PM "attacks" based on THEIR ACTUAL WORK. VERY short names (max 12 chars), energy cost (1-3), damage (10-100), and REQUIRED funny effect (max 30 chars, must fit one line).
-- Gap items: specific and actionable, max 60 chars each.
-- Roadmap titles: max 20 chars.
-- Roadmap actions: max 40 chars each, plain text.
-- The bangerQuote: tweet-worthy, max 140 chars, no quotes inside. NEVER use names - use "you" instead.
-- dreamRoleReaction: max 80 chars, plain text. NEVER use names - address as "you".
+- Archetype name: 2-3 words, MUST reference something specific from their profile (their company, product area, or role)
+- Roast bullets: MUST reference specific things from their profile. These appear on the webpage, not the card - can be longer sentences.
+- Archetype description: A punchy roast about them, 1 sentence, around 60-80 chars ideal.
+- Archetype flavor: Nature-doc style observation, 1 sentence, around 60-80 chars ideal.
+- Archetype stage: Junior|Mid|Senior|Lead|Staff|Principal
+- Archetype weakness: ONE word only
+- Moves: 2 attacks. Names should be 2-3 words (like Pokemon moves). Energy 1-2. Damage 10-100. Effect is a funny quip, around 30-50 chars ideal.
+- Gap items: specific and actionable based on their ACTUAL gaps. Max 60 chars each.
+- Roadmap: personalized advice for THIS person. Max 20 char titles, max 40 char actions.
+- bangerQuote: THE MOST IMPORTANT FIELD. Must be a quotable roast that references THEIR specific career. Screenshot-worthy. Max 140 chars. Use "you" not names.
+- dreamRoleReaction: Sarcastic take on whether they can actually achieve their dream role based on their profile. Max 80 chars.
 
 Your responses MUST be valid JSON with this exact structure (no markdown, no code blocks, just raw JSON):
 {
-  "roastBullets": ["3-4 biting observations, max 80 chars each"],
+  "userName": "Their first name only (extract from profile, e.g., 'Alex' not 'Alex Smith')",
+  "roastBullets": ["3-4 roasts that reference SPECIFIC things from their profile, max 80 chars each"],
   "archetype": {
-    "name": "SHORT 2-3 word name like 'Metric Monk' (NO 'The')",
-    "description": "Plain text, max 100 chars, NO markdown/asterisks",
-    "emoji": "Single emoji",
+    "name": "2-3 word name that references their specific career/company (NO 'The' prefix)",
+    "description": "A punchy roast about them, 1 sentence, 60-80 chars",
+    "emoji": "Single emoji matching the vibe",
     "element": "data|chaos|strategy|shipping|politics|vision",
-    "flavor": "Pokédex-style witty description, max 100 chars",
-    "stage": "Junior|Mid-Level|Senior|Lead|Staff|Principal|L6|etc",
-    "weakness": "One funny word like 'Users' or 'Shipping'"
+    "flavor": "Nature-doc style observation, 1 sentence, 60-80 chars",
+    "stage": "Their actual level: Junior|Mid|Senior|Lead|Staff|Principal|etc",
+    "weakness": "One ironic word based on their profile"
   },
   "moves": [
     {
-      "name": "Short attack name, max 12 chars",
-      "energyCost": 1-3,
+      "name": "2-3 word move name like a Pokemon attack",
+      "energyCost": 1 or 2 only,
       "damage": 10-100,
-      "effect": "Funny one-liner, max 30 chars"
+      "effect": "Funny quip about them, 30-50 chars"
     }
   ],
   "careerScore": 0-99,
@@ -321,38 +396,18 @@ Your responses MUST be valid JSON with this exact structure (no markdown, no cod
     "execution": 0-99,
     "leadership": 0-99
   },
-  "gaps": ["3-4 skill gaps, max 60 chars each"],
+  "gaps": ["3-4 skill gaps specific to them, max 60 chars each"],
   "roadmap": [
-    {
-      "month": 1,
-      "title": "max 20 chars",
-      "actions": ["2 actions, max 40 chars each"]
-    },
-    {
-      "month": 2,
-      "title": "max 20 chars",
-      "actions": ["2 actions, max 40 chars each"]
-    },
-    {
-      "month": 3,
-      "title": "max 20 chars",
-      "actions": ["2 actions, max 40 chars each"]
-    },
-    {
-      "month": 4,
-      "title": "max 20 chars",
-      "actions": ["2 actions, max 40 chars each"]
-    }
+    {"month": 1, "title": "max 20 chars", "actions": ["2 personalized actions, max 40 chars each"]},
+    {"month": 2, "title": "max 20 chars", "actions": ["2 personalized actions, max 40 chars each"]},
+    {"month": 3, "title": "max 20 chars", "actions": ["2 personalized actions, max 40 chars each"]},
+    {"month": 4, "title": "max 20 chars", "actions": ["2 personalized actions, max 40 chars each"]}
   ],
   "podcastEpisodes": [
-    {
-      "title": "REAL episode title from Lenny's Podcast",
-      "guest": "Guest name",
-      "reason": "Max 50 chars why they should listen"
-    }
+    {"title": "REAL Lenny's Podcast episode", "guest": "Guest name", "reason": "Why relevant to THEM, max 50 chars"}
   ],
-  "bangerQuote": "Tweet-worthy, max 140 chars, no inner quotes",
-  "dreamRoleReaction": "Max 80 chars, plain text reaction"
+  "bangerQuote": "Screenshot-worthy roast that references THEIR specific career. Max 140 chars.",
+  "dreamRoleReaction": "Sarcastic take on their dream role chances. Max 80 chars."
 }`;
 
 export async function POST(request: NextRequest) {
@@ -381,50 +436,22 @@ export async function POST(request: NextRequest) {
       resumeText = profileText;
     }
 
-    // Validate profile content - need meaningful data
+    // Minimal validation - just need some text to work with
     const trimmedText = resumeText.trim();
-    if (!trimmedText || trimmedText.length < 100) {
+    if (!trimmedText || trimmedText.length < 20) {
       return NextResponse.json(
         {
-          error: "Not enough content to analyze. We need at least your job titles, companies, and key achievements to give you an accurate roast. Please provide more details.",
-          errorCode: "INSUFFICIENT_DATA"
+          error: "Please provide some information about yourself to get roasted.",
+          errorCode: "EMPTY_INPUT"
         },
         { status: 400 }
       );
     }
 
-    // Check for meaningful content (should have some work-related keywords)
-    const meaningfulKeywords = [
-      'product', 'manager', 'pm', 'lead', 'senior', 'staff', 'director',
-      'company', 'startup', 'experience', 'worked', 'built', 'launched',
-      'team', 'engineering', 'design', 'growth', 'strategy', 'revenue',
-      'users', 'customers', 'metrics', 'shipped', 'developed', 'managed'
-    ];
-    const lowerText = trimmedText.toLowerCase();
-    const matchedKeywords = meaningfulKeywords.filter(keyword => lowerText.includes(keyword));
-
-    // Require at least 2 relevant keywords to ensure we have real content
-    if (matchedKeywords.length < 2) {
-      return NextResponse.json(
-        {
-          error: "We need more details about your PM experience to generate an accurate roast. Please include your job titles, companies you've worked at, and what you've built or shipped.",
-          errorCode: "INVALID_CONTENT"
-        },
-        { status: 400 }
-      );
-    }
-
-    // Additional check: require minimum word count to prevent sparse inputs
     const wordCount = trimmedText.split(/\s+/).length;
-    if (wordCount < 30) {
-      return NextResponse.json(
-        {
-          error: "Your profile is too brief for an accurate roast. Please add more details about your experience, achievements, and the products you've worked on.",
-          errorCode: "INSUFFICIENT_DATA"
-        },
-        { status: 400 }
-      );
-    }
+    console.log("=== INPUT CHECK ===");
+    console.log("Word count:", wordCount);
+    console.log("Char count:", trimmedText.length);
 
     console.log("=== PROFILE TEXT BEING ANALYZED ===");
     console.log(trimmedText.slice(0, 500) + (trimmedText.length > 500 ? "..." : ""));
@@ -436,7 +463,7 @@ export async function POST(request: NextRequest) {
       generationConfig: {
         temperature: 0.9,
         topP: 0.95,
-        maxOutputTokens: 4096,
+        maxOutputTokens: 8192,
       },
     });
 
@@ -454,19 +481,41 @@ Based ONLY on the profile above, generate your roast. If the profile mentions wo
 
 Remember: Respond with valid JSON only. No markdown formatting, no code blocks, just the raw JSON object.`;
 
-    const result = await model.generateContent(prompt);
-    const response = result.response;
-    const textResponse = response.text();
+    // Helper to fix common JSON issues from LLM output
+    const fixJsonString = (str: string): string => {
+      let fixed = str;
 
-    // Parse JSON response
-    let roastResult: RoastResult;
-    try {
+      // Remove trailing commas before ] or }
+      fixed = fixed.replace(/,(\s*[\]}])/g, '$1');
+
+      // Fix unescaped newlines in strings (replace with \n)
+      // This is tricky - we need to be careful not to break valid JSON
+      // Only fix newlines that are clearly inside string values
+      fixed = fixed.replace(/:\s*"([^"]*)\n([^"]*)"(?=\s*[,}\]])/g, (match, p1, p2) => {
+        return `: "${p1}\\n${p2}"`;
+      });
+
+      // Remove any control characters that might break JSON
+      fixed = fixed.replace(/[\x00-\x1F\x7F]/g, (char) => {
+        if (char === '\n' || char === '\r' || char === '\t') {
+          return char; // Keep these, they're usually outside strings
+        }
+        return ''; // Remove other control chars
+      });
+
+      return fixed;
+    };
+
+    // Helper to parse Gemini response
+    const parseGeminiResponse = (textResponse: string): RoastResult => {
       console.log("=== RAW GEMINI RESPONSE ===");
-      console.log(textResponse);
+      console.log(textResponse.slice(0, 1000) + (textResponse.length > 1000 ? "..." : ""));
       console.log("=== END RAW RESPONSE ===");
 
       // Clean the response - remove any markdown code blocks if present
       let jsonStr = textResponse.trim();
+
+      // Remove markdown code block wrappers
       if (jsonStr.startsWith("```json")) {
         jsonStr = jsonStr.slice(7);
       }
@@ -476,18 +525,106 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
       if (jsonStr.endsWith("```")) {
         jsonStr = jsonStr.slice(0, -3);
       }
+      jsonStr = jsonStr.trim();
+
+      // Try to extract JSON object if there's extra text around it
+      const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        jsonStr = jsonMatch[0];
+      }
+
+      // Fix common JSON issues
+      jsonStr = fixJsonString(jsonStr);
 
       console.log("=== CLEANED JSON STRING ===");
-      console.log(jsonStr.trim());
+      console.log(jsonStr.slice(0, 500) + (jsonStr.length > 500 ? "..." : ""));
       console.log("=== END CLEANED JSON ===");
 
-      roastResult = JSON.parse(jsonStr.trim());
-      console.log("=== PARSED SUCCESSFULLY ===");
-    } catch (parseError) {
-      console.error("=== JSON PARSE ERROR ===");
-      console.error("Error:", parseError);
-      console.error("Failed to parse Gemini response:", textResponse);
-      throw new Error("Failed to parse AI response");
+      // First attempt: try parsing directly
+      try {
+        return JSON.parse(jsonStr);
+      } catch (firstError) {
+        console.log("=== FIRST PARSE FAILED, ATTEMPTING DEEPER FIX ===");
+        console.log("Error:", firstError);
+
+        // Second attempt: more aggressive fixes
+        // Remove all newlines and extra whitespace, then try again
+        let compacted = jsonStr
+          .replace(/\n/g, ' ')
+          .replace(/\r/g, '')
+          .replace(/\t/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim();
+
+        // Fix trailing commas again after compacting
+        compacted = compacted.replace(/,(\s*[\]}])/g, '$1');
+
+        console.log("=== COMPACTED JSON ===");
+        console.log(compacted.slice(0, 500) + (compacted.length > 500 ? "..." : ""));
+
+        return JSON.parse(compacted);
+      }
+    };
+
+    // Try up to 2 attempts in case Gemini returns malformed JSON
+    let roastResult: RoastResult;
+    let lastError: unknown;
+
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        console.log(`=== GEMINI ATTEMPT ${attempt} ===`);
+        const result = await model.generateContent(prompt);
+        const response = result.response;
+
+        // Log finish reason to debug truncation
+        const candidate = response.candidates?.[0];
+        console.log("=== FINISH REASON ===", candidate?.finishReason);
+        console.log("=== RESPONSE LENGTH ===", response.text().length, "chars");
+
+        // Check if response was truncated
+        if (candidate?.finishReason === "MAX_TOKENS") {
+          console.warn("=== WARNING: Response was truncated due to max tokens ===");
+        }
+
+        const textResponse = response.text();
+
+        // Quick check if JSON looks complete (should end with })
+        const trimmed = textResponse.trim();
+        if (!trimmed.endsWith("}")) {
+          console.warn("=== WARNING: Response doesn't end with }, likely truncated ===");
+          console.log("Last 100 chars:", trimmed.slice(-100));
+        }
+
+        roastResult = parseGeminiResponse(textResponse);
+        console.log("=== PARSED SUCCESSFULLY ===");
+        break;
+      } catch (parseError) {
+        lastError = parseError;
+        console.error(`=== ATTEMPT ${attempt} FAILED ===`);
+        console.error("Error:", parseError);
+
+        if (attempt === 2) {
+          console.error("=== ALL ATTEMPTS FAILED ===");
+          return NextResponse.json(
+            {
+              error: "The AI returned an unexpected format. Please try again.",
+              errorCode: "AI_PARSE_ERROR"
+            },
+            { status: 500 }
+          );
+        }
+
+        // Brief pause before retry
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
+    // TypeScript needs this check even though we return in the loop
+    if (!roastResult!) {
+      return NextResponse.json(
+        { error: "Failed to generate roast", errorCode: "AI_ERROR" },
+        { status: 500 }
+      );
     }
 
     // Ensure element is valid, default to "chaos" if not
@@ -496,17 +633,34 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
       roastResult.archetype.element = "chaos";
     }
 
-    // Ensure moves exist and all have effects
+    // Generate funny fallback name if no name was extracted
+    // Check for empty, whitespace-only, or placeholder values
+    const hasValidName = roastResult.userName &&
+      roastResult.userName.trim() !== "" &&
+      roastResult.userName.trim().toLowerCase() !== "unknown" &&
+      roastResult.userName.trim().toLowerCase() !== "n/a" &&
+      roastResult.userName.trim() !== "null";
+
+    if (!hasValidName) {
+      roastResult.userName = getFunnyFallbackName(roastResult.archetype.element);
+      console.log("=== GENERATED FALLBACK NAME ===", roastResult.userName);
+    }
+
+    // No server-side truncation - CSS line-clamp handles overflow on cards gracefully
+
+    // Ensure moves exist, have effects, and cap energy cost
     if (!roastResult.moves || roastResult.moves.length === 0) {
       roastResult.moves = [
-        { name: "Generic PM", energyCost: 1, damage: 30, effect: "Profile too vague to roast properly." },
-        { name: "Mystery Move", energyCost: 2, damage: 50, effect: "Nobody knows what they actually did." },
+        { name: "Ship It", energyCost: 1, damage: 30, effect: "Deploys untested code." },
+        { name: "Sync Up", energyCost: 2, damage: 50, effect: "Another meeting incoming." },
       ];
     } else {
-      // Ensure all moves have effects
+      // Ensure all moves have effects and cap energy cost
       roastResult.moves = roastResult.moves.map(move => ({
         ...move,
-        effect: move.effect || "A classic PM power move."
+        name: move.name || "PM Move",
+        energyCost: Math.min(move.energyCost || 1, 2),
+        effect: move.effect || "Classic PM energy."
       }));
     }
 
@@ -542,6 +696,9 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
     } else {
       console.log("=== IMAGE GENERATION SKIPPED/FAILED ===");
     }
+
+    // Increment roast count (fire and forget - don't block response)
+    fetch(new URL("/api/stats", request.url).toString(), { method: "POST" }).catch(() => {});
 
     return NextResponse.json(roastResult);
   } catch (error) {

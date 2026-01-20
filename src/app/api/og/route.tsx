@@ -33,6 +33,40 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
+// Element type colors and gradients
+const PM_ELEMENTS: Record<string, { color: string; bg: string; textColor: string }> = {
+  data: {
+    color: "#3b82f6",
+    bg: "linear-gradient(180deg, #1e3a8a 0%, #1e40af 50%, #2563eb 100%)",
+    textColor: "#bfdbfe",
+  },
+  chaos: {
+    color: "#ef4444",
+    bg: "linear-gradient(180deg, #7f1d1d 0%, #991b1b 50%, #dc2626 100%)",
+    textColor: "#fecaca",
+  },
+  strategy: {
+    color: "#8b5cf6",
+    bg: "linear-gradient(180deg, #4c1d95 0%, #5b21b6 50%, #7c3aed 100%)",
+    textColor: "#ddd6fe",
+  },
+  shipping: {
+    color: "#22c55e",
+    bg: "linear-gradient(180deg, #14532d 0%, #166534 50%, #16a34a 100%)",
+    textColor: "#bbf7d0",
+  },
+  politics: {
+    color: "#f59e0b",
+    bg: "linear-gradient(180deg, #78350f 0%, #92400e 50%, #d97706 100%)",
+    textColor: "#fde68a",
+  },
+  vision: {
+    color: "#ec4899",
+    bg: "linear-gradient(180deg, #831843 0%, #9d174d 50%, #db2777 100%)",
+    textColor: "#fbcfe8",
+  },
+};
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const data = searchParams.get("data");
@@ -86,25 +120,8 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const StarRating = ({ score }: { score: number }) => {
-    const stars = Math.round(score / 20);
-    return (
-      <div style={{ display: "flex", gap: 2 }}>
-        {[1, 2, 3, 4, 5].map((star) => (
-          <div
-            key={star}
-            style={{
-              width: 16,
-              height: 16,
-              color: star <= stars ? "#ffd700" : "#4b5563",
-            }}
-          >
-            ★
-          </div>
-        ))}
-      </div>
-    );
-  };
+  const element = PM_ELEMENTS[card.el] || PM_ELEMENTS.chaos;
+  const moves = card.m || [];
 
   return new ImageResponse(
     (
@@ -119,183 +136,326 @@ export async function GET(request: NextRequest) {
           padding: 40,
         }}
       >
-        {/* Card with holographic border */}
+        {/* Pokemon-style Card - Larger and centered */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            width: 500,
+            width: 380,
+            height: 530,
             position: "relative",
           }}
         >
-          {/* Holographic border glow */}
+          {/* Holographic glow */}
           <div
             style={{
               position: "absolute",
-              inset: -4,
+              top: -10,
+              left: -10,
+              right: -10,
+              bottom: -10,
               background: "linear-gradient(45deg, #ff0080, #ff8c00, #40e0d0, #7b68ee, #ff0080)",
               borderRadius: 28,
-              filter: "blur(8px)",
+              filter: "blur(16px)",
               opacity: 0.7,
             }}
           />
 
-          {/* Main card */}
+          {/* Main card body */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
+              flex: 1,
               position: "relative",
-              background: "linear-gradient(135deg, rgba(26,26,46,0.98) 0%, rgba(22,33,62,0.98) 50%, rgba(15,15,35,0.98) 100%)",
-              borderRadius: 24,
-              border: "2px solid rgba(255,255,255,0.2)",
+              borderRadius: 16,
+              border: `6px solid ${element.color}`,
               overflow: "hidden",
+              background: "linear-gradient(180deg, #fefefe 0%, #e5e5e5 30%, #d4d4d4 100%)",
             }}
           >
-            {/* Header - Gold Pokemon style */}
+            {/* Header: Name + HP */}
             <div
               style={{
-                height: 48,
-                background: "linear-gradient(90deg, #eab308 0%, #fbbf24 50%, #eab308 100%)",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
+                justifyContent: "space-between",
+                padding: "12px 16px",
+                background: "rgba(255,255,255,0.9)",
               }}
             >
-              <span style={{ color: "black", fontSize: 16, fontWeight: 900, letterSpacing: 4 }}>
-                PM ROAST
-              </span>
-            </div>
-
-          {/* Content */}
-          <div style={{ padding: 32, display: "flex", flexDirection: "column" }}>
-            {/* Score + Emoji */}
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 20 }}>
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                <div
-                  style={{
-                    fontSize: 72,
-                    fontWeight: 900,
-                    background: "linear-gradient(180deg, #ffd700 0%, #ff8c00 100%)",
-                    backgroundClip: "text",
-                    color: "transparent",
-                  }}
-                >
-                  {card.s}
-                </div>
-                <span style={{ fontSize: 10, color: "rgba(255, 215, 0, 0.7)", letterSpacing: 2 }}>
-                  OVERALL
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 26 }}>{card.e}</span>
+                <span style={{ fontSize: 16, fontWeight: 900, color: "#1a1a1a" }}>
+                  {stripMarkdown(card.n)}
                 </span>
               </div>
-              <div
-                style={{
-                  width: 100,
-                  height: 100,
-                  borderRadius: 16,
-                  background: "linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2))",
-                  border: "1px solid rgba(99, 102, 241, 0.4)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 56,
-                }}
-              >
-                {card.e}
-              </div>
-            </div>
-
-            {/* Archetype Name */}
-            <div style={{ marginBottom: 20, display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: 28, fontWeight: "bold", color: "white", marginBottom: 8 }}>
-                {stripMarkdown(card.n)}
-              </span>
-              <span style={{ fontSize: 14, color: "#d1d5db", lineHeight: 1.4 }}>
-                {stripMarkdown(card.d)}
-              </span>
-            </div>
-
-            {/* Stats */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 20 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>🎯</span>
-                  <span style={{ fontSize: 14, color: "#d1d5db" }}>Product Sense</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20, fontWeight: "bold", color: "#6366f1" }}>{card.ps}</span>
-                  <StarRating score={card.ps} />
-                </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>⚡</span>
-                  <span style={{ fontSize: 14, color: "#d1d5db" }}>Execution</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20, fontWeight: "bold", color: "#6366f1" }}>{card.ex}</span>
-                  <StarRating score={card.ex} />
-                </div>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20 }}>👥</span>
-                  <span style={{ fontSize: 14, color: "#d1d5db" }}>Leadership</span>
-                </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ fontSize: 20, fontWeight: "bold", color: "#6366f1" }}>{card.ld}</span>
-                  <StarRating score={card.ld} />
+              <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <span style={{ fontSize: 22, fontWeight: 900, color: "#dc2626" }}>{card.s}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "#666" }}>/100 HP</span>
+                <div
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 11,
+                    backgroundColor: element.color,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontSize: 11,
+                    fontWeight: 700,
+                    marginLeft: 4,
+                  }}
+                >
+                  {card.el?.charAt(0).toUpperCase() || "C"}
                 </div>
               </div>
             </div>
 
-            {/* Quote */}
+            {/* Image frame */}
             <div
               style={{
-                padding: 16,
-                background: "rgba(99, 102, 241, 0.1)",
-                borderRadius: 12,
-                border: "1px solid rgba(99, 102, 241, 0.2)",
-              }}
-            >
-              <span style={{ fontSize: 13, color: "#d1d5db", fontStyle: "italic", textAlign: "center" }}>
-                &quot;{stripMarkdown(card.q)}&quot;
-              </span>
-            </div>
-          </div>
-
-            {/* Footer */}
-            <div
-              style={{
-                height: 40,
-                background: "linear-gradient(90deg, rgba(234,179,8,0.15) 0%, rgba(251,191,36,0.15) 50%, rgba(234,179,8,0.15) 100%)",
-                borderTop: "1px solid rgba(234,179,8,0.3)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
+                margin: "0 14px",
+                height: 160,
+                borderRadius: 8,
+                border: `4px solid ${element.color}66`,
+                background: element.bg,
+                position: "relative",
               }}
             >
-              <span style={{ fontSize: 12, color: "rgba(234,179,8,0.8)", fontWeight: 600, letterSpacing: 1 }}>
-                pmroast.com • Get your roast
+              {/* Gradient overlay for depth */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: "radial-gradient(circle at 30% 20%, rgba(255,255,255,0.3) 0%, transparent 50%)",
+                }}
+              />
+              <span style={{ fontSize: 72, textShadow: "0 4px 20px rgba(0,0,0,0.5)" }}>{card.e}</span>
+            </div>
+
+            {/* Element type badge */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                margin: "10px 14px",
+              }}
+            >
+              <div
+                style={{
+                  padding: "4px 10px",
+                  borderRadius: 20,
+                  backgroundColor: element.color,
+                  color: "white",
+                  fontSize: 11,
+                  fontWeight: 700,
+                }}
+              >
+                {(card.el || "chaos").charAt(0).toUpperCase() + (card.el || "chaos").slice(1)} Type PM
+              </div>
+              <span style={{ fontSize: 11, fontStyle: "italic", color: "#666" }}>
+                {card.st || "Senior"}
               </span>
+            </div>
+
+            {/* Moves */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                margin: "0 14px",
+                background: "rgba(255,255,255,0.7)",
+                borderRadius: 8,
+                border: `1px solid ${element.color}33`,
+              }}
+            >
+              {moves.slice(0, 2).map((move: { n: string; c: number; d: number; e?: string }, index: number) => (
+                <div
+                  key={index}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "6px 10px",
+                    borderBottom: index === 0 ? `1px solid ${element.color}33` : "none",
+                  }}
+                >
+                  {/* Energy cost */}
+                  <div style={{ display: "flex", gap: 2, width: 45 }}>
+                    {Array.from({ length: Math.min(move.c || 1, 3) }).map((_, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          width: 14,
+                          height: 14,
+                          borderRadius: 7,
+                          backgroundColor: element.color,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "white",
+                          fontSize: 7,
+                          fontWeight: 700,
+                        }}
+                      >
+                        {(card.el || "C").charAt(0).toUpperCase()}
+                      </div>
+                    ))}
+                  </div>
+                  {/* Move name + effect */}
+                  <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#1a1a1a" }}>
+                      {move.n}
+                    </span>
+                    {move.e && (
+                      <span style={{ fontSize: 8, color: "#666" }}>{move.e}</span>
+                    )}
+                  </div>
+                  {/* Damage */}
+                  <span style={{ fontSize: 16, fontWeight: 900, color: "#1a1a1a" }}>
+                    {move.d}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            {/* Description / Flavor text */}
+            <div
+              style={{
+                display: "flex",
+                margin: "10px 14px",
+                padding: "6px 10px",
+                background: "rgba(255,255,255,0.5)",
+                borderRadius: 8,
+                border: `1px solid ${element.color}33`,
+              }}
+            >
+              <p
+                style={{
+                  fontSize: 10,
+                  fontStyle: "italic",
+                  color: "#444",
+                  textAlign: "center",
+                  margin: 0,
+                  lineHeight: 1.4,
+                }}
+              >
+                {stripMarkdown(card.d)}
+              </p>
+            </div>
+
+            {/* Footer: Weakness + branding */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "6px 14px",
+                marginTop: "auto",
+                background: `${element.color}22`,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 10, color: "#666" }}>weakness</span>
+                <span style={{ fontSize: 10, fontWeight: 700, color: "#1a1a1a" }}>{card.w || "Meetings"}</span>
+              </div>
+              <span style={{ fontSize: 10, fontWeight: 600, color: element.color }}>pmroast.com</span>
             </div>
           </div>
         </div>
 
-        {/* Side CTA */}
+        {/* Side content - Quote and CTA */}
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            marginLeft: 60,
-            maxWidth: 400,
+            marginLeft: 50,
+            maxWidth: 500,
+            justifyContent: "center",
           }}
         >
-          <span style={{ fontSize: 48, fontWeight: "bold", color: "white", marginBottom: 16 }}>
-            Get Roasted.
-          </span>
-          <span style={{ fontSize: 20, color: "#a3a3a3", lineHeight: 1.5 }}>
-            Brutally honest AI feedback on your PM career, powered by 200+ Lenny&apos;s Podcast interviews.
-          </span>
+          {/* Title */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
+            <span style={{ fontSize: 40, fontWeight: 900, color: "white" }}>
+              PM Roast
+            </span>
+            <span style={{ fontSize: 20, color: "#666" }}>
+              🔥
+            </span>
+          </div>
+
+          {/* Quote - larger and more prominent */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              marginBottom: 28,
+              padding: "20px 24px",
+              background: "linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15))",
+              borderRadius: 16,
+              border: "1px solid rgba(99, 102, 241, 0.3)",
+            }}
+          >
+            <span style={{ fontSize: 20, color: "#6366f1", marginBottom: 8 }}>&ldquo;</span>
+            <span
+              style={{
+                fontSize: 20,
+                color: "white",
+                fontStyle: "italic",
+                lineHeight: 1.5,
+              }}
+            >
+              {stripMarkdown(card.q).slice(0, 120)}
+            </span>
+            <span style={{ fontSize: 20, color: "#6366f1", textAlign: "right", marginTop: 8 }}>&rdquo;</span>
+          </div>
+
+          {/* Score badge */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 16,
+              marginBottom: 20,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 20px",
+                background: "rgba(255,255,255,0.1)",
+                borderRadius: 12,
+              }}
+            >
+              <span style={{ fontSize: 16, color: "#a3a3a3" }}>Score:</span>
+              <span style={{ fontSize: 28, fontWeight: 900, color: "white" }}>{card.s}</span>
+              <span style={{ fontSize: 14, color: "#666" }}>/100</span>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "14px 24px",
+              background: "linear-gradient(90deg, #6366f1, #8b5cf6)",
+              borderRadius: 14,
+              width: "fit-content",
+            }}
+          >
+            <span style={{ fontSize: 18, fontWeight: 700, color: "white" }}>Get your card at pmroast.com</span>
+          </div>
         </div>
       </div>
     ),

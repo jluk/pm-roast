@@ -47,35 +47,61 @@ CSS variables defined in `src/app/globals.css`
 src/
 ├── app/
 │   ├── api/
-│   │   └── roast/
-│   │       └── route.ts      # PDF parsing + Claude API call
-│   ├── globals.css           # Theme variables, Tailwind config
-│   ├── layout.tsx            # Root layout with fonts, metadata
-│   └── page.tsx              # Main page with multi-step flow
+│   │   ├── roast/route.ts     # Main roast generation (PDF/text + Gemini)
+│   │   ├── linkedin/route.ts  # LinkedIn profile scraping via Proxycurl
+│   │   ├── website/route.ts   # Website scraping for portfolio URLs
+│   │   ├── stats/route.ts     # Roast counter stats
+│   │   └── og/route.tsx       # Dynamic OG image generation
+│   ├── share/[data]/          # Shareable result pages
+│   ├── globals.css            # Theme variables, Tailwind config
+│   ├── layout.tsx             # Root layout with fonts, metadata
+│   └── page.tsx               # Main page with multi-step flow
 ├── components/
 │   ├── steps/
-│   │   ├── GoalSelector.tsx  # Dream role selection step
 │   │   ├── AnalyzingLoader.tsx # Loading animation
-│   │   └── Results.tsx       # Roast results display
-│   └── ui/                   # Shadcn/UI components
+│   │   └── Results.tsx        # Roast results display
+│   ├── HoloCard.tsx           # Holographic card effect
+│   ├── PokemonCard.tsx        # Pokemon-style card component
+│   ├── InteractiveCard.tsx    # 3D tilt card interactions
+│   ├── ExampleGallery.tsx     # Homepage card gallery
+│   └── ui/                    # Shadcn/UI components
 └── lib/
-    ├── types.ts              # TypeScript types for roast result
-    └── utils.ts              # cn() utility
+    ├── types.ts               # TypeScript types for roast result
+    ├── linkedin.ts            # LinkedIn data parsing utilities
+    ├── share.ts               # URL sharing/encoding utilities
+    └── utils.ts               # cn() utility
 ```
 
 ## User Flow
 
-1. **Upload**: User uploads PDF resume (LinkedIn URL coming soon)
-2. **Goals**: User selects dream role (Founder, CPO, L6 FAANG, etc.)
-3. **Analyzing**: Animated loading while Claude analyzes resume
-4. **Results**: Display roast, archetype, career score, gaps, 6-month roadmap, podcast recommendations
+1. **Input**: User provides LinkedIn URL, website URL, or uploads PDF resume
+   - LinkedIn: Fetches profile via Proxycurl API
+   - Website: Scrapes and extracts text content (e.g., jluk.me)
+   - PDF: Parses resume text
+2. **Goals**: User selects dream role (Founder, CPO, L6 FAANG, etc.) inline
+3. **Analyzing**: Animated loading while Gemini analyzes profile
+4. **Results**: Display roast, archetype card, career score, gaps, 6-month roadmap, podcast recommendations
+5. **Share**: Generate shareable link with encoded result data
 
-## API Route (`/api/roast`)
+## API Routes
 
-- Accepts `multipart/form-data` with `file` (PDF) and `dreamRole`
-- Parses PDF text using pdf-parse
+### `/api/roast`
+- Accepts `multipart/form-data` with `file` (PDF), `profileText`, and `dreamRole`
+- Parses PDF text using pdf-parse or uses provided profile text
 - Calls Gemini Flash 2.0 with system prompt mimicking Lenny Rachitsky
 - Returns structured JSON with roast, archetype, score, roadmap, etc.
+
+### `/api/linkedin`
+- Accepts `POST` with `{ url: "linkedin.com/in/..." }`
+- Uses Proxycurl API to fetch profile data
+- Returns profile text, quality assessment, and optional profile pic URL
+
+### `/api/website`
+- Accepts `POST` with `{ url: "example.com" }`
+- Fetches and scrapes HTML content
+- Extracts text, title, meta description
+- Checks for PM-related keywords to assess content quality
+- Returns `high`, `partial`, or error status
 
 ## Adding Shadcn Components
 
