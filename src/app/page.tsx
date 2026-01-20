@@ -17,7 +17,7 @@ const LINKEDIN_URL_REGEX = /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[\w-]+\/?$
 const WEBSITE_URL_REGEX = /^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+\/?.*$/i;
 
 type InputMode = "magic" | "manual";
-type UrlType = "linkedin" | "website";
+type UrlType = "linkedin" | "website" | "resume";
 
 export default function Home() {
   const [step, setStep] = useState<Step>("upload");
@@ -245,6 +245,41 @@ export default function Home() {
     }
   };
 
+  // Handle resume upload directly from main form
+  const handleResumeSubmit = async () => {
+    if (!dreamRole || !file) return;
+
+    setInputSource("pdf");
+    setIsLoadingLinkedin(true);
+    setStep("analyzing");
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("dreamRole", dreamRole);
+
+      const response = await fetch("/api/roast", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to analyze");
+      }
+
+      const data: RoastResult = await response.json();
+      setResult(data);
+      setStep("results");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setStep("upload");
+    } finally {
+      setIsLoadingLinkedin(false);
+    }
+  };
+
   const handleStartOver = () => {
     setStep("upload");
     setInputMode("magic");
@@ -257,6 +292,7 @@ export default function Home() {
     setResult(null);
     setError(null);
     setInputSource("linkedin");
+    setUrlType("linkedin");
     window.scrollTo(0, 0);
   };
 
@@ -376,11 +412,11 @@ export default function Home() {
                       exit={{ opacity: 0, x: -20 }}
                       className="space-y-4"
                     >
-                      {/* URL Type Toggle */}
+                      {/* Input Type Toggle */}
                       <div className="flex justify-center">
                         <div className="inline-flex bg-white/10 rounded-lg p-0.5">
                           <button
-                            onClick={() => { setUrlType("linkedin"); setLinkedinUrl(""); }}
+                            onClick={() => { setUrlType("linkedin"); setLinkedinUrl(""); setFile(null); }}
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                               urlType === "linkedin"
                                 ? "bg-white/20 text-white"
@@ -390,7 +426,7 @@ export default function Home() {
                             LinkedIn
                           </button>
                           <button
-                            onClick={() => { setUrlType("website"); setLinkedinUrl(""); }}
+                            onClick={() => { setUrlType("website"); setLinkedinUrl(""); setFile(null); }}
                             className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
                               urlType === "website"
                                 ? "bg-white/20 text-white"
@@ -399,43 +435,99 @@ export default function Home() {
                           >
                             Website
                           </button>
+                          <button
+                            onClick={() => { setUrlType("resume"); setLinkedinUrl(""); }}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${
+                              urlType === "resume"
+                                ? "bg-white/20 text-white"
+                                : "text-white/60 hover:text-white/80"
+                            }`}
+                          >
+                            Resume
+                          </button>
                         </div>
                       </div>
 
-                      {/* URL Input - Glassmorphism style */}
-                      <div className="relative">
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
-                          {urlType === "linkedin" ? (
-                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                            </svg>
+                      {/* URL Input or File Upload based on type */}
+                      {urlType === "resume" ? (
+                        /* Resume Upload */
+                        <div
+                          onDragOver={handleDragOver}
+                          onDragLeave={handleDragLeave}
+                          onDrop={handleDrop}
+                          className={`
+                            relative border-2 border-dashed rounded-lg p-4 text-center transition-all cursor-pointer
+                            ${isDragging ? "border-[#6366f1] bg-[#6366f1]/10" : "border-white/30 hover:border-white/50"}
+                            ${file ? "border-green-500/50 bg-green-500/10" : ""}
+                          `}
+                        >
+                          <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={handleFileChange}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          />
+                          {file ? (
+                            <div className="flex items-center justify-center gap-3">
+                              <svg className="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <span className="text-sm text-white truncate">{file.name}</span>
+                              <button
+                                onClick={(e) => { e.preventDefault(); e.stopPropagation(); setFile(null); }}
+                                className="p-1 hover:bg-white/10 rounded shrink-0"
+                              >
+                                <svg className="w-4 h-4 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
                           ) : (
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                            </svg>
+                            <div className="flex flex-col items-center gap-2">
+                              <svg className="w-8 h-8 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                              <span className="text-sm text-white/60">Drop your resume or click to upload</span>
+                              <span className="text-xs text-white/40">PDF only</span>
+                            </div>
                           )}
                         </div>
-                        <input
-                          type="url"
-                          placeholder={urlType === "linkedin" ? "linkedin.com/in/yourprofile" : "yourwebsite.com"}
-                          value={linkedinUrl}
-                          onChange={(e) => setLinkedinUrl(e.target.value)}
-                          className={`w-full h-12 pl-11 bg-white/10 backdrop-blur-sm border rounded-lg text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/50 focus:border-transparent transition-all ${
-                            isValidUrl ? "border-green-500/50 pr-10" : "border-white/20 pr-4"
-                          }`}
-                        />
-                        {isValidUrl && (
-                          <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                      ) : (
+                        /* URL Input - Glassmorphism style */
+                        <div className="relative">
+                          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-white/60">
+                            {urlType === "linkedin" ? (
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                              </svg>
+                            ) : (
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                              </svg>
+                            )}
                           </div>
-                        )}
-                      </div>
+                          <input
+                            type="url"
+                            placeholder={urlType === "linkedin" ? "linkedin.com/in/yourprofile" : "yourwebsite.com"}
+                            value={linkedinUrl}
+                            onChange={(e) => setLinkedinUrl(e.target.value)}
+                            className={`w-full h-12 pl-11 bg-white/10 backdrop-blur-sm border rounded-lg text-base text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/50 focus:border-transparent transition-all ${
+                              isValidUrl ? "border-green-500/50 pr-10" : "border-white/20 pr-4"
+                            }`}
+                          />
+                          {isValidUrl && (
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                      )}
 
-                      {/* Inline Goal Selector - appears when URL is valid */}
+                      {/* Inline Goal Selector - appears when URL is valid OR file is selected */}
                       <AnimatePresence>
-                        {isValidUrl && (
+                        {(isValidUrl || (urlType === "resume" && file)) && (
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
@@ -472,27 +564,29 @@ export default function Home() {
                         )}
                       </AnimatePresence>
 
-                      {/* Use Profile Picture Toggle */}
-                      <label className="flex items-center gap-2 cursor-pointer group">
-                        <div className="relative">
-                          <input
-                            type="checkbox"
-                            checked={useProfilePic}
-                            onChange={(e) => setUseProfilePic(e.target.checked)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-9 h-5 bg-white/10 border border-white/20 rounded-full peer-checked:bg-[#6366f1] peer-checked:border-[#6366f1] transition-all" />
-                          <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
-                        </div>
-                        <span className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
-                          Use my photo for card
-                        </span>
-                      </label>
+                      {/* Use Profile Picture Toggle - only show for LinkedIn/Website */}
+                      {urlType !== "resume" && (
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                          <div className="relative">
+                            <input
+                              type="checkbox"
+                              checked={useProfilePic}
+                              onChange={(e) => setUseProfilePic(e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-9 h-5 bg-white/10 border border-white/20 rounded-full peer-checked:bg-[#6366f1] peer-checked:border-[#6366f1] transition-all" />
+                            <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-4" />
+                          </div>
+                          <span className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+                            Use my photo for card
+                          </span>
+                        </label>
+                      )}
 
                       {/* Submit Button */}
                       <Button
-                        onClick={handleMagicLinkSubmit}
-                        disabled={!isValidUrl || !dreamRole || isLoadingLinkedin}
+                        onClick={urlType === "resume" ? handleResumeSubmit : handleMagicLinkSubmit}
+                        disabled={urlType === "resume" ? (!file || !dreamRole || isLoadingLinkedin) : (!isValidUrl || !dreamRole || isLoadingLinkedin)}
                         className="w-full h-12 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white font-bold text-base hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:scale-[1.02] disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100"
                       >
                         {isLoadingLinkedin ? (
