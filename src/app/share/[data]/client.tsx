@@ -13,21 +13,58 @@ interface SharePageClientProps {
 
 export function SharePageClient({ card, encodedData }: SharePageClientProps) {
   const [archetypeImage, setArchetypeImage] = useState<string | undefined>(undefined);
+  const [isLoadingImage, setIsLoadingImage] = useState(false);
 
-  // Try to retrieve the generated image from sessionStorage
+  // Try to retrieve the generated image from sessionStorage, or generate it via API
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    async function loadImage() {
+      if (typeof window === "undefined") return;
+
+      // First, try sessionStorage
       try {
         const storedImage = sessionStorage.getItem(`pm-roast-image-${encodedData}`);
         if (storedImage) {
           setArchetypeImage(storedImage);
+          return;
         }
       } catch (e) {
-        // Storage might be disabled, ignore
         console.warn("Could not retrieve image from sessionStorage:", e);
       }
+
+      // If no cached image, generate one via API
+      setIsLoadingImage(true);
+      try {
+        const response = await fetch("/api/card-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            archetypeName: card.n,
+            archetypeDescription: card.d,
+            element: card.el,
+          }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.image) {
+            setArchetypeImage(data.image);
+            // Cache it in sessionStorage for this tab
+            try {
+              sessionStorage.setItem(`pm-roast-image-${encodedData}`, data.image);
+            } catch (e) {
+              console.warn("Could not cache image in sessionStorage:", e);
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Failed to generate card image:", error);
+      } finally {
+        setIsLoadingImage(false);
+      }
     }
-  }, [encodedData]);
+
+    loadImage();
+  }, [encodedData, card.n, card.d, card.el]);
 
   // Convert ShareableCard to RoastResult
   const result = shareableCardToRoastResult(card);
