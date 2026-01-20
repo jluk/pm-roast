@@ -44,8 +44,9 @@ export interface FetchLinkedInResult {
 }
 
 // Mock profile data for development/testing when API key is missing
+// Note: Using empty name so fallback name system kicks in
 const MOCK_PROFILE: LinkedInProfileData = {
-  full_name: "Alex Johnson",
+  full_name: "",
   occupation: "Senior Product Manager at TechCorp",
   headline: "Building products that users love | Ex-Google, Ex-Meta",
   summary: "Product leader with 8+ years of experience shipping consumer and B2B products at scale. Passionate about user research, data-driven decision making, and building high-performing teams.",

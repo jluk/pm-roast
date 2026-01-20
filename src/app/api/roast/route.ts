@@ -371,7 +371,7 @@ FORMATTING RULES:
 
 Your responses MUST be valid JSON with this exact structure (no markdown, no code blocks, just raw JSON):
 {
-  "userName": "Their first name only (extract from profile, e.g., 'Alex' not 'Alex Smith')",
+  "userName": "Their first name only extracted from profile (just first name, not full name). Leave empty string if not found.",
   "roastBullets": ["3-4 roasts that reference SPECIFIC things from their profile, max 80 chars each"],
   "archetype": {
     "name": "2-3 word name that references their specific career/company (NO 'The' prefix)",
