@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenAI } from "@google/genai";
 import { RoastResult, DreamRole, DREAM_ROLES, PMElement } from "@/lib/types";
+import { storeCard } from "@/lib/card-storage";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const genAINew = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -786,10 +787,20 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
       console.log("=== IMAGE GENERATION SKIPPED/FAILED ===");
     }
 
+    // Store the card in KV and get a permanent ID
+    let cardId: string | null = null;
+    try {
+      cardId = await storeCard(roastResult, dreamRole);
+      console.log("=== CARD STORED WITH ID:", cardId, "===");
+    } catch (error) {
+      console.error("Failed to store card:", error);
+      // Continue without cardId - fallback to encoded URL sharing
+    }
+
     // Increment roast count (fire and forget - don't block response)
     fetch(new URL("/api/stats", request.url).toString(), { method: "POST" }).catch(() => {});
 
-    return NextResponse.json(roastResult);
+    return NextResponse.json({ ...roastResult, cardId });
   } catch (error) {
     console.error("Error processing roast:", error);
     return NextResponse.json(

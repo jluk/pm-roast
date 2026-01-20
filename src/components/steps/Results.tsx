@@ -65,6 +65,7 @@ interface ResultsProps {
   dreamRole: DreamRole;
   onStartOver: () => void;
   isSharePage?: boolean;
+  cardId?: string;
 }
 
 // Generate YouTube search URL for a podcast episode
@@ -84,35 +85,23 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-export function Results({ result, dreamRole, onStartOver, isSharePage = false }: ResultsProps) {
+export function Results({ result, dreamRole, onStartOver, isSharePage = false, cardId }: ResultsProps) {
   const [copied, setCopied] = useState(false);
 
-  // Generate the shareable URL
+  // Generate the shareable URL - prefer cardId if available (permanent storage)
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const shareUrl = generateShareUrl(baseUrl, result, dreamRole);
+  const shareUrl = cardId
+    ? `${baseUrl}/card/${cardId}`
+    : generateShareUrl(baseUrl, result, dreamRole);
 
-  // Update the browser URL to the unique share URL (without page reload)
-  // Also store the image in sessionStorage so it persists if the page is refreshed
+  // Update the browser URL to the shareable URL (without page reload)
   // Skip this on the share page since we're already on the share URL
   useEffect(() => {
     if (typeof window !== "undefined" && shareUrl && !isSharePage) {
-      // Extract the encoded data from the share URL to use as storage key
-      const urlPath = shareUrl.replace(baseUrl, "");
-      const encodedData = urlPath.replace("/share/", "");
-
-      // Store the generated image in sessionStorage if available
-      if (result.archetypeImage) {
-        try {
-          sessionStorage.setItem(`pm-roast-image-${encodedData}`, result.archetypeImage);
-        } catch (e) {
-          // Storage might be full or disabled, ignore
-          console.warn("Could not store image in sessionStorage:", e);
-        }
-      }
-
+      const urlPath = cardId ? `/card/${cardId}` : shareUrl.replace(baseUrl, "");
       window.history.pushState({ path: urlPath }, "", urlPath);
     }
-  }, [shareUrl, baseUrl, result.archetypeImage, isSharePage]);
+  }, [shareUrl, baseUrl, isSharePage, cardId]);
 
   const shareToTwitter = () => {
     const archetype = stripMarkdown(result.archetype.name);

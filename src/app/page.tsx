@@ -30,6 +30,7 @@ export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [dreamRole, setDreamRole] = useState<DreamRole | null>("founder");
   const [result, setResult] = useState<RoastResult | null>(null);
+  const [cardId, setCardId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingLinkedin, setIsLoadingLinkedin] = useState(false);
   const [inputSource, setInputSource] = useState<"linkedin" | "pdf" | "manual">("linkedin");
@@ -197,8 +198,10 @@ export default function Home() {
         throw new Error(errorData.error || "Failed to analyze");
       }
 
-      const data: RoastResult = await response.json();
-      setResult(data);
+      const data = await response.json();
+      const { cardId: newCardId, ...roastResult } = data;
+      setResult(roastResult);
+      setCardId(newCardId || null);
       setStep("results");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -235,8 +238,10 @@ export default function Home() {
           throw new Error(errorData.error || "Failed to analyze");
         }
 
-        const data: RoastResult = await response.json();
-        setResult(data);
+        const data = await response.json();
+        const { cardId: newCardId, ...roastResult } = data;
+        setResult(roastResult);
+        setCardId(newCardId || null);
         setStep("results");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -270,8 +275,10 @@ export default function Home() {
         throw new Error(errorData.error || "Failed to analyze");
       }
 
-      const data: RoastResult = await response.json();
-      setResult(data);
+      const data = await response.json();
+      const { cardId: newCardId, ...roastResult } = data;
+      setResult(roastResult);
+      setCardId(newCardId || null);
       setStep("results");
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -292,6 +299,7 @@ export default function Home() {
     setUseProfilePic(true);
     setDreamRole("founder");
     setResult(null);
+    setCardId(null);
     setError(null);
     setInputSource("linkedin");
     setUrlType("linkedin");
@@ -805,6 +813,7 @@ export default function Home() {
               result={result}
               dreamRole={dreamRole}
               onStartOver={handleStartOver}
+              cardId={cardId || undefined}
             />
           )}
 
