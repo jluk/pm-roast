@@ -226,8 +226,8 @@ describe('Share URL Encoding/Decoding', () => {
 
       expect(decoded).not.toBeNull();
       expect(decoded!.n.length).toBeLessThanOrEqual(30);
-      expect(decoded!.d.length).toBeLessThanOrEqual(80);
-      expect(decoded!.q.length).toBeLessThanOrEqual(100);
+      expect(decoded!.d.length).toBeLessThanOrEqual(95); // Matches share.ts truncation
+      expect(decoded!.q.length).toBeLessThanOrEqual(140); // Matches share.ts truncation
 
       logResult('Name truncated to', decoded!.n.length);
       logResult('Description truncated to', decoded!.d.length);

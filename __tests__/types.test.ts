@@ -6,11 +6,10 @@
  * but forget to update related code.
  */
 
-import { DREAM_ROLES, ROLE_CATEGORIES, DreamRole, RoleCategory } from '@/lib/types';
+import { DREAM_ROLES, DreamRole, PMElement } from '@/lib/types';
 
-// PM Elements (duplicated here since it's in a client component)
-const PM_ELEMENTS = ['data', 'chaos', 'strategy', 'shipping', 'politics', 'vision'] as const;
-type PMElement = typeof PM_ELEMENTS[number];
+// PM Elements
+const PM_ELEMENTS: PMElement[] = ['data', 'chaos', 'strategy', 'shipping', 'politics', 'vision'];
 
 // Card rarities
 const CARD_RARITIES = ['common', 'uncommon', 'rare', 'ultra', 'rainbow', 'gold'] as const;
@@ -39,12 +38,13 @@ describe('Type & Data Structure Consistency', () => {
 
       const expectedRoles: DreamRole[] = [
         'founder',
-        'cpo-startup',
-        'cpo-enterprise',
-        'l6-faang',
-        'l7-faang',
         'vp-product',
-        'ic-senior'
+        'cpo',
+        'director-faang',
+        'staff-faang',
+        'senior-pm',
+        'vc',
+        'cult-leader'
       ];
 
       expectedRoles.forEach(role => {
@@ -53,20 +53,7 @@ describe('Type & Data Structure Consistency', () => {
         expect(roleInfo).toBeDefined();
         expect(roleInfo.label).toBeTruthy();
         expect(roleInfo.description).toBeTruthy();
-        expect(roleInfo.category).toBeTruthy();
         expect(roleInfo.emoji).toBeTruthy();
-      });
-    });
-
-    it('should have valid category for each role', () => {
-      logStep('Checking role categories');
-
-      const validCategories: RoleCategory[] = ['executive', 'bigtech', 'startup', 'ic'];
-
-      Object.entries(DREAM_ROLES).forEach(([role, info]) => {
-        const isValidCategory = validCategories.includes(info.category);
-        logResult(`${role} category: ${info.category}`, isValidCategory ? 'valid' : 'INVALID');
-        expect(isValidCategory).toBe(true);
       });
     });
 
@@ -81,25 +68,14 @@ describe('Type & Data Structure Consistency', () => {
 
       expect(uniqueLabels.size).toBe(labels.length);
     });
-  });
 
-  describe('Role Categories', () => {
+    it('should have exactly 8 dream roles', () => {
+      logStep('Checking dream role count');
 
-    it('should have all categories defined with styling', () => {
-      logStep('Checking category styling definitions');
+      const roleCount = Object.keys(DREAM_ROLES).length;
+      logResult('Role count', roleCount);
 
-      const expectedCategories: RoleCategory[] = ['executive', 'bigtech', 'startup', 'ic'];
-
-      expectedCategories.forEach(category => {
-        const categoryInfo = ROLE_CATEGORIES[category];
-        logResult(`Category: ${category}`, categoryInfo ? `✓ ${categoryInfo.label}` : '✗ Missing!');
-
-        expect(categoryInfo).toBeDefined();
-        expect(categoryInfo.label).toBeTruthy();
-        expect(categoryInfo.color).toMatch(/^text-/);
-        expect(categoryInfo.bgColor).toMatch(/^bg-/);
-        expect(categoryInfo.borderColor).toMatch(/^border-/);
-      });
+      expect(roleCount).toBe(8);
     });
   });
 
@@ -200,7 +176,7 @@ describe('Type & Data Structure Consistency', () => {
 
       let issues = 0;
       Object.entries(DREAM_ROLES).forEach(([role, info]) => {
-        if (!info.label || !info.description || !info.category || !info.emoji) {
+        if (!info.label || !info.description || !info.emoji) {
           logError(`Role ${role}`, 'has missing fields');
           issues++;
         }
