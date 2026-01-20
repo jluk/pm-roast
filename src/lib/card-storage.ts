@@ -25,8 +25,8 @@ export async function storeCard(result: RoastResult, dreamRole: DreamRole): Prom
     createdAt: Date.now(),
   };
 
-  // Store in KV with 90 day expiration (in seconds)
-  await kv.set(`card:${cardId}`, JSON.stringify(storedCard), { ex: 90 * 24 * 60 * 60 });
+  // Store in KV with 30 day expiration (in seconds) to manage 256MB limit
+  await kv.set(`card:${cardId}`, JSON.stringify(storedCard), { ex: 30 * 24 * 60 * 60 });
 
   return cardId;
 }
