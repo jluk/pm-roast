@@ -140,6 +140,35 @@ export function PokemonCard({
   // Display name: use userName if available, otherwise archetype name
   const displayName = userName || archetypeName;
 
+  // Dynamic text sizing based on content length
+  const getDescriptionTextSize = (text: string, isCompact: boolean) => {
+    const len = text.length;
+    if (isCompact) {
+      if (len < 40) return "text-[11px]";
+      if (len < 70) return "text-[10px]";
+      if (len < 100) return "text-[9px]";
+      return "text-[8px]";
+    } else {
+      if (len < 40) return "text-sm";
+      if (len < 70) return "text-xs";
+      if (len < 100) return "text-[11px]";
+      return "text-[10px]";
+    }
+  };
+
+  const getMoveEffectTextSize = (text: string, isCompact: boolean) => {
+    const len = text.length;
+    if (isCompact) {
+      if (len < 30) return "text-[9px]";
+      if (len < 50) return "text-[8px]";
+      return "text-[7px]";
+    } else {
+      if (len < 30) return "text-xs";
+      if (len < 50) return "text-[11px]";
+      return "text-[10px]";
+    }
+  };
+
   return (
     <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"} rarity={rarity}>
       <div
@@ -277,7 +306,7 @@ export function PokemonCard({
                 </span>
                 {move.effect && (
                   <p
-                    className={`leading-tight mt-0.5 line-clamp-2 ${compact ? "text-[9px]" : "text-xs"}`}
+                    className={`leading-tight mt-0.5 ${getMoveEffectTextSize(move.effect, compact)}`}
                     style={{ color: elementData.textMuted }}
                   >
                     {move.effect}
@@ -299,11 +328,11 @@ export function PokemonCard({
         {/* Flavor Text / PM Descriptor */}
         {archetypeDescription && (
           <div
-            className={`${compact ? "mx-3 mb-2 px-2 py-1.5" : "mx-4 mb-3 px-3 py-2"} bg-white/50 rounded border overflow-hidden`}
-            style={{ borderColor: elementData.innerBorderColor }}
+            className={`${compact ? "mx-3 mb-2 px-2 py-2" : "mx-4 mb-3 px-3 py-2.5"} bg-white/50 rounded border overflow-hidden flex-1 flex items-center`}
+            style={{ borderColor: elementData.innerBorderColor, minHeight: compact ? "2.5rem" : "3rem" }}
           >
             <p
-              className={`italic text-center leading-snug line-clamp-2 ${compact ? "text-[10px]" : "text-xs"}`}
+              className={`italic text-center leading-snug w-full ${getDescriptionTextSize(archetypeDescription, compact)}`}
               style={{ color: elementData.textSecondary }}
             >
               {archetypeDescription}
