@@ -119,7 +119,7 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
               <span>Click outside to close</span>
             </motion.div>
 
-            {/* Flippable Card Container */}
+            {/* Flippable Card Container - fixed dimensions to prevent layout shift */}
             <motion.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -130,17 +130,28 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
                 handleModalClick();
               }}
               className="cursor-pointer"
-              style={{ perspective: "1000px" }}
+              style={{
+                perspective: "1000px",
+                // Full-size card dimensions (2.5:3.5 aspect ratio)
+                width: 360,
+                height: 504,
+              }}
             >
               <motion.div
                 animate={{ rotateY: isFlipped ? 180 : 0 }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                style={{ transformStyle: "preserve-3d" }}
+                style={{
+                  transformStyle: "preserve-3d",
+                  width: "100%",
+                  height: "100%",
+                  willChange: "transform",
+                }}
                 className="relative"
               >
                 {/* Front of card - always full size for readability */}
                 <div
                   ref={modalCardRef}
+                  className="absolute inset-0"
                   style={{
                     backfaceVisibility: "hidden",
                     WebkitBackfaceVisibility: "hidden",
@@ -164,7 +175,7 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
 
                 {/* Back of card - roast summary */}
                 <div
-                  className="absolute top-0 left-0"
+                  className="absolute inset-0"
                   style={{
                     backfaceVisibility: "hidden",
                     WebkitBackfaceVisibility: "hidden",

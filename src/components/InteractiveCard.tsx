@@ -64,12 +64,9 @@ export function InteractiveCard({
   }, [enableModal, isOpen, openModal, score, archetypeName, archetypeEmoji, archetypeDescription, archetypeImage, element, moves, stage, weakness, flavor, compact, userName, bangerQuote]);
 
   return (
-    <motion.div
+    <div
       onClick={handleClick}
       className="cursor-pointer"
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
     >
       <PokemonCard
         score={score}
@@ -85,7 +82,7 @@ export function InteractiveCard({
         compact={compact}
         userName={userName}
       />
-    </motion.div>
+    </div>
   );
 }
 
@@ -112,6 +109,10 @@ export function HeroCard() {
 
   const rarity = getCardRarity(heroData.score);
 
+  // Card dimensions for compact mode
+  const cardWidth = 300;
+  const cardHeight = cardWidth * 1.4; // 2.5:3.5 aspect ratio
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -123,7 +124,6 @@ export function HeroCard() {
       <motion.div
         animate={{
           opacity: [0.4, 0.7, 0.4],
-          scale: [1, 1.05, 1],
         }}
         transition={{
           duration: 3,
@@ -134,22 +134,30 @@ export function HeroCard() {
         style={{ transform: "scale(1.2)" }}
       />
 
-      {/* Card with click to flip */}
-      <motion.div
-        className="relative cursor-pointer"
-        style={{ perspective: "1000px" }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.98 }}
+      {/* Card with click to flip - fixed dimensions to prevent layout shift */}
+      <div
+        className="relative cursor-pointer select-none"
+        style={{
+          perspective: "1000px",
+          width: cardWidth,
+          height: cardHeight,
+        }}
         onClick={() => setIsFlipped(!isFlipped)}
       >
         <motion.div
           animate={{ rotateY: isFlipped ? 180 : 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          style={{ transformStyle: "preserve-3d" }}
+          style={{
+            transformStyle: "preserve-3d",
+            width: "100%",
+            height: "100%",
+            willChange: "transform",
+          }}
           className="relative"
         >
-          {/* Front */}
+          {/* Front - absolute positioned */}
           <div
+            className="absolute inset-0"
             style={{
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
@@ -170,9 +178,9 @@ export function HeroCard() {
             />
           </div>
 
-          {/* Back */}
+          {/* Back - absolute positioned, same size */}
           <div
-            className="absolute top-0 left-0"
+            className="absolute inset-0"
             style={{
               backfaceVisibility: "hidden",
               WebkitBackfaceVisibility: "hidden",
@@ -182,7 +190,7 @@ export function HeroCard() {
             <CardBack compact rarity={rarity} />
           </div>
         </motion.div>
-      </motion.div>
+      </div>
 
       {/* Click hint */}
       <motion.p
@@ -191,7 +199,7 @@ export function HeroCard() {
         transition={{ delay: 0.5 }}
         className="text-center text-xs text-muted-foreground mt-4"
       >
-        Click to flip
+        Tap to flip
       </motion.p>
     </motion.div>
   );

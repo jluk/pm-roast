@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 
 // Rarity tiers based on score
@@ -206,9 +206,18 @@ export function HoloCard({ children, className = "", rarity = "rare", holoEffect
     scale: 1,
   });
   const [isHovering, setIsHovering] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+
+  // Detect touch device on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setIsTouchDevice("ontouchstart" in window || navigator.maxTouchPoints > 0);
+    }
+  }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!cardRef.current) return;
+    // Skip hover effects on touch devices to prevent flickering
+    if (isTouchDevice || !cardRef.current) return;
 
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -231,7 +240,7 @@ export function HoloCard({ children, className = "", rarity = "rare", holoEffect
       glareY,
       scale: 1.05,
     });
-  }, []);
+  }, [isTouchDevice]);
 
   const handleMouseLeave = useCallback(() => {
     setIsHovering(false);
@@ -245,7 +254,21 @@ export function HoloCard({ children, className = "", rarity = "rare", holoEffect
   }, []);
 
   const handleMouseEnter = useCallback(() => {
+    // Skip hover effects on touch devices
+    if (isTouchDevice) return;
     setIsHovering(true);
+  }, [isTouchDevice]);
+
+  // Handle touch end to reset state and prevent stuck hover states
+  const handleTouchEnd = useCallback(() => {
+    setIsHovering(false);
+    setStyle({
+      rotateX: 0,
+      rotateY: 0,
+      glareX: 50,
+      glareY: 50,
+      scale: 1,
+    });
   }, []);
 
   return (
@@ -258,6 +281,7 @@ export function HoloCard({ children, className = "", rarity = "rare", holoEffect
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         onMouseEnter={handleMouseEnter}
+        onTouchEnd={handleTouchEnd}
         animate={{
           rotateX: style.rotateX,
           rotateY: style.rotateY,
