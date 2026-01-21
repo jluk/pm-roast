@@ -265,27 +265,26 @@ Get your PM card: ${shareUrl}
         </motion.div>
 
         {/* Right: Bento Glass Tiles - justify-between for flush alignment with card */}
-        <div className="flex flex-col gap-4 w-full lg:flex-1 lg:h-[560px] lg:justify-between">
-          {/* Tile 1: PM Capabilities - FIFA-style stats */}
+        <div className="flex flex-col gap-3 w-full lg:flex-1 lg:h-[560px] lg:justify-between">
+          {/* Tile 1: PM Capabilities - Compact stats */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
-            className="relative group"
+            className="relative group shrink-0"
           >
             <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-blue-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            <div className="relative p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-white/50 uppercase tracking-wider">PM Capabilities</span>
+            <div className="relative p-4 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs text-white/50 uppercase tracking-wider">PM Capabilities</span>
                 <span className={`text-xs px-2 py-0.5 rounded-full ${rarityInfo.color} bg-white/5`}>
                   {rarityInfo.label}
                 </span>
               </div>
-              <div className="space-y-3">
-                {/* Product Sense */}
-                <div className="flex items-center gap-3">
-                  <div className="w-24 text-sm text-white font-medium">Product Sense</div>
-                  <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="w-20 text-xs text-white font-medium">Product Sense</div>
+                  <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${result.capabilities.productSense}%` }}
@@ -293,12 +292,11 @@ Get your PM card: ${shareUrl}
                       className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
                     />
                   </div>
-                  <span className="w-8 text-right font-mono text-sm text-white/80">{result.capabilities.productSense}</span>
+                  <span className="w-6 text-right font-mono text-xs text-white/80">{result.capabilities.productSense}</span>
                 </div>
-                {/* Execution */}
-                <div className="flex items-center gap-3">
-                  <div className="w-24 text-sm text-white font-medium">Execution</div>
-                  <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="flex items-center gap-2">
+                  <div className="w-20 text-xs text-white font-medium">Execution</div>
+                  <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${result.capabilities.execution}%` }}
@@ -306,12 +304,11 @@ Get your PM card: ${shareUrl}
                       className="h-full bg-gradient-to-r from-emerald-500 to-teal-500"
                     />
                   </div>
-                  <span className="w-8 text-right font-mono text-sm text-white/80">{result.capabilities.execution}</span>
+                  <span className="w-6 text-right font-mono text-xs text-white/80">{result.capabilities.execution}</span>
                 </div>
-                {/* Leadership */}
-                <div className="flex items-center gap-3">
-                  <div className="w-24 text-sm text-white font-medium">Leadership</div>
-                  <div className="flex-1 h-2 bg-white/10 rounded-full overflow-hidden">
+                <div className="flex items-center gap-2">
+                  <div className="w-20 text-xs text-white font-medium">Leadership</div>
+                  <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${result.capabilities.leadership}%` }}
@@ -319,100 +316,156 @@ Get your PM card: ${shareUrl}
                       className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
                     />
                   </div>
-                  <span className="w-8 text-right font-mono text-sm text-white/80">{result.capabilities.leadership}</span>
+                  <span className="w-6 text-right font-mono text-xs text-white/80">{result.capabilities.leadership}</span>
                 </div>
               </div>
             </div>
           </motion.div>
 
-          {/* Tile 2: Banger Quote - Fades in last */}
+          {/* Tile 2: The Roast - Combined banger quote + roast bullets */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 0.5, ease: "easeOut" }}
-            className="relative group"
+            className="relative group flex-1 min-h-0"
           >
             <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/20 via-red-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            <div className="relative p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl">
-              <div className="flex items-start gap-3">
-                <svg className="w-4 h-4 text-orange-400 shrink-0 mt-1" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
-                </svg>
-                <p className="text-[15px] text-white/90 font-medium leading-relaxed">
-                  {stripMarkdown(result.bangerQuote)}
-                </p>
+            <div className="relative h-full rounded-2xl bg-black/40 backdrop-blur-xl border border-orange-500/20 shadow-xl overflow-hidden flex flex-col">
+              {/* Singed gradient accent line */}
+              <div className="h-[2px] bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 shrink-0" />
+
+              <div className="p-4 flex-1 overflow-y-auto min-h-0">
+                {/* Header */}
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
+                    <svg className="w-3.5 h-3.5 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.5 1.5-4.5 3-6.5s3-4.5 3-7.5c0 0 1 2 2 4 .5-1 1-2 1-3 2.5 3.5 5 6.5 5 13 0 3.866-3.134 7-7 7zm0-2c2.761 0 5-2.239 5-5 0-2.5-1.5-5-3-7-.5 1-1 2-2 3-.5-1-1-2-1.5-3-1 1.5-2.5 3.5-2.5 7 0 2.761 2.239 5 5 5z"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-sm font-semibold text-white">The Roast</h3>
+                </div>
+
+                {/* Banger Quote */}
+                <div className="flex items-start gap-2 mb-4 p-2 rounded-lg bg-white/[0.03]">
+                  <svg className="w-3.5 h-3.5 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+                  </svg>
+                  <p className="text-sm text-white/90 font-medium leading-relaxed">
+                    {stripMarkdown(result.bangerQuote)}
+                  </p>
+                </div>
+
+                {/* Roast bullets */}
+                <div className="space-y-2">
+                  {result.roastBullets.slice(1).map((bullet, index) => {
+                    const heatLevel = index === 0 ? 3 : index === 1 ? 2 : 1;
+                    return (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.6 + index * 0.1 }}
+                        className="flex gap-2 items-start p-2 rounded-lg hover:bg-white/[0.02] transition-all duration-300"
+                      >
+                        {/* Heat Meter - compact */}
+                        <div className="flex flex-col gap-0.5 shrink-0 mt-1">
+                          {[3, 2, 1].map((level) => (
+                            <div
+                              key={level}
+                              className={`w-2 h-1 rounded-sm transition-all ${
+                                level <= heatLevel
+                                  ? level === 3
+                                    ? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.6)]"
+                                    : level === 2
+                                      ? "bg-orange-500 shadow-[0_0_3px_rgba(249,115,22,0.5)]"
+                                      : "bg-amber-500"
+                                  : "bg-zinc-700/50"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-xs text-zinc-300/90 leading-relaxed">
+                          {stripMarkdown(bullet)}
+                        </p>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+
+                {/* Natural Rival */}
+                {result.naturalRival && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.9 }}
+                    className="mt-3 pt-3 border-t border-white/[0.06]"
+                  >
+                    <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-md bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                        <svg className="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wider text-red-400/70 font-medium mb-0.5">Natural Rival</p>
+                        <p className="text-xs text-white/80 italic">
+                          &ldquo;{result.naturalRival}&rdquo;
+                        </p>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
               </div>
             </div>
           </motion.div>
 
-          {/* Tile 3: CTA Buttons - Bounces at end */}
+          {/* Tile 3: CTA Buttons - Compact */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.7, type: "spring", stiffness: 200, damping: 15 }}
-            className="relative group"
+            className="relative group shrink-0"
           >
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            <div className="relative p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl space-y-3">
+            <div className="relative p-3 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl space-y-2">
               {/* Share to X - Primary CTA */}
-              <div className="relative group/share">
-                <motion.button
-                  onClick={shareToTwitter}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full h-12 px-6 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                  </svg>
-                  <span>Share on X</span>
-                </motion.button>
-
-                {/* Tweet preview tooltip */}
-                <div className="absolute top-full left-0 right-0 mt-3 opacity-0 group-hover/share:opacity-100 transition-all duration-200 pointer-events-none -translate-y-2 group-hover/share:translate-y-0 z-10">
-                  <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 bg-black/95 border-l border-t border-white/20 transform rotate-45" />
-                  <div className="p-4 rounded-xl bg-black/95 border border-white/20 shadow-2xl backdrop-blur-sm">
-                    <div className="flex items-start gap-3 mb-3">
-                      <svg className="w-5 h-5 text-white/60 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                      </svg>
-                      <p className="text-sm text-white/90 leading-relaxed">
-                        PM Roast said I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; ({rarityInfo.label} card)<br /><br />&quot;{result.bangerQuote}&quot;<br /><br />Brutal but fair. What&apos;s your PM archetype?
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-xs text-white/50 border-t border-white/10 pt-3">
-                      <span className="px-2 py-0.5 rounded bg-white/10">Preview</span>
-                      <span>Click button to post</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <motion.button
+                onClick={shareToTwitter}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full h-10 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
+              >
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+                <span>Share on X</span>
+              </motion.button>
 
               {/* Secondary buttons */}
               <div className="flex gap-2">
                 <button
                   onClick={downloadCard}
-                  className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors"
+                  className="flex-1 h-9 px-3 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-white/[0.08] transition-colors"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   Save
                 </button>
                 <button
                   onClick={copyLink}
-                  className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors"
+                  className="flex-1 h-9 px-3 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-white/[0.08] transition-colors"
                 >
                   {copied ? (
                     <>
-                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       Copied!
                     </>
                   ) : (
                     <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
                       Link
@@ -421,7 +474,7 @@ Get your PM card: ${shareUrl}
                 </button>
                 <button
                   onClick={onStartOver}
-                  className={`flex-1 h-10 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+                  className={`flex-1 h-9 px-3 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
                     isSharePage
                       ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#5558e3] hover:to-[#7c4fe0]"
                       : "bg-white/[0.05] border border-white/10 text-white/70 hover:bg-white/[0.08]"
@@ -430,13 +483,13 @@ Get your PM card: ${shareUrl}
                   {isSharePage ? (
                     <>
                       Get Yours
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                       </svg>
                     </>
                   ) : (
                     <>
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
                       New
@@ -448,100 +501,6 @@ Get your PM card: ${shareUrl}
           </motion.div>
         </div>
       </div>
-
-      {/* The Roast - Singed Dark Theme */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-        className="relative mt-8 pt-8 border-t border-white/5"
-      >
-        {/* Ember glow effect */}
-        <div className="absolute -inset-1 top-8 bg-gradient-to-r from-orange-600/15 via-red-600/10 to-orange-600/15 rounded-2xl blur-2xl pointer-events-none" />
-
-        <div className="relative rounded-2xl bg-black/40 backdrop-blur-xl border border-orange-500/20 overflow-hidden">
-          {/* Singed gradient accent line - ember colors */}
-          <div className="h-[2px] bg-gradient-to-r from-orange-600 via-red-500 to-orange-600" />
-
-          <div className="px-8 py-8">
-            {/* Header with flame icon */}
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
-                <svg className="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.5 1.5-4.5 3-6.5s3-4.5 3-7.5c0 0 1 2 2 4 .5-1 1-2 1-3 2.5 3.5 5 6.5 5 13 0 3.866-3.134 7-7 7zm0-2c2.761 0 5-2.239 5-5 0-2.5-1.5-5-3-7-.5 1-1 2-2 3-.5-1-1-2-1.5-3-1 1.5-2.5 3.5-2.5 7 0 2.761 2.239 5 5 5z"/>
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-white">The Roast</h3>
-              <span className="text-xs text-orange-400/60 uppercase tracking-wider ml-auto">Brutal Truths</span>
-            </div>
-
-            {/* Roast bullets with Heat Meter - skip first bullet as it's shown as bangerQuote */}
-            <div className="space-y-5">
-              {result.roastBullets.slice(1).map((bullet, index) => {
-                // Heat level decreases as we go down
-                const heatLevel = index === 0 ? 3 : index === 1 ? 2 : 1;
-
-                return (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.8 + index * 0.1 }}
-                    className="flex gap-4 items-start p-3 rounded-lg hover:bg-white/[0.02] transition-all duration-300"
-                  >
-                    {/* Heat Meter - 3 flame bars */}
-                    <div className="flex flex-col gap-0.5 shrink-0 mt-1">
-                      {[3, 2, 1].map((level) => (
-                        <div
-                          key={level}
-                          className={`w-3 h-1.5 rounded-sm transition-all ${
-                            level <= heatLevel
-                              ? level === 3
-                                ? "bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.6)]"
-                                : level === 2
-                                  ? "bg-orange-500 shadow-[0_0_4px_rgba(249,115,22,0.5)]"
-                                  : "bg-amber-500"
-                              : "bg-zinc-700/50"
-                          }`}
-                        />
-                      ))}
-                    </div>
-
-                    {/* Roast text */}
-                    <p className="text-[15px] text-zinc-300/90 leading-relaxed">
-                      {stripMarkdown(bullet)}
-                    </p>
-                  </motion.div>
-                );
-              })}
-            </div>
-
-            {/* Natural Rival */}
-            {result.naturalRival && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 1.1 }}
-                className="mt-8 pt-6 border-t border-white/[0.06]"
-              >
-                <div className="flex items-start gap-4">
-                  <div className="w-6 h-6 rounded-md bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
-                    <svg className="w-3.5 h-3.5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-xs uppercase tracking-wider text-red-400/70 font-medium mb-1">Natural Rival</p>
-                    <p className="text-[15px] text-white/80 italic">
-                      &ldquo;{result.naturalRival}&rdquo;
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      </motion.div>
 
       {/* Growth Plan - Premium Glassmorphism */}
       <motion.div
