@@ -985,19 +985,19 @@ export default function Home() {
           {/* Center: Navigation Links */}
           <div className="hidden sm:flex items-center gap-1">
             <a
-              href="#roast-me"
+              href="/#roast-me"
               className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all"
             >
               Roast Me
             </a>
             <a
-              href="#mt-roastmore"
+              href="/#mt-roastmore"
               className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all"
             >
               Mt. Roastmore
             </a>
             <a
-              href="#archetypes"
+              href="/#archetypes"
               className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all"
             >
               Archetypes

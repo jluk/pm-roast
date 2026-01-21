@@ -84,10 +84,31 @@ export function SharePageClient({ card, encodedData }: SharePageClientProps) {
     <main className="min-h-screen flex flex-col">
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-6 h-14 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <a href="/" className="font-semibold tracking-tight hover:opacity-80 transition-opacity">
             PM Roast
           </a>
+          {/* Center: Navigation Links */}
+          <div className="hidden sm:flex items-center gap-1">
+            <a
+              href="/#roast-me"
+              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all"
+            >
+              Roast Me
+            </a>
+            <a
+              href="/#mt-roastmore"
+              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all"
+            >
+              Mt. Roastmore
+            </a>
+            <a
+              href="/#archetypes"
+              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all"
+            >
+              Archetypes
+            </a>
+          </div>
           <span className="text-xs text-muted-foreground">Powered by Gemini</span>
         </div>
       </nav>
