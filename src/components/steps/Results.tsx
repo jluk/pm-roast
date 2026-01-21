@@ -266,63 +266,7 @@ Get your PM card: ${shareUrl}
 
         {/* Right: Bento Glass Tiles - justify-between for flush alignment with card */}
         <div className="flex flex-col gap-3 w-full lg:flex-1 lg:h-[560px] lg:justify-between">
-          {/* Tile 1: PM Capabilities - Compact stats */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3, type: "spring", stiffness: 100 }}
-            className="relative group shrink-0"
-          >
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-500/20 via-cyan-500/20 to-blue-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            <div className="relative p-4 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-xs text-white/50 uppercase tracking-wider">PM Capabilities</span>
-                <span className={`text-xs px-2 py-0.5 rounded-full ${rarityInfo.color} bg-white/5`}>
-                  {rarityInfo.label}
-                </span>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-20 text-xs text-white font-medium">Product Sense</div>
-                  <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${result.capabilities.productSense}%` }}
-                      transition={{ delay: 0.3, duration: 0.8, ease: "easeOut" }}
-                      className="h-full bg-gradient-to-r from-cyan-500 to-blue-500"
-                    />
-                  </div>
-                  <span className="w-6 text-right font-mono text-xs text-white/80">{result.capabilities.productSense}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 text-xs text-white font-medium">Execution</div>
-                  <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${result.capabilities.execution}%` }}
-                      transition={{ delay: 0.5, duration: 0.8, ease: "easeOut" }}
-                      className="h-full bg-gradient-to-r from-emerald-500 to-teal-500"
-                    />
-                  </div>
-                  <span className="w-6 text-right font-mono text-xs text-white/80">{result.capabilities.execution}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-20 text-xs text-white font-medium">Leadership</div>
-                  <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${result.capabilities.leadership}%` }}
-                      transition={{ delay: 0.7, duration: 0.8, ease: "easeOut" }}
-                      className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
-                    />
-                  </div>
-                  <span className="w-6 text-right font-mono text-xs text-white/80">{result.capabilities.leadership}</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Tile 2: The Roast - Combined banger quote + roast bullets */}
+          {/* The Roast - Combined banger quote + roast bullets */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
