@@ -372,84 +372,104 @@ Get your PM card: ${shareUrl}
             </motion.div>
           )}
 
-          {/* CTA Buttons - Optimized */}
+          {/* CTA Buttons - with hover preview */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.7, type: "spring", stiffness: 200, damping: 15 }}
             className="relative group shrink-0"
           >
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            <div className="relative p-3 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl">
-              {/* Primary row: Share on X + Get Yours (on share pages) */}
-              <div className="flex gap-2">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="relative p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl space-y-3">
+              {/* Share to X - Primary CTA */}
+              <div className="relative group/share">
                 <motion.button
                   onClick={shareToTwitter}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex-1 h-11 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
+                  className="w-full h-12 px-6 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
                   <span>Share on X</span>
                 </motion.button>
-                {isSharePage && (
-                  <motion.button
-                    onClick={onStartOver}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="h-11 px-5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
-                  >
-                    Get Yours
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </motion.button>
-                )}
+
+                {/* Tweet preview tooltip */}
+                <div className="absolute top-full left-0 right-0 mt-3 opacity-0 group-hover/share:opacity-100 transition-all duration-200 pointer-events-none -translate-y-2 group-hover/share:translate-y-0 z-10">
+                  <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-3 bg-black/95 border-l border-t border-white/20 transform rotate-45" />
+                  <div className="p-4 rounded-xl bg-black/95 border border-white/20 shadow-2xl backdrop-blur-sm">
+                    <div className="flex items-start gap-3 mb-3">
+                      <svg className="w-5 h-5 text-white/60 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                      <p className="text-sm text-white/90 leading-relaxed">
+                        PM Roast said I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; ({rarityInfo.label} card)<br /><br />&quot;{result.bangerQuote}&quot;<br /><br />Brutal but fair. What&apos;s your PM archetype?
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-white/50 border-t border-white/10 pt-3">
+                      <span className="px-2 py-0.5 rounded bg-white/10">Preview</span>
+                      <span>Click button to post</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              {/* Secondary row: Icon-only Save, Link, and New (non-share pages) */}
-              <div className="flex gap-2 mt-2">
+              {/* Secondary buttons */}
+              <div className="flex gap-2">
                 <button
                   onClick={downloadCard}
-                  title="Save card"
-                  className="h-9 w-9 rounded-lg bg-white/[0.05] border border-white/10 text-white/60 flex items-center justify-center hover:bg-white/[0.08] hover:text-white/80 transition-all"
+                  className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
+                  Save
                 </button>
                 <button
                   onClick={copyLink}
-                  title={copied ? "Copied!" : "Copy link"}
-                  className={`h-9 w-9 rounded-lg border flex items-center justify-center transition-all ${
-                    copied
-                      ? "bg-green-500/20 border-green-500/30 text-green-400"
-                      : "bg-white/[0.05] border-white/10 text-white/60 hover:bg-white/[0.08] hover:text-white/80"
-                  }`}
+                  className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors"
                 >
                   {copied ? (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
+                    <>
+                      <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      Copied!
+                    </>
                   ) : (
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-                    </svg>
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Link
+                    </>
                   )}
                 </button>
-                {!isSharePage && (
-                  <button
-                    onClick={onStartOver}
-                    title="Start new roast"
-                    className="h-9 w-9 rounded-lg bg-white/[0.05] border border-white/10 text-white/60 flex items-center justify-center hover:bg-white/[0.08] hover:text-white/80 transition-all"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                  </button>
-                )}
+                <button
+                  onClick={onStartOver}
+                  className={`flex-1 h-10 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+                    isSharePage
+                      ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#5558e3] hover:to-[#7c4fe0]"
+                      : "bg-white/[0.05] border border-white/10 text-white/70 hover:bg-white/[0.08]"
+                  }`}
+                >
+                  {isSharePage ? (
+                    <>
+                      Get Yours
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      New
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </motion.div>
