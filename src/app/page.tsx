@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -83,6 +83,41 @@ export default function Home() {
   const [userProfileImage, setUserProfileImage] = useState<File | null>(null);
   const [userProfileImagePreview, setUserProfileImagePreview] = useState<string | null>(null);
   const [isImageDragging, setIsImageDragging] = useState(false);
+
+  // Active navigation section tracking
+  const [activeSection, setActiveSection] = useState<string>("roast-me");
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Set up Intersection Observer for nav section tracking
+  useEffect(() => {
+    const sections = ["roast-me", "mt-roastmore", "archetypes"];
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      {
+        rootMargin: "-20% 0px -70% 0px", // Trigger when section is in top 30% of viewport
+        threshold: 0,
+      }
+    );
+
+    // Observe all sections
+    sections.forEach((sectionId) => {
+      const element = document.getElementById(sectionId);
+      if (element) {
+        observerRef.current?.observe(element);
+      }
+    });
+
+    return () => {
+      observerRef.current?.disconnect();
+    };
+  }, []);
 
   // LinkedIn preview state
   const [linkedinPreview, setLinkedinPreview] = useState<{
@@ -986,19 +1021,31 @@ export default function Home() {
           <div className="hidden sm:flex items-center gap-1">
             <a
               href="/#roast-me"
-              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all"
+              className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
+                activeSection === "roast-me"
+                  ? "text-foreground bg-white/5 border-b-2 border-indigo-500"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+              }`}
             >
               Roast Me
             </a>
             <a
               href="/#mt-roastmore"
-              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all"
+              className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
+                activeSection === "mt-roastmore"
+                  ? "text-foreground bg-white/5 border-b-2 border-indigo-500"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+              }`}
             >
               Mt. Roastmore
             </a>
             <a
               href="/#archetypes"
-              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all"
+              className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
+                activeSection === "archetypes"
+                  ? "text-foreground bg-white/5 border-b-2 border-indigo-500"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+              }`}
             >
               Archetypes
             </a>

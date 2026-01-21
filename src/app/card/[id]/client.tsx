@@ -23,11 +23,11 @@ export function CardPageClient({ result, dreamRole, cardId }: CardPageClientProp
           <a href="/" className="font-semibold tracking-tight hover:opacity-80 transition-opacity">
             PM Roast
           </a>
-          {/* Center: Navigation Links */}
+          {/* Center: Navigation Links - "Roast Me" is active since user just finished a roast */}
           <div className="hidden sm:flex items-center gap-1">
             <a
               href="/#roast-me"
-              className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-all"
+              className="px-3 py-1.5 text-sm text-foreground bg-white/5 border-b-2 border-indigo-500 rounded-lg transition-all"
             >
               Roast Me
             </a>
