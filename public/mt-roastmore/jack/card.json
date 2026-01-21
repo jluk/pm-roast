@@ -1,0 +1,28 @@
+{
+  "id": "jack-dorsey",
+  "name": "Jack Dorsey",
+  "title": "Former CEO & Founder",
+  "company": "Twitter / Block",
+  "imageUrl": "/mt-roastmore/jack/jack.png",
+  "score": 85,
+  "archetypeName": "The Zen Billionaire",
+  "archetypeEmoji": "🧘",
+  "archetypeDescription": "Meditates for 2 hours daily while his platforms burn. Namaste.",
+  "element": "vision",
+  "moves": [
+    { "name": "Silent Retreat", "energyCost": 2, "damage": 50, "effect": "Disappears for a month, company continues without noticing" },
+    { "name": "Bitcoin Maximalism", "energyCost": 3, "damage": 85, "effect": "Converts opponent's treasury to BTC" },
+    { "name": "Edit Button Denial", "energyCost": 1, "damage": 40, "effect": "Refuses to add obvious feature for 15 years" }
+  ],
+  "stage": "Elite",
+  "weakness": "Moderation decisions",
+  "flavor": "Built a platform for free speech, then spent a decade trying to figure out what that means.",
+  "bangerQuote": "Ran two public companies part-time while doing ice baths and fasting. Peak Silicon Valley monk energy.",
+  "naturalRival": "Anyone who asks why Twitter didn't have an edit button for 16 years",
+  "roastBullets": [
+    "Was CEO of two companies simultaneously and both somehow felt neglected",
+    "His content moderation strategy was 'meditate on it and hope it goes away'",
+    "Sold Twitter to Elon, then spent the next year subtweeting about how it's being run",
+    "Walks to work barefoot, eats one meal a day, and wonders why people think he's out of touch"
+  ]
+}

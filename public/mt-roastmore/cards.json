@@ -1,0 +1,287 @@
+{
+  "title": "Mt. Roastmore",
+  "description": "The legends immortalized in roast. Pre-generated cards for famous tech leaders.",
+  "disclaimer": "These are fictional roasts for entertainment purposes only.",
+  "cards": [
+    {
+      "id": "brian-chesky",
+      "name": "Brian Chesky",
+      "title": "CEO & Co-founder",
+      "company": "Airbnb",
+      "imageUrl": "/famous/generated/brian-card.png",
+      "score": 94,
+      "archetypeName": "The Design Dictator",
+      "archetypeEmoji": "🎨",
+      "archetypeDescription": "Believes every problem can be solved with better typography and a 47-slide deck about 'belonging'",
+      "element": "vision",
+      "moves": [
+        { "name": "Founder Mode Activate", "energyCost": 2, "damage": 60, "effect": "Bypasses all middle management" },
+        { "name": "Pixel Perfect Rage", "energyCost": 3, "damage": 80, "effect": "Redesigns opponent's entire product roadmap" },
+        { "name": "Snow White Strategy", "energyCost": 4, "damage": 120, "effect": "Storyboards the competition into oblivion" }
+      ],
+      "stage": "Legendary",
+      "weakness": "Hotels",
+      "flavor": "Once redesigned an air mattress into a $100B company. Still thinks he could've made the mattress better.",
+      "bangerQuote": "Your Figma skills are not a substitute for a business model, but damn if Brian didn't prove otherwise.",
+      "naturalRival": "Marriott's entire marketing budget",
+      "roastBullets": [
+        "Turned 'strangers sleeping in your house' from a horror movie plot into a $100B company",
+        "Has definitely fired someone over font kerning",
+        "The only CEO who treats every all-hands like a TED talk about the meaning of human connection",
+        "Invented 'Founder Mode' because 'micromanaging with charisma' didn't fit on the blog post title"
+      ]
+    },
+    {
+      "id": "demis-hassabis",
+      "name": "Demis Hassabis",
+      "title": "CEO & Co-founder",
+      "company": "Google DeepMind",
+      "imageUrl": "/famous/generated/demis-card.png",
+      "score": 99,
+      "archetypeName": "The Galaxy Brain",
+      "archetypeEmoji": "🧠",
+      "archetypeDescription": "Solving intelligence so he can finally have someone smart enough to talk to",
+      "element": "data",
+      "moves": [
+        { "name": "Chess Grandmaster Stare", "energyCost": 1, "damage": 40, "effect": "Makes opponent question their IQ" },
+        { "name": "Nobel Prize Drop", "energyCost": 3, "damage": 100, "effect": "Stuns all critics for 3 turns" },
+        { "name": "AlphaFold Flex", "energyCost": 4, "damage": 150, "effect": "Solves opponent's entire industry" }
+      ],
+      "stage": "Mythical",
+      "weakness": "Small talk",
+      "flavor": "Built an AI that beat Go champions, solved protein folding, and still somehow has to explain to his parents what he does.",
+      "bangerQuote": "Won a Nobel Prize for AI and still gets asked 'but can it write my emails?' at dinner parties.",
+      "naturalRival": "Anyone who says 'AGI is just hype'",
+      "roastBullets": [
+        "Casually revolutionized biology between chess tournaments",
+        "Has a Nobel Prize and a Nature paper but LinkedIn still suggests he 'complete his profile'",
+        "The only person whose 'I was a child prodigy' story is somehow underselling it",
+        "Solved protein folding but still can't solve why Google keeps killing his favorite products"
+      ]
+    },
+    {
+      "id": "lenny-rachitsky",
+      "name": "Lenny Rachitsky",
+      "title": "Newsletter Guy",
+      "company": "Lenny's Newsletter",
+      "imageUrl": "/famous/generated/lenny-card.png",
+      "score": 88,
+      "archetypeName": "The PM Whisperer",
+      "archetypeEmoji": "🎙️",
+      "archetypeDescription": "Turned 'I got laid off from Airbnb' into a media empire by asking other PMs about their frameworks",
+      "element": "strategy",
+      "moves": [
+        { "name": "Podcast Plug", "energyCost": 1, "damage": 30, "effect": "Gains 10K subscribers" },
+        { "name": "Framework Overload", "energyCost": 2, "damage": 60, "effect": "Buries opponent in 2x2 matrices" },
+        { "name": "Benchmark Blast", "energyCost": 3, "damage": 90, "effect": "Makes opponent feel inadequate about their metrics" }
+      ],
+      "stage": "Elite",
+      "weakness": "Original thought",
+      "flavor": "Interviewed every PM who ever shipped anything, synthesized it into frameworks, and now every PM sounds exactly the same. You're welcome.",
+      "bangerQuote": "Made more money asking 'what metrics do you track?' than most PMs make actually tracking metrics.",
+      "naturalRival": "PMs with actual opinions",
+      "roastBullets": [
+        "Became the most influential PM by... not being a PM anymore",
+        "Has asked 'what's your framework for X' so many times it's now his actual personality",
+        "The only person who can make 'I aggregate other people's insights' sound like thought leadership",
+        "Proof that the best career move in product is to stop doing product and just talk about it"
+      ]
+    },
+    {
+      "id": "reid-hoffman",
+      "name": "Reid Hoffman",
+      "title": "Partner & LinkedIn Guy",
+      "company": "Greylock Partners",
+      "imageUrl": "/famous/generated/reid-card.png",
+      "score": 91,
+      "archetypeName": "The Network Node",
+      "archetypeEmoji": "🕸️",
+      "archetypeDescription": "Built the world's largest professional cringe repository and somehow made billions",
+      "element": "politics",
+      "moves": [
+        { "name": "LinkedIn Connection", "energyCost": 1, "damage": 20, "effect": "Forces opponent to accept unwanted networking request" },
+        { "name": "Board Seat Shuffle", "energyCost": 3, "damage": 80, "effect": "Appears on opponent's cap table" },
+        { "name": "Blitzscaling Bomb", "energyCost": 4, "damage": 130, "effect": "Burns cash faster than opponent can react" }
+      ],
+      "stage": "Legendary",
+      "weakness": "AI ethics questions",
+      "flavor": "Created a platform where people unironically write 'I'm humbled to announce' and it's worth more than most countries.",
+      "bangerQuote": "Invented the place where your weird uncle posts motivational quotes next to crypto scams, and VCs call it 'professional networking'.",
+      "naturalRival": "Twitter/X stealing his thought leaders",
+      "roastBullets": [
+        "Made a website for job hunting and somehow it became a platform for people to write 5-paragraph posts about being fired",
+        "The godfather of 'agree?' posts",
+        "Blitzscaled his way through every ethical question by just going faster",
+        "Wrote a book about networks and then invested in AI that might make networks obsolete"
+      ]
+    },
+    {
+      "id": "justin-luk",
+      "name": "Justin Luk",
+      "title": "PM / Indie Hacker",
+      "company": "Shipping Side Projects",
+      "imageUrl": "/famous/generated/justin-card.png",
+      "score": 72,
+      "archetypeName": "The Chronic Shipper",
+      "archetypeEmoji": "🚢",
+      "archetypeDescription": "Has 47 side projects, 3 users (all his mom), and calls himself a 'founder'",
+      "element": "shipping",
+      "moves": [
+        { "name": "Scope Creep Strike", "energyCost": 1, "damage": 30, "effect": "Adds 'just one more thing' to any project" },
+        { "name": "Weekend Deploy", "energyCost": 2, "damage": 50, "effect": "Ships feature nobody asked for" },
+        { "name": "Hacker News Hype", "energyCost": 3, "damage": 70, "effect": "Gets 100 upvotes, 0 signups" }
+      ],
+      "stage": "Senior",
+      "weakness": "Marketing",
+      "flavor": "Spends more time setting up the perfect dev environment than actually building products. The README is always immaculate though.",
+      "bangerQuote": "Built a roast app instead of doing his actual job. Honestly, respect.",
+      "naturalRival": "That guy who shipped the same idea but with VC funding",
+      "roastBullets": [
+        "Portfolio website lists 12 projects, 11 are 'currently in stealth mode' (abandoned)",
+        "Bio says 'building in public' but the public is just his Twitter followers who are also building in public",
+        "The Venn diagram of 'things Justin has shipped' and 'things with users' is two separate circles",
+        "Created PM Roast to roast others, didn't realize the algorithm would roast him back"
+      ]
+    },
+    {
+      "id": "elon-musk",
+      "name": "Elon Musk",
+      "title": "Chief Twit / Technoking",
+      "company": "Tesla / SpaceX / X",
+      "imageUrl": "/famous/generated/elon-card.png",
+      "score": 97,
+      "archetypeName": "The Chaos Emperor",
+      "archetypeEmoji": "🚀",
+      "archetypeDescription": "Runs 5 companies, posts at 3am, and somehow convinced people that sleeping at the office is sigma behavior",
+      "element": "chaos",
+      "moves": [
+        { "name": "3AM Tweet Storm", "energyCost": 1, "damage": 45, "effect": "Tanks own stock price, confuses everyone" },
+        { "name": "Mass Layoff", "energyCost": 2, "damage": 80, "effect": "Reduces opponent's team by 80%" },
+        { "name": "First Principles Rant", "energyCost": 4, "damage": 150, "effect": "Makes opponent question everything they know" }
+      ],
+      "stage": "Mythical",
+      "weakness": "Regulators",
+      "flavor": "The only man who can mass layoff an entire company and have people thank him for it.",
+      "bangerQuote": "Bought Twitter to fix free speech, turned it into the world's most expensive shitposting platform.",
+      "naturalRival": "The SEC, sleep, and anyone who asks about Cybertruck windows",
+      "roastBullets": [
+        "Paid $44 billion for a website, immediately made it worth $12 billion, called it a win",
+        "Has 11 kids but still finds time to post memes at 2am like a teenager",
+        "Promised self-driving cars by 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024... any day now",
+        "The only CEO whose HR strategy is 'tweet something wild and see who quits'"
+      ]
+    },
+    {
+      "id": "mark-zuckerberg",
+      "name": "Mark Zuckerberg",
+      "title": "CEO & Founder",
+      "company": "Meta",
+      "imageUrl": "/famous/generated/mark-card.png",
+      "score": 93,
+      "archetypeName": "The Metaverse Missionary",
+      "archetypeEmoji": "🤖",
+      "archetypeDescription": "Spent $50B trying to make people wear VR headsets to attend meetings they already hate",
+      "element": "data",
+      "moves": [
+        { "name": "Congressional Testimony", "energyCost": 1, "damage": 30, "effect": "Drinks water robotically, survives another hearing" },
+        { "name": "Privacy Pivot", "energyCost": 2, "damage": 70, "effect": "Harvests opponent's data while apologizing" },
+        { "name": "Metaverse Rebrand", "energyCost": 4, "damage": 100, "effect": "Changes company name, nothing else changes" }
+      ],
+      "stage": "Legendary",
+      "weakness": "Human emotions",
+      "flavor": "Started by rating college girls, now rates your grandma's engagement metrics.",
+      "bangerQuote": "Convinced 3 billion people to give him their data, then wondered why they don't trust him.",
+      "naturalRival": "Apple's privacy features and anyone who asks him to smile naturally",
+      "roastBullets": [
+        "Renamed the company 'Meta' so people would stop calling him the Facebook guy. It didn't work.",
+        "His Senate testimony water-drinking technique has been studied by robots learning human behavior",
+        "Spent more on the metaverse than NASA's entire annual budget, created Wii avatars with legs",
+        "The only billionaire who looks more comfortable fighting in a cage than making small talk"
+      ]
+    },
+    {
+      "id": "dario-amodei",
+      "name": "Dario Amodei",
+      "title": "CEO & Co-founder",
+      "company": "Anthropic",
+      "imageUrl": "/famous/generated/dario-card.png",
+      "score": 96,
+      "archetypeName": "The Safety Sage",
+      "archetypeEmoji": "🛡️",
+      "archetypeDescription": "Left OpenAI because it wasn't safe enough, immediately built an even more powerful AI",
+      "element": "strategy",
+      "moves": [
+        { "name": "Safety Theater", "energyCost": 2, "damage": 60, "effect": "Publishes 50-page paper explaining why this is fine" },
+        { "name": "Constitutional AI", "energyCost": 3, "damage": 90, "effect": "Makes opponent's AI politely refuse to compete" },
+        { "name": "Scaling Laws Lecture", "energyCost": 4, "damage": 130, "effect": "Bores opponent into submission with math" }
+      ],
+      "stage": "Legendary",
+      "weakness": "Moving fast",
+      "flavor": "The 'responsible AI' guy who keeps making AI more powerful. The cognitive dissonance is a feature, not a bug.",
+      "bangerQuote": "We're building the most powerful AI in history, but don't worry, we wrote a constitution for it.",
+      "naturalRival": "OpenAI's marketing budget and anyone who ships without a safety review",
+      "roastBullets": [
+        "Left OpenAI over safety concerns, raised $7B to build something even more capable. Make it make sense.",
+        "Writes blog posts about AI risk while his company races to build AGI. The irony writes itself.",
+        "Has the energy of a physics professor who's seen the equations and knows we're all doomed",
+        "Named his AI 'Claude' because 'Definitely Not Skynet' was already taken"
+      ]
+    },
+    {
+      "id": "jack-dorsey",
+      "name": "Jack Dorsey",
+      "title": "Former CEO & Founder",
+      "company": "Twitter / Block",
+      "imageUrl": "/famous/generated/jack-card.png",
+      "score": 85,
+      "archetypeName": "The Zen Billionaire",
+      "archetypeEmoji": "🧘",
+      "archetypeDescription": "Meditates for 2 hours daily while his platforms burn. Namaste.",
+      "element": "vision",
+      "moves": [
+        { "name": "Edit Button Denial", "energyCost": 1, "damage": 40, "effect": "Refuses to add obvious feature for 15 years" },
+        { "name": "Silent Retreat", "energyCost": 2, "damage": 50, "effect": "Disappears for a month, company continues without noticing" },
+        { "name": "Bitcoin Maximalism", "energyCost": 3, "damage": 85, "effect": "Converts opponent's treasury to BTC" }
+      ],
+      "stage": "Elite",
+      "weakness": "Moderation decisions",
+      "flavor": "Built a platform for free speech, then spent a decade trying to figure out what that means.",
+      "bangerQuote": "Ran two public companies part-time while doing ice baths and fasting. Peak Silicon Valley monk energy.",
+      "naturalRival": "Anyone who asks why Twitter didn't have an edit button for 16 years",
+      "roastBullets": [
+        "Was CEO of two companies simultaneously and both somehow felt neglected",
+        "His content moderation strategy was 'meditate on it and hope it goes away'",
+        "Sold Twitter to Elon, then spent the next year subtweeting about how it's being run",
+        "Walks to work barefoot, eats one meal a day, and wonders why people think he's out of touch"
+      ]
+    },
+    {
+      "id": "nikita-bier",
+      "name": "Nikita Bier",
+      "title": "Serial App Flipper",
+      "company": "TBH / Gas / ???",
+      "imageUrl": "/famous/generated/nikita-card.png",
+      "score": 89,
+      "archetypeName": "The Teen Whisperer",
+      "archetypeEmoji": "📱",
+      "archetypeDescription": "Has sold more apps to Facebook than most people have downloaded",
+      "element": "shipping",
+      "moves": [
+        { "name": "Gen Z Decoder", "energyCost": 1, "damage": 45, "effect": "Understands what teens want before they do" },
+        { "name": "Viral Loop Deploy", "energyCost": 2, "damage": 75, "effect": "App spreads through every high school in America" },
+        { "name": "Acqui-hire Bait", "energyCost": 3, "damage": 90, "effect": "Gets bought before having to figure out monetization" }
+      ],
+      "stage": "Elite",
+      "weakness": "Long-term retention",
+      "flavor": "The only person who's figured out that the real product is the acquisition, not the app.",
+      "bangerQuote": "Built two apps, sold both to Big Tech, and made it look easy. The rest of us are just playing checkers.",
+      "naturalRival": "App Store reviewers and anyone who asks about DAU after month 3",
+      "roastBullets": [
+        "Has a better exit-to-effort ratio than anyone in Silicon Valley history",
+        "Builds apps for teens, sells to Facebook, watches them die. Rinse and repeat.",
+        "His growth hack is making apps so viral that Big Tech has to buy them to understand young people",
+        "The only founder whose business model is literally 'get acquired before we have to make money'"
+      ]
+    }
+  ]
+}

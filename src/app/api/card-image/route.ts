@@ -93,10 +93,14 @@ ART STYLE (CRITICAL - POKEMON TCG NOSTALGIC):
 - Premium quality - polished, engaging, and memorable
 - Should evoke nostalgia for classic Pokemon cards
 
+CRITICAL - NO TEXT:
+- NEVER generate ANY text, words, letters, numbers, labels, signs, or writing
+- AI-generated text always looks wrong - avoid it completely
+
 DO NOT:
 - Cut off the creature's head, ears, or any body parts
 - Make it photorealistic, 3D rendered, or AI-looking
-- Add ANY text, words, or labels anywhere
+- Generate any text, words, labels, signs, or writing of any kind
 - Make portrait/vertical orientation - MUST be landscape/horizontal
 - Make it generic or boring - should have personality and charm`;
 

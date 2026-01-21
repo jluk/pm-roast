@@ -1,0 +1,28 @@
+{
+  "id": "lenny-rachitsky",
+  "name": "Lenny Rachitsky",
+  "title": "Newsletter Guy",
+  "company": "Lenny's Newsletter",
+  "imageUrl": "/mt-roastmore/lenny/lenny.jpeg",
+  "score": 88,
+  "archetypeName": "The PM Whisperer",
+  "archetypeEmoji": "🎙️",
+  "archetypeDescription": "Turned 'I got laid off from Airbnb' into a media empire by asking other PMs about their frameworks",
+  "element": "strategy",
+  "moves": [
+    { "name": "Framework Overload", "energyCost": 2, "damage": 60, "effect": "Buries opponent in 2x2 matrices" },
+    { "name": "Podcast Plug", "energyCost": 1, "damage": 30, "effect": "Gains 10K subscribers" },
+    { "name": "Benchmark Blast", "energyCost": 3, "damage": 90, "effect": "Makes opponent feel inadequate about their metrics" }
+  ],
+  "stage": "Elite",
+  "weakness": "Original thought",
+  "flavor": "Interviewed every PM who ever shipped anything, synthesized it into frameworks, and now every PM sounds exactly the same. You're welcome.",
+  "bangerQuote": "Made more money asking 'what metrics do you track?' than most PMs make actually tracking metrics.",
+  "naturalRival": "PMs with actual opinions",
+  "roastBullets": [
+    "Became the most influential PM by... not being a PM anymore",
+    "Has asked 'what's your framework for X' so many times it's now his actual personality",
+    "The only person who can make 'I aggregate other people's insights' sound like thought leadership",
+    "Proof that the best career move in product is to stop doing product and just talk about it"
+  ]
+}

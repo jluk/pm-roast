@@ -1,0 +1,28 @@
+{
+  "id": "demis-hassabis",
+  "name": "Demis Hassabis",
+  "title": "CEO & Co-founder",
+  "company": "Google DeepMind",
+  "imageUrl": "/mt-roastmore/demis/demis.jpeg",
+  "score": 99,
+  "archetypeName": "The Galaxy Brain",
+  "archetypeEmoji": "🧠",
+  "archetypeDescription": "Solving intelligence so he can finally have someone smart enough to talk to",
+  "element": "data",
+  "moves": [
+    { "name": "AlphaFold Flex", "energyCost": 4, "damage": 150, "effect": "Solves opponent's entire industry" },
+    { "name": "Nobel Prize Drop", "energyCost": 3, "damage": 100, "effect": "Stuns all critics for 3 turns" },
+    { "name": "Chess Grandmaster Stare", "energyCost": 1, "damage": 40, "effect": "Makes opponent question their IQ" }
+  ],
+  "stage": "Mythical",
+  "weakness": "Small talk",
+  "flavor": "Built an AI that beat Go champions, solved protein folding, and still somehow has to explain to his parents what he does.",
+  "bangerQuote": "Won a Nobel Prize for AI and still gets asked 'but can it write my emails?' at dinner parties.",
+  "naturalRival": "Anyone who says 'AGI is just hype'",
+  "roastBullets": [
+    "Casually revolutionized biology between chess tournaments",
+    "Has a Nobel Prize and a Nature paper but LinkedIn still suggests he 'complete his profile'",
+    "The only person whose 'I was a child prodigy' story is somehow underselling it",
+    "Solved protein folding but still can't solve why Google keeps killing his favorite products"
+  ]
+}

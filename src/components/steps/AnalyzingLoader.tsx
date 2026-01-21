@@ -175,7 +175,11 @@ function MiniCard({
   );
 }
 
-export function AnalyzingLoader() {
+interface AnalyzingLoaderProps {
+  hasProfilePic?: boolean;
+}
+
+export function AnalyzingLoader({ hasProfilePic }: AnalyzingLoaderProps) {
   const [stageIndex, setStageIndex] = useState(0);
 
   useEffect(() => {
@@ -267,6 +271,34 @@ export function AnalyzingLoader() {
       <p className="text-xs text-muted-foreground mt-4">
         Generating your PM card...
       </p>
+
+      {/* Profile Photo Status Indicator */}
+      {hasProfilePic !== undefined && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-4"
+        >
+          {hasProfilePic ? (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/30 rounded-full">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-xs text-green-400 font-medium">Profile photo found</span>
+              <svg className="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-full">
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="text-xs text-amber-400 font-medium">No profile photo</span>
+              <svg className="w-3.5 h-3.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+          )}
+        </motion.div>
+      )}
     </motion.div>
   );
 }

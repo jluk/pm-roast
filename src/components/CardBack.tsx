@@ -9,7 +9,7 @@ interface RoastSummary {
   topRoast?: string;
   element?: string;
   userName?: string;
-  naturalPredator?: string;
+  naturalRival?: string;
 }
 
 interface CardBackProps {
@@ -124,24 +124,24 @@ export function CardBack({ compact = false, rarity = "rare", roastSummary }: Car
                   {/* Quote marks */}
                   <span className="absolute -top-1 left-2 text-yellow-500/30 text-2xl font-serif">&ldquo;</span>
                   <p className={`text-yellow-100/90 italic text-center leading-snug ${
-                    roastSummary.bangerQuote.length > 100
-                      ? (compact ? "text-[9px]" : "text-[10px]")
-                      : (compact ? "text-[10px]" : "text-xs")
+                    roastSummary.bangerQuote.length > 150
+                      ? (compact ? "text-[11px]" : "text-xs")
+                      : roastSummary.bangerQuote.length > 100
+                        ? (compact ? "text-xs" : "text-sm")
+                        : (compact ? "text-sm" : "text-base")
                   }`}>
-                    {roastSummary.bangerQuote.length > 130
-                      ? roastSummary.bangerQuote.slice(0, 127) + "..."
-                      : roastSummary.bangerQuote}
+                    {roastSummary.bangerQuote}
                   </p>
                   <span className="absolute -bottom-2 right-2 text-yellow-500/30 text-2xl font-serif">&rdquo;</span>
                 </div>
               </div>
 
-              {/* Natural Predator - Arch Nemesis */}
-              {roastSummary.naturalPredator && (
+              {/* Natural Rival - Arch Nemesis */}
+              {roastSummary.naturalRival && (
                 <div className="flex items-center justify-center gap-2 mt-2">
-                  <span className="text-red-400/70 text-[9px] uppercase tracking-wider">⚠️ Natural Predator:</span>
-                  <span className={`text-red-300/90 font-medium ${compact ? "text-[9px]" : "text-[10px]"}`}>
-                    {roastSummary.naturalPredator}
+                  <span className="text-red-400/70 text-xs uppercase tracking-wider">⚠️ Natural Rival:</span>
+                  <span className={`text-red-300/90 font-medium ${compact ? "text-xs" : "text-sm"}`}>
+                    {roastSummary.naturalRival}
                   </span>
                 </div>
               )}

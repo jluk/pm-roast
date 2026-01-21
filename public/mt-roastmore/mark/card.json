@@ -1,0 +1,28 @@
+{
+  "id": "mark-zuckerberg",
+  "name": "Mark Zuckerberg",
+  "title": "CEO & Founder",
+  "company": "Meta",
+  "imageUrl": "/mt-roastmore/mark/mark.jpeg",
+  "score": 93,
+  "archetypeName": "The Metaverse Missionary",
+  "archetypeEmoji": "🤖",
+  "archetypeDescription": "Spent $50B trying to make people wear VR headsets to attend meetings they already hate",
+  "element": "data",
+  "moves": [
+    { "name": "Privacy Pivot", "energyCost": 2, "damage": 70, "effect": "Harvests opponent's data while apologizing" },
+    { "name": "Metaverse Rebrand", "energyCost": 4, "damage": 100, "effect": "Changes company name, nothing else changes" },
+    { "name": "Congressional Testimony", "energyCost": 1, "damage": 30, "effect": "Drinks water robotically, survives another hearing" }
+  ],
+  "stage": "Legendary",
+  "weakness": "Human emotions",
+  "flavor": "Started by rating college girls, now rates your grandma's engagement metrics.",
+  "bangerQuote": "Convinced 3 billion people to give him their data, then wondered why they don't trust him.",
+  "naturalRival": "Apple's privacy features and anyone who asks him to smile naturally",
+  "roastBullets": [
+    "Renamed the company 'Meta' so people would stop calling him the Facebook guy. It didn't work.",
+    "His Senate testimony water-drinking technique has been studied by robots learning human behavior",
+    "Spent more on the metaverse than NASA's entire annual budget, created Wii avatars with legs",
+    "The only billionaire who looks more comfortable fighting in a cage than making small talk"
+  ]
+}

@@ -61,7 +61,7 @@ const createMockRoastResult = (): RoastResult => ({
   ],
   bangerQuote: "Your roadmap is just a wish list with dates.",
   dreamRoleReaction: "You'll need to actually ship something first.",
-  naturalPredator: "Engineers who ask 'when is this shipping?'",
+  naturalRival: "Engineers who ask 'when is this shipping?'",
 });
 
 describe('Vercel KV Card Storage', () => {
@@ -109,7 +109,7 @@ describe('Vercel KV Card Storage', () => {
     expect(retrieved?.result.careerScore).toBe(mockResult.careerScore);
     expect(retrieved?.result.bangerQuote).toBe(mockResult.bangerQuote);
     expect(retrieved?.result.roastBullets).toEqual(mockResult.roastBullets);
-    expect(retrieved?.result.naturalPredator).toBe(mockResult.naturalPredator);
+    expect(retrieved?.result.naturalRival).toBe(mockResult.naturalRival);
 
     global.logResult('Retrieved archetype', retrieved?.result.archetype.name);
     global.logResult('Retrieved score', retrieved?.result.careerScore);

@@ -23,7 +23,7 @@ interface CardData {
   compact?: boolean;
   userName?: string;
   bangerQuote?: string;
-  naturalPredator?: string;
+  naturalRival?: string;
 }
 
 interface CardModalContextType {
@@ -105,7 +105,7 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md isolate"
             onClick={handleCloseModal}
           >
             {/* Close hint */}
@@ -130,7 +130,7 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
                 e.stopPropagation();
                 handleModalClick();
               }}
-              className="cursor-pointer"
+              className="cursor-pointer isolate overflow-visible"
               style={{
                 perspective: "1000px",
                 // Full-size card dimensions (2.5:3.5 aspect ratio)
@@ -147,9 +147,9 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
                   height: "100%",
                   willChange: "transform",
                 }}
-                className="relative"
+                className="relative isolate"
               >
-                {/* Front of card - always full size for readability */}
+                {/* Front of card */}
                 <div
                   ref={modalCardRef}
                   className="absolute inset-0"
@@ -174,7 +174,7 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
                   />
                 </div>
 
-                {/* Back of card - roast summary */}
+                {/* Back of card */}
                 <div
                   className="absolute inset-0"
                   style={{
@@ -192,7 +192,7 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
                       bangerQuote: cardData.bangerQuote || cardData.archetypeDescription,
                       userName: cardData.userName,
                       element: cardData.element,
-                      naturalPredator: cardData.naturalPredator,
+                      naturalRival: cardData.naturalRival,
                     }}
                   />
                 </div>

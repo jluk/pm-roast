@@ -1,0 +1,28 @@
+{
+  "id": "justin-luk",
+  "name": "Justin Luk",
+  "title": "PM / Indie Hacker",
+  "company": "Shipping Side Projects",
+  "imageUrl": "/mt-roastmore/justin/justin.jpeg",
+  "score": 72,
+  "archetypeName": "The Chronic Shipper",
+  "archetypeEmoji": "🚢",
+  "archetypeDescription": "Has 47 side projects, 3 users (all his mom), and calls himself a 'founder'",
+  "element": "shipping",
+  "moves": [
+    { "name": "Weekend Deploy", "energyCost": 2, "damage": 50, "effect": "Ships feature nobody asked for" },
+    { "name": "Scope Creep Strike", "energyCost": 1, "damage": 30, "effect": "Adds 'just one more thing' to any project" },
+    { "name": "Hacker News Hype", "energyCost": 3, "damage": 70, "effect": "Gets 100 upvotes, 0 signups" }
+  ],
+  "stage": "Senior",
+  "weakness": "Marketing",
+  "flavor": "Spends more time setting up the perfect dev environment than actually building products. The README is always immaculate though.",
+  "bangerQuote": "Built a roast app instead of doing his actual job. Honestly, respect.",
+  "naturalRival": "That guy who shipped the same idea but with VC funding",
+  "roastBullets": [
+    "Portfolio website lists 12 projects, 11 are 'currently in stealth mode' (abandoned)",
+    "Bio says 'building in public' but the public is just his Twitter followers who are also building in public",
+    "The Venn diagram of 'things Justin has shipped' and 'things with users' is two separate circles",
+    "Created PM Roast to roast others, didn't realize the algorithm would roast him back"
+  ]
+}

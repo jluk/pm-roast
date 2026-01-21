@@ -1,0 +1,28 @@
+{
+  "id": "nikita-bier",
+  "name": "Nikita Bier",
+  "title": "Serial App Flipper",
+  "company": "TBH / Gas / ???",
+  "imageUrl": "/mt-roastmore/nikita/nikita.jpg",
+  "score": 89,
+  "archetypeName": "The Teen Whisperer",
+  "archetypeEmoji": "📱",
+  "archetypeDescription": "Has sold more apps to Facebook than most people have downloaded",
+  "element": "shipping",
+  "moves": [
+    { "name": "Viral Loop Deploy", "energyCost": 2, "damage": 75, "effect": "App spreads through every high school in America" },
+    { "name": "Acqui-hire Bait", "energyCost": 3, "damage": 90, "effect": "Gets bought before having to figure out monetization" },
+    { "name": "Gen Z Decoder", "energyCost": 1, "damage": 45, "effect": "Understands what teens want before they do" }
+  ],
+  "stage": "Elite",
+  "weakness": "Long-term retention",
+  "flavor": "The only person who's figured out that the real product is the acquisition, not the app.",
+  "bangerQuote": "Built two apps, sold both to Big Tech, and made it look easy. The rest of us are just playing checkers.",
+  "naturalRival": "App Store reviewers and anyone who asks about DAU after month 3",
+  "roastBullets": [
+    "Has a better exit-to-effort ratio than anyone in Silicon Valley history",
+    "Builds apps for teens, sells to Facebook, watches them die. Rinse and repeat.",
+    "His growth hack is making apps so viral that Big Tech has to buy them to understand young people",
+    "The only founder whose business model is literally 'get acquired before we have to make money'"
+  ]
+}

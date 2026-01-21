@@ -23,7 +23,7 @@ export interface ShareableCard {
   rm?: { t: string; a: string[] }[]; // roadmap (title, actions)
   pe?: { t: string; g: string; r: string }[]; // podcastEpisodes (title, guest, reason)
   u?: string; // userName
-  np?: string; // naturalPredator
+  nr?: string; // naturalRival
 }
 
 // Convert ShareableCard back to RoastResult for reusing the Results component
@@ -74,7 +74,7 @@ export function shareableCardToRoastResult(card: ShareableCard): RoastResult {
     bangerQuote: card.q,
     dreamRoleReaction: card.rr,
     userName: card.u,
-    naturalPredator: card.np || "",
+    naturalRival: card.nr || "",
   };
 }
 
@@ -142,7 +142,7 @@ export function generateShareUrl(
     roadmap?: { title: string; actions: string[] }[];
     podcastEpisodes?: { title: string; guest: string; reason: string }[];
     userName?: string;
-    naturalPredator?: string;
+    naturalRival?: string;
   },
   dreamRole: string
 ): string {
@@ -189,7 +189,7 @@ export function generateShareUrl(
     rm: compressedRoadmap,
     pe: compressedPodcasts,
     u: result.userName?.slice(0, 50),
-    np: result.naturalPredator?.slice(0, 80),
+    nr: result.naturalRival?.slice(0, 80),
   };
 
   const encoded = encodeCardData(card);

@@ -61,27 +61,31 @@ export async function POST(request: NextRequest) {
       console.log("Has headline (10+ chars):", hasHeadline);
 
       // Quality assessment for roast-worthy content
-      // We need EITHER:
-      // 1. At least 1 experience with a description (tells us what they actually DID)
-      // 2. OR a substantial summary (50+ chars) that describes their work
-      // 3. AND at least some job context (company + title)
+      // RELAXED: We can roast with minimal info - just need name + headline/company
+      // The AI will make creative assumptions based on whatever we have
       const hasSubstantiveContent = experiencesWithDescriptions.length >= 1 || hasSummary;
-      const hasBasicJobContext = experiencesWithCompanies.length >= 1 && experiencesWithTitles.length >= 1;
+      const hasBasicJobContext = experiencesWithCompanies.length >= 1 || experiencesWithTitles.length >= 1;
+      const hasMinimalContext = hasHeadline || experiencesWithCompanies.length >= 1;
+
+      // HIGH: Rich content with descriptions
       const isHighQuality = hasSubstantiveContent && hasBasicJobContext && textLength >= 150;
+      // GOOD ENOUGH: Has headline and/or company - can make creative roasts
+      const isGoodEnough = hasMinimalContext && textLength >= 50;
       const isPartialQuality = hasBasicJobContext && textLength >= 100;
 
       console.log("=== QUALITY ASSESSMENT ===");
       console.log("Has substantive content:", hasSubstantiveContent);
       console.log("Has basic job context:", hasBasicJobContext);
+      console.log("Has minimal context:", hasMinimalContext);
       console.log("Is HIGH quality (proceed automatically):", isHighQuality);
-      console.log("Is PARTIAL quality (needs supplementing):", isPartialQuality && !isHighQuality);
+      console.log("Is GOOD ENOUGH (proceed with creative roasts):", isGoodEnough && !isHighQuality);
 
-      if (textLength < 100) {
-        console.log("WARNING: Profile text is under 100 chars");
+      if (textLength < 50) {
+        console.log("WARNING: Profile text is under 50 chars");
         console.log("Full profile text:", result.profileText);
       }
 
-      // HIGH QUALITY: Proceed automatically
+      // HIGH QUALITY: Rich content, proceed automatically
       if (isHighQuality) {
         console.log("=== HIGH QUALITY - PROCEEDING ===");
         return NextResponse.json({
@@ -97,18 +101,19 @@ export async function POST(request: NextRequest) {
         });
       }
 
-      // PARTIAL QUALITY: Return what we have but flag it needs supplementing
-      if (isPartialQuality) {
-        console.log("=== PARTIAL QUALITY - NEEDS SUPPLEMENT ===");
+      // GOOD ENOUGH: Has basic info (headline/company), AI will make creative assumptions
+      if (isGoodEnough) {
+        console.log("=== GOOD ENOUGH - PROCEEDING WITH CREATIVE ROAST ===");
         return NextResponse.json({
           success: true,
           profileText: result.profileText,
           profilePicUrl: result.profilePicUrl || null,
           data: result.data,
           isMock: result.isMock || false,
-          quality: "partial",
-          needsSupplement: true,
-          message: "We found your basic info but need more details for a quality roast. Please add your job descriptions and achievements below.",
+          quality: "high", // Treat as high so frontend proceeds
+          message: result.isMock
+            ? "Using mock profile (API key not configured)"
+            : "Profile fetched successfully",
         });
       }
 

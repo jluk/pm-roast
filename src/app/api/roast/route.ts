@@ -114,147 +114,243 @@ async function fetchImageAsBase64(imageUrl: string): Promise<{ data: string; mim
   }
 }
 
+// Funny office scenarios for each element type
+const FUNNY_SCENARIOS: Record<PMElement, string[]> = {
+  data: [
+    "frantically pointing at a holographic dashboard showing impossible metrics while coffee spills everywhere",
+    "surrounded by floating pie charts and bar graphs, looking confused at one that clearly doesn't add up",
+    "presenting to invisible stakeholders with a laser pointer, charts literally exploding with data",
+    "buried under a mountain of spreadsheets, only their face visible, still smiling maniacally",
+    "riding a giant bar chart like a surfboard through a sea of numbers",
+  ],
+  chaos: [
+    "juggling flaming laptops while standing on a spinning office chair",
+    "conducting an orchestra of panicking coworkers with a coffee mug as a baton",
+    "surrounded by sticky notes forming a tornado, looking completely zen",
+    "putting out multiple small fires (literally) while casually sipping coffee",
+    "skateboarding through a collapsing Jira board, giving a thumbs up",
+  ],
+  strategy: [
+    "playing 4D chess against themselves while a whiteboard full of frameworks looms behind them",
+    "building an elaborate house of cards labeled 'Q3 Roadmap' with intense focus",
+    "meditating in front of a massive flowchart that connects to everything including the coffee machine",
+    "drawing on a whiteboard that extends infinitely in all directions",
+    "arranging miniature people on a strategy board like a benevolent (or malevolent) deity",
+  ],
+  shipping: [
+    "literally pushing a giant 'SHIP IT' button while everything around them is on fire",
+    "riding a rocket-powered shopping cart through a warehouse of features",
+    "arm-wrestling a giant bug while deployment scripts run in the background",
+    "crossing a finish line tape while dragging an entire product behind them",
+    "speedrunning through a maze of code reviews with a stopwatch",
+  ],
+  politics: [
+    "shaking hands with everyone in a circle simultaneously like a many-armed deity",
+    "playing poker with stakeholders, holding cards that just say 'ALIGNMENT'",
+    "navigating a literal maze of org charts with a compass and torch",
+    "puppet-mastering a meeting room full of action figures in suits",
+    "balancing on a tightrope between two angry emoji-faced executives",
+  ],
+  vision: [
+    "standing on a mountain peak, pointing at a glowing 'FUTURE' that nobody else can see",
+    "painting the sky with a giant brush while standing on clouds",
+    "wearing VR goggles and gesturing wildly at things only they can see",
+    "gazing into a crystal ball that shows a roadmap stretching to infinity",
+    "surfing on a wave of lightbulbs, each one a different 'brilliant idea'",
+  ],
+};
+
 // Generate archetype image using Gemini - with profile photo if available
 async function generateArchetypeImage(
   archetypeName: string,
   archetypeDescription: string,
   emoji: string,
   element: PMElement,
-  profilePicUrl?: string | null
+  profilePicUrl?: string | null,
+  profileImageBase64?: { data: string; mimeType: string } | null,
+  context?: {
+    userName?: string;
+    weakness?: string;
+    stage?: string;
+    moveName?: string;
+    dreamRole?: string;
+    company?: string;
+  }
 ): Promise<string | null> {
   try {
     const elementSettings = ELEMENT_SETTINGS[element];
 
-    // If we have a profile photo, use it for personalized generation
-    if (profilePicUrl) {
-      console.log("=== GENERATING PERSONALIZED IMAGE FROM PROFILE PHOTO ===");
+    // Pick a random funny scenario for this element
+    const scenarios = FUNNY_SCENARIOS[element];
+    const funnyScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+
+    // Build personalized details string
+    const personalDetails: string[] = [];
+    if (context?.company) personalDetails.push(`works at ${context.company}`);
+    if (context?.stage) personalDetails.push(`${context.stage}-level energy`);
+    if (context?.weakness) personalDetails.push(`clearly afraid of "${context.weakness}"`);
+    if (context?.dreamRole) personalDetails.push(`dreams of being ${context.dreamRole}`);
+
+    const personalContext = personalDetails.length > 0
+      ? `\n\nPERSONAL DETAILS TO INCORPORATE:\n- ${personalDetails.join('\n- ')}`
+      : '';
+
+    // If we have a profile photo (either uploaded directly or from URL), use it for personalized generation
+    let profileImage: { data: string; mimeType: string } | null = profileImageBase64 || null;
+
+    // If no direct upload but we have a URL, fetch it
+    if (!profileImage && profilePicUrl) {
+      console.log("=== FETCHING PROFILE IMAGE FROM URL ===");
       console.log("Profile URL:", profilePicUrl);
+      profileImage = await fetchImageAsBase64(profilePicUrl);
+    }
 
-      const profileImage = await fetchImageAsBase64(profilePicUrl);
+    if (profileImage) {
+      console.log("=== GENERATING PERSONALIZED IMAGE FROM PROFILE PHOTO ===");
+      console.log("Profile image source:", profileImageBase64 ? "direct upload" : "URL fetch");
+      console.log("Profile image size:", profileImage.data.length);
 
-      if (profileImage) {
-        console.log("Profile image fetched, size:", profileImage.data.length);
+      const personalizedPrompt = `Create a FUNNY illustration of THIS EXACT PERSON as "${archetypeName}" in a hilarious situation.
 
-        const personalizedPrompt = `Transform this person into a POKEMON TRADING CARD style character illustration. They are "${archetypeName}" - an iconic PM archetype.
+CRITICAL - NO TEXT IN IMAGE:
+- NEVER generate ANY text, words, letters, numbers, labels, signs, or writing of any kind
+- AI-generated text always looks wrong - avoid it completely
 
-Character vibe: ${archetypeDescription}
+CRITICAL - PRESERVE THE PERSON'S LIKENESS:
+- This is THE MOST IMPORTANT requirement - the output MUST look like this specific person
+- Copy their EXACT face: same eyes, nose, mouth, face shape, skin tone, hair color, hairstyle
+- The person in the output should be IMMEDIATELY RECOGNIZABLE as the person in the input photo
+- Study every facial detail in the input and replicate it faithfully
+- If they have glasses, facial hair, distinctive features - KEEP THEM
+- Think of this as drawing a caricature portrait - exaggerate for humor but preserve identity
 
-SCENE (POKEMON TCG AESTHETIC):
-- Place them ${elementSettings.setting}
-- Background: ${elementSettings.bg}
-- Include magical props: ${elementSettings.props}
-- Primary colors: ${elementSettings.colors}
+THE FUNNY SITUATION:
+Place this person in this comedic scene: ${funnyScenario}
 
-TRANSFORMATION:
-- Transform them into a stylized Pokemon trainer/character
-- Keep their general likeness recognizable but make it anime/cartoon style
-- Exaggerated expressions - this is internet humor energy
-- Think: nostalgic 90s/2000s Pokemon card art meets modern meme culture
+Their character: ${archetypeDescription}
+${personalContext}
 
-IMAGE DIMENSIONS (CRITICAL):
-- LANDSCAPE orientation - 16:9 aspect ratio (wider than tall)
-- Subject must be CENTERED horizontally
-- Show from waist/chest up - classic trading card portrait framing
-- Leave breathing room on all sides - don't crop the head or shoulders
-- Subject takes up 50-60% of frame height, centered
+CREATIVE HUMOR (while keeping their likeness):
+- Show THEIR face reacting to absurd PM/tech situations
+- Exaggerated expressions are great: stress, panic, manic joy, existential dread, fake confidence
+- Put them in ridiculous but relatable work scenarios
+- Props and environment create the joke, their recognizable face sells it
+- The humor comes from "that's definitely [person] dealing with [absurd situation]"
 
-ART STYLE (CRITICAL - POKEMON TCG NOSTALGIC):
-- Classic Pokemon trading card illustration style
-- Hand-painted watercolor aesthetic with soft edges
-- Vibrant colors, dynamic poses, magical energy effects
-- Nostalgic 90s/2000s trading card game feel
-- Premium collectible card quality - polished and memorable
+ART STYLE:
+- Illustrated/painted style (NOT photorealistic, NOT abstract)
+- Vibrant, colorful, fun - like a premium trading card illustration
+- Colors: ${elementSettings.colors}
+- Background setting: ${elementSettings.bg}
+- Clear, focused composition - not busy or chaotic
+- The person should be the obvious subject, not lost in effects
 
-DO NOT:
-- Cut off the top of their head or crop awkwardly
-- Make it photorealistic or 3D rendered
-- Add ANY text, words, or labels
-- Make it portrait/vertical orientation`;
+COMPOSITION:
+- Person prominently featured, face clearly visible and LARGE
+- Upper body or head/shoulders framing
+- Front-facing or 3/4 view (never profile or from behind)
+- ${elementSettings.props}
+- LANDSCAPE 16:9 aspect ratio
 
-        try {
-          // Use new SDK for image generation with profile photo
-          const response = await genAINew.models.generateContent({
-            model: "gemini-2.0-flash-exp-image-generation",
-            contents: [
-              {
-                role: "user",
-                parts: [
-                  {
-                    inlineData: {
-                      mimeType: profileImage.mimeType,
-                      data: profileImage.data,
-                    },
+ABSOLUTELY DO NOT:
+- Create abstract art, surreal imagery, or unrecognizable outputs
+- Change the person's fundamental appearance or make them generic
+- Obscure, shrink, or hide the face
+- Make the face small or distant in the frame
+- Generate ANY text, words, letters, numbers, signs, labels, or writing (AI text always looks wrong)
+- Create photorealistic renders
+- Make the person unidentifiable`;
+
+      try {
+        // Use new SDK for image generation with profile photo
+        const response = await genAINew.models.generateContent({
+          model: "gemini-2.0-flash-exp-image-generation",
+          contents: [
+            {
+              role: "user",
+              parts: [
+                {
+                  inlineData: {
+                    mimeType: profileImage.mimeType,
+                    data: profileImage.data,
                   },
-                  { text: personalizedPrompt },
-                ],
-              },
-            ],
-            config: {
-              responseModalities: ["Text", "Image"],
+                },
+                { text: personalizedPrompt },
+              ],
             },
-          });
+          ],
+          config: {
+            responseModalities: ["Text", "Image"],
+          },
+        });
 
-          // Check for image in response
-          if (response.candidates && response.candidates[0]?.content?.parts) {
-            for (const part of response.candidates[0].content.parts) {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const anyPart = part as any;
-              if (anyPart.inlineData) {
-                console.log("=== PERSONALIZED IMAGE GENERATED ===");
-                return `data:${anyPart.inlineData.mimeType};base64,${anyPart.inlineData.data}`;
-              }
+        // Check for image in response
+        if (response.candidates && response.candidates[0]?.content?.parts) {
+          for (const part of response.candidates[0].content.parts) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const anyPart = part as any;
+            if (anyPart.inlineData) {
+              console.log("=== PERSONALIZED IMAGE GENERATED ===");
+              return `data:${anyPart.inlineData.mimeType};base64,${anyPart.inlineData.data}`;
             }
           }
-
-          console.log("No personalized image in response, trying generic");
-        } catch (personalizedError) {
-          console.error("Personalized image generation failed:", personalizedError);
         }
+
+        console.log("No personalized image in response, trying generic");
+      } catch (personalizedError) {
+        console.error("Personalized image generation failed:", personalizedError);
       }
     }
 
     // Fallback: Generate Pokemon-style creature without profile photo
     console.log("=== GENERATING POKEMON-STYLE CREATURE IMAGE ===");
 
-    const imagePrompt = `Generate a POKEMON TRADING CARD style creature illustration. The character is "${archetypeName}" - ${elementSettings.creature}.
+    const imagePrompt = `Generate a HILARIOUS Pokemon trading card style creature illustration. The character is "${archetypeName}" - a ${elementSettings.creature}.
+
+THE SCENE (MAKE IT FUNNY):
+Show the creature ${funnyScenario}
 
 Character vibe: ${archetypeDescription}
+${personalContext}
 
-SCENE (POKEMON TCG AESTHETIC):
-- The creature is ${elementSettings.setting}
-- Background: ${elementSettings.bg}
-- Include magical props: ${elementSettings.props}
-- Primary colors: ${elementSettings.colors}
+HUMOR IS MANDATORY:
+- This creature should be doing something RELATABLE and FUNNY
+- Expressions: stressed, confused, manic confidence, or existential dread
+- Absurd office/tech situations that make people laugh
+- Props: laptops, coffee cups, sticky notes, whiteboards, Jira boards
+- Think: Pokemon meets corporate satire
 
 CREATURE DESIGN:
-- A ${elementSettings.creature}
-- Original Pokemon-inspired creature design
-- Expressive and full of personality - internet meme energy
-- Can be any fantastical creature - not limited to real animals
-- Should feel like a real Pokemon you'd find in a game
+- Original Pokemon-inspired creature (${elementSettings.creature})
+- Anthropomorphized enough to do office activities
+- Expressive face showing the chaos of PM life
+- Can hold objects, gesture, have human-like reactions
+- Should feel like a REAL Pokemon doing REAL PM work
+
+POKEMON TCG AESTHETIC:
+- Classic 90s/2000s Pokemon card illustration style
+- Hand-painted watercolor look
+- Vibrant colors: ${elementSettings.colors}
+- Background: ${elementSettings.bg}
+- Magical energy effects
+- Premium collectible quality
 
 IMAGE DIMENSIONS (CRITICAL):
-- LANDSCAPE orientation - 16:9 aspect ratio (wider than tall)
-- Creature must be CENTERED horizontally in the frame
-- Show the full creature or from waist up - NOT a close-up face shot
-- Leave breathing room on all sides - don't crop any part of the creature
-- Creature takes up 50-60% of frame height, centered
-- Background details visible on both sides
+- LANDSCAPE 16:9 aspect ratio
+- Full scene visible - show the funny situation
+- Creature centered but room for comedic props
+- Don't crop the creature or important elements
 
-ART STYLE (CRITICAL - POKEMON TCG NOSTALGIC):
-- Classic Pokemon trading card illustration style from the 90s/2000s
-- Hand-painted watercolor aesthetic with soft edges and texture
-- Vibrant saturated colors, dynamic poses, magical energy effects
-- Nostalgic collectible card game feel - like Ken Sugimori meets trading card art
-- Premium quality - polished, engaging, and memorable
-- Should evoke nostalgia for classic Pokemon cards
+CRITICAL - NO TEXT:
+- NEVER generate ANY text, words, letters, numbers, labels, signs, or writing
+- AI-generated text always looks wrong - avoid it completely
 
 DO NOT:
-- Cut off the creature's head, ears, or any body parts
-- Make it photorealistic, 3D rendered, or AI-looking
-- Add ANY text, words, or labels anywhere
-- Make portrait/vertical orientation - MUST be landscape/horizontal
-- Make it generic or boring - should have personality and charm`;
+- Make it boring, generic, or just standing there
+- Cut off the creature or comedic elements
+- Make it photorealistic or 3D rendered
+- Generate any text, words, labels, or writing of any kind
+- Make it portrait orientation`;
 
     // Use new SDK with responseModalities for image generation
     const response = await genAINew.models.generateContent({
@@ -382,13 +478,14 @@ The roast intensity should match the career score:
 - Score 95-100: Light nitpicks wrapped in genuine admiration
 
 CRITICAL RULES - YOU MUST FOLLOW THESE:
-1. Use what's in the profile first. If details are sparse, make REASONABLE assumptions based on typical PM careers - that's part of the fun.
-2. If the profile mentions specific companies or achievements, definitely use those. Otherwise, make witty observations based on what IS there.
-3. NEVER complain about lack of info or roast them for a sparse profile. Just work with what you have and fill in with plausible PM stereotypes.
-4. The career score should reflect what's shown, but assume mid-level (50-65) if very little info is given.
-5. NEVER address the person by name in your roasts. Use "you" or refer to their role/title instead.
-6. NEVER hallucinate specific company names or achievements that aren't mentioned - but you CAN make jokes about generic PM behaviors.
-7. Keep it fun and entertaining regardless of input quality. Every profile should get a full, entertaining roast.
+1. Work with whatever info you have - even just a name and headline is ENOUGH. Make reasonable assumptions based on the company/role mentioned.
+2. If they mention Google, roast Big Tech PM life. If they mention a startup, roast startup chaos. If they just have a title, roast that title's typical behaviors.
+3. ABSOLUTELY NEVER mention, reference, or joke about having limited info or a sparse profile. This is the #1 rule. Treat every profile as if it's complete.
+4. If details are sparse, lean into universal PM stereotypes that match their level/company type. Everyone can relate to these.
+5. The career score: If they're at FAANG, assume 60-75. Startup founder? 55-70. Generic PM? 45-60. Famous person? 75-90. Adjust based on headline impressiveness.
+6. NEVER address the person by name in your roasts. Use "you" or refer to their role/title instead.
+7. You CAN reference the specific companies/titles that ARE mentioned, and you CAN make jokes about typical behaviors for that type of PM.
+8. Every profile MUST get a full, entertaining, complete roast. No exceptions. No complaints. Just roast what's there creatively.
 
 PM ELEMENT TYPES (choose the most fitting one):
 - "data": PMs obsessed with metrics, dashboards, A/B tests
@@ -429,7 +526,7 @@ FORMATTING RULES:
 - Roadmap: A 4-month plan specifically designed to move them TOWARD THEIR DREAM ROLE. Each month should address a specific gap between current state and dream role requirements. Max 20 char titles, max 40 char actions.
 - bangerQuote: THE MOST IMPORTANT FIELD. Must be a quotable roast that references THEIR specific career AND ideally their dream role gap. Screenshot-worthy. Max 140 chars. Use "you" not names.
 - dreamRoleReaction: Sarcastic verdict on their dream role chances. Reference specific gaps. Be brutally honest. Max 80 chars.
-- naturalPredator: Their arch-nemesis - the person or concept that strikes fear in their PM heart. Should be funny and specific to their archetype/element. Examples: "An Engineer with a valid technical concern", "A designer with an opinion", "A 4:45 PM Friday bug report", "A stakeholder who actually read the PRD". Max 60 chars.
+- naturalRival: Their arch-nemesis - the person or concept that strikes fear in their PM heart. Should be funny and specific to their archetype/element. Examples: "An Engineer with a valid technical concern", "A designer with an opinion", "A 4:45 PM Friday bug report", "A stakeholder who actually read the PRD". Max 60 chars.
 
 Your responses MUST be valid JSON with this exact structure (no markdown, no code blocks, just raw JSON):
 {
@@ -470,7 +567,7 @@ Your responses MUST be valid JSON with this exact structure (no markdown, no cod
   ],
   "bangerQuote": "Screenshot-worthy roast, ideally referencing gap between current state and dream role. Max 140 chars.",
   "dreamRoleReaction": "Brutally honest verdict on their dream role chances given the gap. Reference what's missing. Max 80 chars.",
-  "naturalPredator": "Their arch-nemesis - funny person/concept they fear. Max 60 chars."
+  "naturalRival": "Their arch-nemesis - funny person/concept they fear. Max 60 chars."
 }`;
 
 export async function POST(request: NextRequest) {
@@ -479,10 +576,27 @@ export async function POST(request: NextRequest) {
     const file = formData.get("file") as File | null;
     const profileText = formData.get("profileText") as string | null;
     const profilePicUrl = formData.get("profilePicUrl") as string | null;
+    const profileImage = formData.get("profileImage") as File | null;
     const dreamRole = formData.get("dreamRole") as DreamRole;
 
     if (!dreamRole || !DREAM_ROLES[dreamRole]) {
       return NextResponse.json({ error: "Invalid dream role" }, { status: 400 });
+    }
+
+    // Convert uploaded profile image to base64 if provided
+    let profileImageBase64: { data: string; mimeType: string } | null = null;
+    if (profileImage) {
+      console.log("=== PROCESSING UPLOADED PROFILE IMAGE ===");
+      console.log("Image name:", profileImage.name);
+      console.log("Image type:", profileImage.type);
+      console.log("Image size:", profileImage.size);
+
+      const imageBuffer = await profileImage.arrayBuffer();
+      const base64Data = Buffer.from(imageBuffer).toString("base64");
+      profileImageBase64 = {
+        data: base64Data,
+        mimeType: profileImage.type || "image/jpeg",
+      };
     }
 
     let resumeText = "";
@@ -548,7 +662,7 @@ What this role REQUIRES:
 Your job is to analyze the GAP between their current profile and these requirements. The roast, gaps, and roadmap should ALL be framed around this specific dream role.
 === END DREAM ROLE ===
 
-IMPORTANT: Your entire analysis MUST be based ONLY on the profile information below. Reference specific companies, roles, and achievements mentioned. Do not invent details.
+IMPORTANT: Use what's provided below. If the profile is sparse, make creative assumptions based on the company/title mentioned - that's half the fun.
 
 === START OF PROFILE ===
 ${resumeText}
@@ -556,13 +670,20 @@ ${resumeText}
 
 ANALYSIS INSTRUCTIONS:
 1. Compare their profile to the dream role requirements above
-2. Identify which red flags apply to them and which green flags they're missing
-3. Your gaps should be the specific skills/experience MISSING for that dream role
-4. Your roadmap should be a realistic path to close the gap to that specific dream role
+2. Identify which red flags likely apply and which green flags they might be missing
+3. Your gaps should be realistic for someone at their apparent level targeting their dream role
+4. Your roadmap should be actionable steps to close the gap to that specific dream role
 5. At least 1-2 roast bullets should mock the gap between their aspiration and reality
-6. The dreamRoleReaction should be a brutally honest take on their chances given the gap
+6. The dreamRoleReaction should be a brutally honest take on their chances
 
-Based ONLY on the profile above, generate your roast. If the profile mentions working at Google, reference Google. If they were at a startup, reference that. Every roast bullet and observation must tie back to something in their actual profile.
+CRITICAL: Generate a COMPLETE, ENTERTAINING roast regardless of how much info is provided.
+- If they're at Google, roast Big Tech PM life and golden handcuffs
+- If they're at a startup, roast the chaos and "we're a family" culture
+- If they're a founder, roast the hustle culture and "disruption"
+- If they're famous (like Reid Hoffman), roast their public persona and empire
+- Reference their actual company/title, then fill in with typical behaviors for that archetype
+
+Never mention having limited info. Just roast confidently based on what IS there.
 
 Remember: Respond with valid JSON only. No markdown formatting, no code blocks, just the raw JSON object.`;
 
@@ -764,20 +885,36 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
       roastResult.archetype.weakness = "Meetings";
     }
 
-    // Ensure naturalPredator exists
-    if (!roastResult.naturalPredator) {
-      roastResult.naturalPredator = "An engineer with a valid technical concern";
+    // Ensure naturalRival exists
+    if (!roastResult.naturalRival) {
+      roastResult.naturalRival = "An engineer with a valid technical concern";
     }
+
+    // Extract company from resume text for image personalization
+    const companyMatch = resumeText.match(/(?:at|@)\s+([A-Z][A-Za-z0-9\s&]+?)(?:\n|,|\.|$)/);
+    const extractedCompany = companyMatch ? companyMatch[1].trim() : undefined;
 
     // Generate archetype image with elemental background (personalized if we have profile photo)
     console.log("=== GENERATING ARCHETYPE IMAGE ===");
     console.log("Profile pic URL:", profilePicUrl || "not provided");
+    console.log("Profile image uploaded:", profileImageBase64 ? "yes" : "no");
+    console.log("Context - Company:", extractedCompany, "Stage:", roastResult.archetype.stage, "Weakness:", roastResult.archetype.weakness);
+
     const archetypeImage = await generateArchetypeImage(
       roastResult.archetype.name,
       roastResult.archetype.description,
       roastResult.archetype.emoji,
       roastResult.archetype.element,
-      profilePicUrl
+      profilePicUrl,
+      profileImageBase64,
+      {
+        userName: roastResult.userName,
+        weakness: roastResult.archetype.weakness,
+        stage: roastResult.archetype.stage,
+        moveName: roastResult.moves?.[0]?.name,
+        dreamRole: DREAM_ROLES[dreamRole]?.label,
+        company: extractedCompany,
+      }
     );
 
     if (archetypeImage) {

@@ -1,0 +1,28 @@
+{
+  "id": "brian-chesky",
+  "name": "Brian Chesky",
+  "title": "CEO & Co-founder",
+  "company": "Airbnb",
+  "imageUrl": "/mt-roastmore/brian/brian.jpeg",
+  "score": 94,
+  "archetypeName": "The Design Dictator",
+  "archetypeEmoji": "🎨",
+  "archetypeDescription": "Believes every problem can be solved with better typography and a 47-slide deck about 'belonging'",
+  "element": "vision",
+  "moves": [
+    { "name": "Pixel Perfect Rage", "energyCost": 3, "damage": 80, "effect": "Redesigns opponent's entire product roadmap" },
+    { "name": "Founder Mode Activate", "energyCost": 2, "damage": 60, "effect": "Bypasses all middle management" },
+    { "name": "Snow White Strategy", "energyCost": 4, "damage": 120, "effect": "Storyboards the competition into oblivion" }
+  ],
+  "stage": "Legendary",
+  "weakness": "Hotels",
+  "flavor": "Once redesigned an air mattress into a $100B company. Still thinks he could've made the mattress better.",
+  "bangerQuote": "Your Figma skills are not a substitute for a business model, but damn if Brian didn't prove otherwise.",
+  "naturalRival": "Marriott's entire marketing budget",
+  "roastBullets": [
+    "Turned 'strangers sleeping in your house' from a horror movie plot into a $100B company",
+    "Has definitely fired someone over font kerning",
+    "The only CEO who treats every all-hands like a TED talk about the meaning of human connection",
+    "Invented 'Founder Mode' because 'micromanaging with charisma' didn't fit on the blog post title"
+  ]
+}

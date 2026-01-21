@@ -1,0 +1,28 @@
+{
+  "id": "elon-musk",
+  "name": "Elon Musk",
+  "title": "Chief Twit / Technoking",
+  "company": "Tesla / SpaceX / X",
+  "imageUrl": "/mt-roastmore/elon/elon.jpg",
+  "score": 97,
+  "archetypeName": "The Chaos Emperor",
+  "archetypeEmoji": "🚀",
+  "archetypeDescription": "Runs 5 companies, posts at 3am, and somehow convinced people that sleeping at the office is sigma behavior",
+  "element": "chaos",
+  "moves": [
+    { "name": "Mass Layoff", "energyCost": 2, "damage": 80, "effect": "Reduces opponent's team by 80%" },
+    { "name": "3AM Tweet Storm", "energyCost": 1, "damage": 45, "effect": "Tanks own stock price, confuses everyone" },
+    { "name": "First Principles Rant", "energyCost": 4, "damage": 150, "effect": "Makes opponent question everything they know" }
+  ],
+  "stage": "Mythical",
+  "weakness": "Regulators",
+  "flavor": "The only man who can mass layoff an entire company and have people thank him for it.",
+  "bangerQuote": "Bought Twitter to fix free speech, turned it into the world's most expensive shitposting platform.",
+  "naturalRival": "The SEC, sleep, and anyone who asks about Cybertruck windows",
+  "roastBullets": [
+    "Paid $44 billion for a website, immediately made it worth $12 billion, called it a win",
+    "Has 11 kids but still finds time to post memes at 2am like a teenager",
+    "Promised self-driving cars by 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024... any day now",
+    "The only CEO whose HR strategy is 'tweet something wild and see who quits'"
+  ]
+}

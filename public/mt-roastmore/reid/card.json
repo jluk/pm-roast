@@ -1,0 +1,28 @@
+{
+  "id": "reid-hoffman",
+  "name": "Reid Hoffman",
+  "title": "Partner & LinkedIn Guy",
+  "company": "Greylock Partners",
+  "imageUrl": "/mt-roastmore/reid/reid.jpeg",
+  "score": 91,
+  "archetypeName": "The Network Node",
+  "archetypeEmoji": "🕸️",
+  "archetypeDescription": "Built the world's largest professional cringe repository and somehow made billions",
+  "element": "politics",
+  "moves": [
+    { "name": "Blitzscaling Bomb", "energyCost": 4, "damage": 130, "effect": "Burns cash faster than opponent can react" },
+    { "name": "LinkedIn Connection", "energyCost": 1, "damage": 20, "effect": "Forces opponent to accept unwanted networking request" },
+    { "name": "Board Seat Shuffle", "energyCost": 3, "damage": 80, "effect": "Appears on opponent's cap table" }
+  ],
+  "stage": "Legendary",
+  "weakness": "AI ethics questions",
+  "flavor": "Created a platform where people unironically write 'I'm humbled to announce' and it's worth more than most countries.",
+  "bangerQuote": "Invented the place where your weird uncle posts motivational quotes next to crypto scams, and VCs call it 'professional networking'.",
+  "naturalRival": "Twitter/X stealing his thought leaders",
+  "roastBullets": [
+    "Made a website for job hunting and somehow it became a platform for people to write 5-paragraph posts about being fired",
+    "The godfather of 'agree?' posts",
+    "Blitzscaled his way through every ethical question by just going faster",
+    "Wrote a book about networks and then invested in AI that might make networks obsolete"
+  ]
+}
