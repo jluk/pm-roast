@@ -178,23 +178,21 @@ Get your PM card: ${shareUrl}
 
   // Calculate dynamic font sizes for roast section based on content length
   const roastFontSizes = useMemo(() => {
-    const bangerLength = result.bangerQuote?.length || 0;
-    const bulletsLength = result.roastBullets.slice(1).reduce((acc, b) => acc + b.length, 0);
-    const rivalLength = result.naturalRival?.length || 0;
-    const totalLength = bangerLength + bulletsLength + rivalLength;
+    // Only count the 3 bullets we display
+    const bulletsLength = result.roastBullets.slice(0, 3).reduce((acc, b) => acc + b.length, 0);
 
     // Determine font size tier based on total content length
     // Shorter content = larger fonts, longer content = smaller fonts
-    if (totalLength < 300) {
-      return { banger: "text-lg", bullet: "text-base", rival: "text-base", spacing: "space-y-4", padding: "p-3" };
-    } else if (totalLength < 450) {
-      return { banger: "text-base", bullet: "text-[15px]", rival: "text-sm", spacing: "space-y-3", padding: "p-2.5" };
-    } else if (totalLength < 600) {
-      return { banger: "text-[15px]", bullet: "text-sm", rival: "text-sm", spacing: "space-y-2.5", padding: "p-2" };
+    if (bulletsLength < 200) {
+      return { bullet: "text-lg", spacing: "space-y-5", padding: "p-3" };
+    } else if (bulletsLength < 350) {
+      return { bullet: "text-base", spacing: "space-y-4", padding: "p-2.5" };
+    } else if (bulletsLength < 500) {
+      return { bullet: "text-[15px]", spacing: "space-y-3", padding: "p-2" };
     } else {
-      return { banger: "text-sm", bullet: "text-[13px]", rival: "text-xs", spacing: "space-y-2", padding: "p-2" };
+      return { bullet: "text-sm", spacing: "space-y-2.5", padding: "p-2" };
     }
-  }, [result.bangerQuote, result.roastBullets, result.naturalRival]);
+  }, [result.roastBullets]);
 
   // Go straight to full results - no multi-step reveal
   return (
@@ -286,7 +284,7 @@ Get your PM card: ${shareUrl}
 
         {/* Right: Bento Glass Tiles - justify-between for flush alignment with card */}
         <div className="flex flex-col gap-3 w-full lg:flex-1 lg:h-[560px] lg:justify-between">
-          {/* The Roast - Combined banger quote + roast bullets */}
+          {/* The Roast - 3 high-impact bullet points only */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -298,9 +296,9 @@ Get your PM card: ${shareUrl}
               {/* Singed gradient accent line */}
               <div className="h-[2px] bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 shrink-0" />
 
-              <div className="p-5 flex-1 overflow-y-auto min-h-0 flex flex-col">
+              <div className="p-5 flex-1 flex flex-col justify-center">
                 {/* Header */}
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-5">
                   <div className="w-7 h-7 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
                     <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.5 1.5-4.5 3-6.5s3-4.5 3-7.5c0 0 1 2 2 4 .5-1 1-2 1-3 2.5 3.5 5 6.5 5 13 0 3.866-3.134 7-7 7zm0-2c2.761 0 5-2.239 5-5 0-2.5-1.5-5-3-7-.5 1-1 2-2 3-.5-1-1-2-1.5-3-1 1.5-2.5 3.5-2.5 7 0 2.761 2.239 5 5 5z"/>
@@ -309,19 +307,9 @@ Get your PM card: ${shareUrl}
                   <h3 className="text-base font-semibold text-white">The Roast</h3>
                 </div>
 
-                {/* Banger Quote */}
-                <div className={`flex items-start gap-3 mb-4 ${roastFontSizes.padding} rounded-lg bg-white/[0.03]`}>
-                  <svg className="w-4 h-4 text-orange-400 shrink-0 mt-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
-                  </svg>
-                  <p className={`${roastFontSizes.banger} text-white/90 font-medium leading-relaxed`}>
-                    {stripMarkdown(result.bangerQuote)}
-                  </p>
-                </div>
-
-                {/* Roast bullets */}
-                <div className={`${roastFontSizes.spacing} flex-1`}>
-                  {result.roastBullets.slice(1).map((bullet, index) => {
+                {/* Roast bullets - limit to 3 */}
+                <div className={`${roastFontSizes.spacing}`}>
+                  {result.roastBullets.slice(0, 3).map((bullet, index) => {
                     const heatLevel = index === 0 ? 3 : index === 1 ? 2 : 1;
                     return (
                       <motion.div
@@ -355,111 +343,113 @@ Get your PM card: ${shareUrl}
                     );
                   })}
                 </div>
-
-                {/* Natural Rival */}
-                {result.naturalRival && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.9 }}
-                    className="mt-4 pt-4 border-t border-white/[0.06]"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-md bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
-                        <svg className="w-3.5 h-3.5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                        </svg>
-                      </div>
-                      <div>
-                        <p className="text-xs uppercase tracking-wider text-red-400/70 font-medium mb-1">Natural Rival</p>
-                        <p className={`${roastFontSizes.rival} text-white/80 italic`}>
-                          &ldquo;{result.naturalRival}&rdquo;
-                        </p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
               </div>
             </div>
           </motion.div>
 
-          {/* Tile 3: CTA Buttons - Compact */}
+          {/* Natural Rival - Separate glassmorphism tag */}
+          {result.naturalRival && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="relative group shrink-0"
+            >
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/15 via-orange-500/15 to-red-500/15 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              <div className="relative px-4 py-3 rounded-xl bg-white/[0.03] backdrop-blur-xl border border-red-500/20 shadow-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-md bg-red-500/15 flex items-center justify-center shrink-0">
+                    <svg className="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                    </svg>
+                  </div>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-xs uppercase tracking-wider text-red-400/70 font-medium shrink-0">Rival:</span>
+                    <span className="text-sm text-white/80 italic truncate">{result.naturalRival}</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* CTA Buttons - Optimized */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.7, type: "spring", stiffness: 200, damping: 15 }}
             className="relative group shrink-0"
           >
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            <div className="relative p-3 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl space-y-2">
-              {/* Share to X - Primary CTA */}
-              <motion.button
-                onClick={shareToTwitter}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="w-full h-10 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
-              >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                </svg>
-                <span>Share on X</span>
-              </motion.button>
-
-              {/* Secondary buttons */}
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="relative p-3 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl">
+              {/* Primary row: Share on X + Get Yours (on share pages) */}
               <div className="flex gap-2">
+                <motion.button
+                  onClick={shareToTwitter}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex-1 h-11 px-4 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                  </svg>
+                  <span>Share on X</span>
+                </motion.button>
+                {isSharePage && (
+                  <motion.button
+                    onClick={onStartOver}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="h-11 px-5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all"
+                  >
+                    Get Yours
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    </svg>
+                  </motion.button>
+                )}
+              </div>
+
+              {/* Secondary row: Icon-only Save, Link, and New (non-share pages) */}
+              <div className="flex gap-2 mt-2">
                 <button
                   onClick={downloadCard}
-                  className="flex-1 h-9 px-3 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-white/[0.08] transition-colors"
+                  title="Save card"
+                  className="h-9 w-9 rounded-lg bg-white/[0.05] border border-white/10 text-white/60 flex items-center justify-center hover:bg-white/[0.08] hover:text-white/80 transition-all"
                 >
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  Save
                 </button>
                 <button
                   onClick={copyLink}
-                  className="flex-1 h-9 px-3 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-xs font-medium flex items-center justify-center gap-1.5 hover:bg-white/[0.08] transition-colors"
-                >
-                  {copied ? (
-                    <>
-                      <svg className="w-3.5 h-3.5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                      </svg>
-                      Link
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={onStartOver}
-                  className={`flex-1 h-9 px-3 rounded-xl text-xs font-medium flex items-center justify-center gap-1.5 transition-colors ${
-                    isSharePage
-                      ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#5558e3] hover:to-[#7c4fe0]"
-                      : "bg-white/[0.05] border border-white/10 text-white/70 hover:bg-white/[0.08]"
+                  title={copied ? "Copied!" : "Copy link"}
+                  className={`h-9 w-9 rounded-lg border flex items-center justify-center transition-all ${
+                    copied
+                      ? "bg-green-500/20 border-green-500/30 text-green-400"
+                      : "bg-white/[0.05] border-white/10 text-white/60 hover:bg-white/[0.08] hover:text-white/80"
                   }`}
                 >
-                  {isSharePage ? (
-                    <>
-                      Get Yours
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </>
+                  {copied ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
                   ) : (
-                    <>
-                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      New
-                    </>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
                   )}
                 </button>
+                {!isSharePage && (
+                  <button
+                    onClick={onStartOver}
+                    title="Start new roast"
+                    className="h-9 w-9 rounded-lg bg-white/[0.05] border border-white/10 text-white/60 flex items-center justify-center hover:bg-white/[0.08] hover:text-white/80 transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
+                )}
               </div>
             </div>
           </motion.div>
