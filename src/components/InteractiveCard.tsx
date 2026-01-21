@@ -158,12 +158,12 @@ export function HeroCard() {
           }}
           className="relative"
         >
-          {/* Front - absolute positioned */}
+          {/* Front - use opacity for visibility since backfaceVisibility breaks with HoloCard's nested 3D context */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 transition-opacity duration-150"
             style={{
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
+              opacity: isFlipped ? 0 : 1,
+              pointerEvents: isFlipped ? "none" : "auto",
             }}
           >
             <PokemonCard
@@ -181,12 +181,12 @@ export function HeroCard() {
             />
           </div>
 
-          {/* Back - absolute positioned, same size */}
+          {/* Back - use opacity for visibility since backfaceVisibility breaks with HoloCard's nested 3D context */}
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 transition-opacity duration-150"
             style={{
-              backfaceVisibility: "hidden",
-              WebkitBackfaceVisibility: "hidden",
+              opacity: isFlipped ? 1 : 0,
+              pointerEvents: isFlipped ? "auto" : "none",
               transform: "rotateY(180deg)",
             }}
           >

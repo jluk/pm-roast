@@ -250,13 +250,10 @@ function ExpandedCardView({
             >
               {/* Flippable Card Container - overflow-visible prevents hover clipping */}
               <div
-                className="cursor-pointer isolate overflow-visible"
+                className="cursor-pointer isolate overflow-visible w-full max-w-[320px] sm:max-w-[400px] aspect-[5/7]"
                 onClick={() => setIsFlipped(!isFlipped)}
                 style={{
                   perspective: "1000px",
-                  // Fixed dimensions to match card aspect ratio (2.5:3.5)
-                  width: 400,
-                  height: 560,
                 }}
               >
                 <motion.div
@@ -270,12 +267,12 @@ function ExpandedCardView({
                   }}
                   className="relative isolate"
                 >
-                  {/* Front of card */}
+                  {/* Front of card - use opacity for visibility since backfaceVisibility breaks with HoloCard's nested 3D context */}
                   <div
-                    className="absolute inset-0"
+                    className="absolute inset-0 transition-opacity duration-150"
                     style={{
-                      backfaceVisibility: "hidden",
-                      WebkitBackfaceVisibility: "hidden",
+                      opacity: isFlipped ? 0 : 1,
+                      pointerEvents: isFlipped ? "none" : "auto",
                     }}
                   >
                     <PokemonCard
@@ -293,12 +290,12 @@ function ExpandedCardView({
                     />
                   </div>
 
-                  {/* Back of card */}
+                  {/* Back of card - use opacity for visibility since backfaceVisibility breaks with HoloCard's nested 3D context */}
                   <div
-                    className="absolute inset-0"
+                    className="absolute inset-0 transition-opacity duration-150"
                     style={{
-                      backfaceVisibility: "hidden",
-                      WebkitBackfaceVisibility: "hidden",
+                      opacity: isFlipped ? 1 : 0,
+                      pointerEvents: isFlipped ? "auto" : "none",
                       transform: "rotateY(180deg)",
                     }}
                   >
@@ -322,7 +319,7 @@ function ExpandedCardView({
             </motion.div>
 
             {/* Right: Bento Glass Tiles - justify-between for flush alignment with card */}
-            <div className="flex flex-col gap-4 w-full lg:flex-1 lg:h-[560px] lg:justify-between">
+            <div className="flex flex-col gap-4 w-full lg:flex-1 lg:h-auto xl:h-[560px] lg:justify-between">
               {/* Tile 1: Legend Info (company, title, rarity, score) */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
@@ -866,11 +863,11 @@ export function FamousCardsGallery() {
 
       {/* First Row - Always visible */}
       <div className="px-4 md:px-8 md:max-w-7xl md:mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-6">
           {firstRowCards.map((card) => (
             <div
               key={card.id}
-              className="w-full max-w-[320px] mx-auto md:max-w-none"
+              className="w-full max-w-[300px] mx-auto sm:max-w-none"
             >
               <GridCard
                 card={card}
@@ -1048,7 +1045,7 @@ export function FamousCardsGallery() {
               </motion.div>
 
               {/* Second Row Cards */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 pt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 pt-8">
                 {secondRowCards.map((card, index) => (
                   <RevealedCard
                     key={card.id}
