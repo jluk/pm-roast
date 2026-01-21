@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { RoastResult, DreamRole, DREAM_ROLES } from "@/lib/types";
 import { generateShareUrl } from "@/lib/share";
@@ -176,6 +176,26 @@ Get your PM card: ${shareUrl}
   const rarity = getCardRarity(result.careerScore);
   const rarityInfo = RARITY_INFO[rarity];
 
+  // Calculate dynamic font sizes for roast section based on content length
+  const roastFontSizes = useMemo(() => {
+    const bangerLength = result.bangerQuote?.length || 0;
+    const bulletsLength = result.roastBullets.slice(1).reduce((acc, b) => acc + b.length, 0);
+    const rivalLength = result.naturalRival?.length || 0;
+    const totalLength = bangerLength + bulletsLength + rivalLength;
+
+    // Determine font size tier based on total content length
+    // Shorter content = larger fonts, longer content = smaller fonts
+    if (totalLength < 300) {
+      return { banger: "text-lg", bullet: "text-base", rival: "text-base", spacing: "space-y-4", padding: "p-3" };
+    } else if (totalLength < 450) {
+      return { banger: "text-base", bullet: "text-[15px]", rival: "text-sm", spacing: "space-y-3", padding: "p-2.5" };
+    } else if (totalLength < 600) {
+      return { banger: "text-[15px]", bullet: "text-sm", rival: "text-sm", spacing: "space-y-2.5", padding: "p-2" };
+    } else {
+      return { banger: "text-sm", bullet: "text-[13px]", rival: "text-xs", spacing: "space-y-2", padding: "p-2" };
+    }
+  }, [result.bangerQuote, result.roastBullets, result.naturalRival]);
+
   // Go straight to full results - no multi-step reveal
   return (
     <motion.div
@@ -278,29 +298,29 @@ Get your PM card: ${shareUrl}
               {/* Singed gradient accent line */}
               <div className="h-[2px] bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 shrink-0" />
 
-              <div className="p-4 flex-1 overflow-y-auto min-h-0">
+              <div className="p-5 flex-1 overflow-y-auto min-h-0 flex flex-col">
                 {/* Header */}
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-6 h-6 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
-                    <svg className="w-3.5 h-3.5 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-7 h-7 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
+                    <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.5 1.5-4.5 3-6.5s3-4.5 3-7.5c0 0 1 2 2 4 .5-1 1-2 1-3 2.5 3.5 5 6.5 5 13 0 3.866-3.134 7-7 7zm0-2c2.761 0 5-2.239 5-5 0-2.5-1.5-5-3-7-.5 1-1 2-2 3-.5-1-1-2-1.5-3-1 1.5-2.5 3.5-2.5 7 0 2.761 2.239 5 5 5z"/>
                     </svg>
                   </div>
-                  <h3 className="text-sm font-semibold text-white">The Roast</h3>
+                  <h3 className="text-base font-semibold text-white">The Roast</h3>
                 </div>
 
                 {/* Banger Quote */}
-                <div className="flex items-start gap-2 mb-4 p-2 rounded-lg bg-white/[0.03]">
-                  <svg className="w-3.5 h-3.5 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <div className={`flex items-start gap-3 mb-4 ${roastFontSizes.padding} rounded-lg bg-white/[0.03]`}>
+                  <svg className="w-4 h-4 text-orange-400 shrink-0 mt-1" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
                   </svg>
-                  <p className="text-sm text-white/90 font-medium leading-relaxed">
+                  <p className={`${roastFontSizes.banger} text-white/90 font-medium leading-relaxed`}>
                     {stripMarkdown(result.bangerQuote)}
                   </p>
                 </div>
 
                 {/* Roast bullets */}
-                <div className="space-y-2">
+                <div className={`${roastFontSizes.spacing} flex-1`}>
                   {result.roastBullets.slice(1).map((bullet, index) => {
                     const heatLevel = index === 0 ? 3 : index === 1 ? 2 : 1;
                     return (
@@ -309,14 +329,14 @@ Get your PM card: ${shareUrl}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 + index * 0.1 }}
-                        className="flex gap-2 items-start p-2 rounded-lg hover:bg-white/[0.02] transition-all duration-300"
+                        className={`flex gap-3 items-start ${roastFontSizes.padding} rounded-lg hover:bg-white/[0.02] transition-all duration-300`}
                       >
-                        {/* Heat Meter - compact */}
-                        <div className="flex flex-col gap-0.5 shrink-0 mt-1">
+                        {/* Heat Meter */}
+                        <div className="flex flex-col gap-0.5 shrink-0 mt-1.5">
                           {[3, 2, 1].map((level) => (
                             <div
                               key={level}
-                              className={`w-2 h-1 rounded-sm transition-all ${
+                              className={`w-2.5 h-1.5 rounded-sm transition-all ${
                                 level <= heatLevel
                                   ? level === 3
                                     ? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.6)]"
@@ -328,7 +348,7 @@ Get your PM card: ${shareUrl}
                             />
                           ))}
                         </div>
-                        <p className="text-xs text-zinc-300/90 leading-relaxed">
+                        <p className={`${roastFontSizes.bullet} text-zinc-300/90 leading-relaxed`}>
                           {stripMarkdown(bullet)}
                         </p>
                       </motion.div>
@@ -342,17 +362,17 @@ Get your PM card: ${shareUrl}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.9 }}
-                    className="mt-3 pt-3 border-t border-white/[0.06]"
+                    className="mt-4 pt-4 border-t border-white/[0.06]"
                   >
-                    <div className="flex items-start gap-2">
-                      <div className="w-5 h-5 rounded-md bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
-                        <svg className="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 24 24">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-md bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                        <svg className="w-3.5 h-3.5 text-red-400" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                         </svg>
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase tracking-wider text-red-400/70 font-medium mb-0.5">Natural Rival</p>
-                        <p className="text-xs text-white/80 italic">
+                        <p className="text-xs uppercase tracking-wider text-red-400/70 font-medium mb-1">Natural Rival</p>
+                        <p className={`${roastFontSizes.rival} text-white/80 italic`}>
                           &ldquo;{result.naturalRival}&rdquo;
                         </p>
                       </div>
