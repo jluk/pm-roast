@@ -23,34 +23,44 @@ const X_HANDLE_REGEX = /^@?[a-zA-Z0-9_]{1,15}$/;
 const PLACEHOLDER_EXAMPLES = [
   { text: "linkedin.com/in/yourprofile", type: "linkedin" as const },
   { text: "yoursite.com/about", type: "website" as const },
+  { text: "Elon Musk", type: "legend" as const },
+  { text: "Nikita Bier", type: "legend" as const },
 ];
 
 // Auto-detect input type from value
-function detectInputType(value: string): "linkedin" | "website" | "x" | null {
-  const trimmed = value.trim().toLowerCase();
+function detectInputType(value: string): "linkedin" | "website" | "x" | "legend" | null {
+  const trimmed = value.trim();
+  const trimmedLower = trimmed.toLowerCase();
   if (!trimmed) return null;
 
+  // URL patterns take priority
   // Check for X/Twitter patterns
-  if (trimmed.startsWith("@") || trimmed.includes("twitter.com") || trimmed.includes("x.com")) {
+  if (trimmedLower.startsWith("@") || trimmedLower.includes("twitter.com") || trimmedLower.includes("x.com")) {
     return "x";
   }
 
   // Check for LinkedIn
-  if (trimmed.includes("linkedin.com")) {
+  if (trimmedLower.includes("linkedin.com")) {
     return "linkedin";
   }
 
   // Check for any URL-like pattern
-  if (trimmed.includes(".") || trimmed.startsWith("http")) {
+  if (trimmedLower.includes(".") || trimmedLower.startsWith("http")) {
     return "website";
   }
 
-  // Could be an X handle without @ if it looks like a username
-  if (/^[a-zA-Z0-9_]{1,15}$/.test(trimmed) && trimmed.length >= 2) {
-    return "x"; // Likely an X handle
+  // Legend search: requires first and last name (two words minimum)
+  // This triggers when user types something like "Sam Altman" or "Elon Musk"
+  if (/^[A-Za-z]+\s+[A-Za-z]+/.test(trimmed)) {
+    return "legend";
   }
 
   return null;
+}
+
+// Check if input is an X/Twitter handle (starts with @)
+function isXHandle(value: string): boolean {
+  return value.trim().startsWith("@");
 }
 
 type InputMode = "magic" | "manual";
@@ -66,7 +76,7 @@ export default function Home() {
   // Unified smart input state
   const [smartInput, setSmartInput] = useState("");
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
-  const [detectedType, setDetectedType] = useState<"linkedin" | "website" | "x" | null>(null);
+  const [detectedType, setDetectedType] = useState<"linkedin" | "website" | "x" | "legend" | null>(null);
   const [profileText, setProfileText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -167,6 +177,27 @@ export default function Home() {
     error: null,
   });
 
+  // Legend preview state (for celebrity verification)
+  const [legendPreview, setLegendPreview] = useState<{
+    loading: boolean;
+    verified: boolean;
+    isFamous: boolean;
+    name: string | null;
+    reason: string | null;
+    imageUrl: string | null;
+    wikipediaExtract: string | null;
+    error: string | null;
+  }>({
+    loading: false,
+    verified: false,
+    isFamous: false,
+    name: null,
+    reason: null,
+    imageUrl: null,
+    wikipediaExtract: null,
+    error: null,
+  });
+
   // Resume preview state
   const [resumePreview, setResumePreview] = useState<{
     loading: boolean;
@@ -245,7 +276,10 @@ export default function Home() {
     setDetectedType(detected);
 
     if (detected) {
-      setUrlType(detected);
+      // Don't change urlType for legend mode - keep existing URL type
+      if (detected !== "legend") {
+        setUrlType(detected);
+      }
       // Sync to the appropriate state variable
       if (detected === "linkedin") {
         setLinkedinUrl(smartInput);
@@ -259,6 +293,10 @@ export default function Home() {
         setXHandle(smartInput);
         setLinkedinUrl("");
         setWebsiteUrl("");
+      } else if (detected === "legend") {
+        setLinkedinUrl("");
+        setWebsiteUrl("");
+        setXHandle("");
       }
     }
   }, [smartInput]);
@@ -497,6 +535,57 @@ export default function Home() {
 
     return () => clearTimeout(timeoutId);
   }, [xHandle, urlType]);
+
+  // Verify legend when name is entered
+  useEffect(() => {
+    if (detectedType !== "legend") {
+      setLegendPreview(prev => ({ ...prev, verified: false, loading: false }));
+      return;
+    }
+
+    const name = smartInput.trim();
+    if (!name || !/^[A-Za-z]+\s+[A-Za-z]+/.test(name)) {
+      setLegendPreview(prev => ({ ...prev, verified: false, loading: false, error: null }));
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setLegendPreview(prev => ({ ...prev, loading: true, error: null }));
+
+      try {
+        const response = await fetch("/api/verify-legend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name }),
+        });
+
+        const data = await response.json();
+
+        setLegendPreview({
+          loading: false,
+          verified: true,
+          isFamous: data.isFamous === true,
+          name: data.name || name,
+          reason: data.reason || null,
+          imageUrl: data.imageUrl || null,
+          wikipediaExtract: data.wikipediaExtract || null,
+          error: data.isFamous ? null : "That's not a legend.",
+        });
+      } catch {
+        setLegendPreview(prev => ({
+          ...prev,
+          loading: false,
+          verified: true,
+          isFamous: false,
+          imageUrl: null,
+          wikipediaExtract: null,
+          error: "Failed to verify",
+        }));
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [smartInput, detectedType]);
 
   // Analyze resume when file is selected
   useEffect(() => {
@@ -819,6 +908,46 @@ export default function Home() {
     }
   };
 
+  // Handle searching for any celebrity by name
+  const handleLegendSearch = async (name: string) => {
+    if (!dreamRole || !name.trim()) return;
+
+    setIsLoadingLinkedin(true);
+    setStep("analyzing");
+    setError(null);
+
+    try {
+      const response = await fetch("/api/roast-legend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: legendPreview.name || name.trim(),
+          dreamRole,
+          imageUrl: legendPreview.imageUrl,
+          wikipediaExtract: legendPreview.wikipediaExtract,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        // Handle "not a legend" error gracefully
+        setError(data.error || "Failed to generate roast");
+        setStep("upload");
+        return;
+      }
+
+      setResult(data.card);
+      setCardId(data.cardId || null);
+      setStep("results");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setStep("upload");
+    } finally {
+      setIsLoadingLinkedin(false);
+    }
+  };
+
   // Direct analyze function that takes data as params (for inline flow)
   const handleAnalyzeWithData = async (text: string, picUrl: string | null) => {
     if (!dreamRole) return;
@@ -949,6 +1078,7 @@ export default function Home() {
     setFile(null);
     setLinkedinUrl("");
     setWebsiteUrl("");
+    setSmartInput("");
     setProfileText("");
     setProfilePicUrl(null);
     setUseProfilePic(true);
@@ -981,6 +1111,16 @@ export default function Home() {
       pageCount: 0,
       textLength: 0,
       qualityScore: 0,
+      error: null,
+    });
+    setLegendPreview({
+      loading: false,
+      verified: false,
+      isFamous: false,
+      name: null,
+      reason: null,
+      imageUrl: null,
+      wikipediaExtract: null,
       error: null,
     });
     setDreamRole("founder");
@@ -1178,6 +1318,10 @@ export default function Home() {
                                   <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
                                   </svg>
+                                ) : detectedType === "legend" ? (
+                                  <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21L12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z"/>
+                                  </svg>
                                 ) : (
                                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -1193,7 +1337,7 @@ export default function Home() {
                             value={smartInput}
                             onChange={(e) => setSmartInput(e.target.value)}
                             className={`w-full h-12 pl-11 bg-white/10 backdrop-blur-sm border rounded-lg text-base text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/50 focus:border-transparent transition-all ${
-                              isValidUrl ? "border-green-500/50 pr-10" : "border-white/20 pr-4"
+                              isValidUrl ? "border-green-500/50 pr-10" : detectedType === "legend" ? "border-yellow-500/50 pr-10" : "border-white/20 pr-4"
                             }`}
                           />
 
@@ -1227,67 +1371,100 @@ export default function Home() {
                               </svg>
                             </motion.div>
                           )}
+
+                          {/* Sparkle icon for legend mode */}
+                          {detectedType === "legend" && !isValidUrl && (
+                            <motion.div
+                              initial={{ opacity: 0, scale: 0.5 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-yellow-400"
+                            >
+                              <motion.svg
+                                className="w-5 h-5"
+                                fill="currentColor"
+                                viewBox="0 0 24 24"
+                                animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
+                                transition={{ duration: 2, repeat: Infinity }}
+                              >
+                                <path d="M12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21L12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z"/>
+                              </motion.svg>
+                            </motion.div>
+                          )}
                         </div>
 
                         {/* Supported platform badges */}
-                        <div className="flex items-center justify-center gap-3">
-                          {/* LinkedIn badge */}
-                          <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 ${
-                            detectedType === "linkedin"
-                              ? "bg-[#0A66C2]/20 border border-[#0A66C2]/40"
-                              : "bg-white/5 border border-transparent"
-                          }`}>
-                            <svg className={`w-3.5 h-3.5 transition-colors duration-200 ${
-                              detectedType === "linkedin" ? "text-[#0A66C2]" : "text-white/30"
-                            }`} fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                            </svg>
-                            <span className={`text-[10px] font-medium transition-colors duration-200 ${
-                              detectedType === "linkedin" ? "text-[#0A66C2]" : "text-white/30"
-                            }`}>LinkedIn</span>
+                        <div className="space-y-2">
+                          {/* Row 1: LinkedIn, Portfolio, Resume */}
+                          <div className="flex items-center justify-center gap-3">
+                            {/* LinkedIn badge */}
+                            <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 ${
+                              detectedType === "linkedin"
+                                ? "bg-[#0A66C2]/20 border border-[#0A66C2]/40"
+                                : "bg-white/5 border border-transparent"
+                            }`}>
+                              <svg className={`w-3.5 h-3.5 transition-colors duration-200 ${
+                                detectedType === "linkedin" ? "text-[#0A66C2]" : "text-white/30"
+                              }`} fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                              </svg>
+                              <span className={`text-[10px] font-medium transition-colors duration-200 ${
+                                detectedType === "linkedin" ? "text-[#0A66C2]" : "text-white/30"
+                              }`}>LinkedIn</span>
+                            </div>
+
+                            {/* Portfolio badge */}
+                            <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 ${
+                              detectedType === "website"
+                                ? "bg-emerald-500/20 border border-emerald-500/40"
+                                : "bg-white/5 border border-transparent"
+                            }`}>
+                              <svg className={`w-3.5 h-3.5 transition-colors duration-200 ${
+                                detectedType === "website" ? "text-emerald-400" : "text-white/30"
+                              }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                              </svg>
+                              <span className={`text-[10px] font-medium transition-colors duration-200 ${
+                                detectedType === "website" ? "text-emerald-400" : "text-white/30"
+                              }`}>Portfolio</span>
+                            </div>
+
+                            {/* Resume upload button */}
+                            <button
+                              onClick={() => setUrlType(urlType === "resume" ? "linkedin" : "resume")}
+                              className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 ${
+                                urlType === "resume"
+                                  ? "bg-purple-500/20 border border-purple-500/40"
+                                  : "bg-white/5 border border-transparent hover:bg-white/10"
+                              }`}
+                            >
+                              <svg className={`w-3.5 h-3.5 transition-colors duration-200 ${
+                                urlType === "resume" ? "text-purple-400" : "text-white/30"
+                              }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                              <span className={`text-[10px] font-medium transition-colors duration-200 ${
+                                urlType === "resume" ? "text-purple-400" : "text-white/30"
+                              }`}>Resume</span>
+                            </button>
                           </div>
 
-                          {/* Portfolio badge */}
-                          <div className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 ${
-                            detectedType === "website"
-                              ? "bg-emerald-500/20 border border-emerald-500/40"
-                              : "bg-white/5 border border-transparent"
-                          }`}>
-                            <svg className={`w-3.5 h-3.5 transition-colors duration-200 ${
-                              detectedType === "website" ? "text-emerald-400" : "text-white/30"
-                            }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-                            </svg>
-                            <span className={`text-[10px] font-medium transition-colors duration-200 ${
-                              detectedType === "website" ? "text-emerald-400" : "text-white/30"
-                            }`}>Portfolio</span>
-                          </div>
-
-                          {/* Resume upload button */}
-                          <button
-                            onClick={() => setUrlType(urlType === "resume" ? "linkedin" : "resume")}
-                            className={`flex items-center gap-1.5 px-2 py-1 rounded-md transition-all duration-200 ${
-                              urlType === "resume"
-                                ? "bg-purple-500/20 border border-purple-500/40"
-                                : "bg-white/5 border border-transparent hover:bg-white/10"
-                            }`}
-                          >
-                            <svg className={`w-3.5 h-3.5 transition-colors duration-200 ${
-                              urlType === "resume" ? "text-purple-400" : "text-white/30"
-                            }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                            </svg>
-                            <span className={`text-[10px] font-medium transition-colors duration-200 ${
-                              urlType === "resume" ? "text-purple-400" : "text-white/30"
-                            }`}>Resume</span>
-                          </button>
-
-                          {/* X badge - under construction */}
-                          <div className="flex items-center gap-1 px-2 py-1 rounded-md bg-white/5 border border-transparent opacity-40 cursor-not-allowed" title="Coming soon">
-                            <svg className="w-3.5 h-3.5 text-white/30" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                            </svg>
-                            <span className="text-[8px]">🚧</span>
+                          {/* Row 2: Legend badge (full width) */}
+                          <div className="flex justify-center">
+                            <div className={`flex items-center justify-center gap-2 px-4 py-1.5 rounded-md transition-all duration-200 ${
+                              detectedType === "legend"
+                                ? "bg-yellow-500/20 border border-yellow-500/40"
+                                : "bg-white/5 border border-transparent"
+                            }`}>
+                              <svg className={`w-3.5 h-3.5 transition-colors duration-200 ${
+                                detectedType === "legend" ? "text-yellow-400" : "text-white/30"
+                              }`} fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21L12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z"/>
+                              </svg>
+                              <span className={`text-[10px] font-medium transition-colors duration-200 ${
+                                detectedType === "legend" ? "text-yellow-400" : "text-white/30"
+                              }`}>Roast a Celebrity</span>
+                              <span className="text-[8px] font-bold px-1 py-0.5 bg-yellow-500/30 text-yellow-300 rounded uppercase">Beta</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1643,6 +1820,103 @@ export default function Home() {
                         )}
                       </AnimatePresence>
 
+                      {/* X/Twitter Under Construction Message */}
+                      <AnimatePresence>
+                        {isXHandle(smartInput) && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-3 bg-white/5 border border-white/10 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center shrink-0">
+                                  <svg className="w-5 h-5 text-white/50" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                                  </svg>
+                                </div>
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm font-medium text-white">X Support Coming Soon</p>
+                                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-amber-500/30 text-amber-300 rounded">SOON</span>
+                                  </div>
+                                  <p className="text-[10px] text-white/50">X/Twitter profile roasting is under construction. Check back later!</p>
+                                </div>
+                              </div>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Legend Preview Card */}
+                      <AnimatePresence>
+                        {detectedType === "legend" && (legendPreview.loading || legendPreview.verified) && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            className="overflow-hidden"
+                          >
+                            <div className="p-3 bg-white/5 border border-white/10 rounded-lg">
+                              {legendPreview.loading ? (
+                                <div className="flex items-center justify-center gap-2 py-2">
+                                  <svg className="animate-spin h-4 w-4 text-yellow-400" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                  </svg>
+                                  <span className="text-xs text-white/60">Verifying legend status...</span>
+                                </div>
+                              ) : legendPreview.error ? (
+                                <div className="flex items-center gap-2 text-red-400">
+                                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                  <span className="text-xs font-medium">{legendPreview.error}</span>
+                                </div>
+                              ) : legendPreview.isFamous ? (
+                                <div className="space-y-2">
+                                  {/* Legend Verified */}
+                                  <div className="flex items-center gap-2">
+                                    {/* Show Wikipedia image if available */}
+                                    {legendPreview.imageUrl ? (
+                                      <img
+                                        src={legendPreview.imageUrl}
+                                        alt={legendPreview.name || ""}
+                                        className="w-10 h-10 rounded-full object-cover border-2 border-yellow-500/50 shrink-0"
+                                      />
+                                    ) : (
+                                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white shrink-0">
+                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                          <path d="M12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21L12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z"/>
+                                        </svg>
+                                      </div>
+                                    )}
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-center gap-1.5">
+                                        <p className="text-sm font-medium text-white">{legendPreview.name}</p>
+                                        <span className="text-[8px] font-bold px-1 py-0.5 bg-yellow-500/30 text-yellow-300 rounded uppercase">Beta</span>
+                                      </div>
+                                      {legendPreview.reason && (
+                                        <p className="text-[10px] text-white/50 truncate">{legendPreview.reason}</p>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-500/15 text-green-400 border border-green-500/30">
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                      </svg>
+                                      Verified
+                                    </div>
+                                  </div>
+                                </div>
+                              ) : null}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
                       {/* Resume Preview Card */}
                       <AnimatePresence>
                         {urlType === "resume" && file && (resumePreview.loading || resumePreview.analyzed) && (
@@ -1849,8 +2123,8 @@ export default function Home() {
 
                       {/* Submit Button */}
                       <Button
-                        onClick={urlType === "resume" ? handleResumeSubmit : handleMagicLinkSubmit}
-                        disabled={urlType === "resume" ? (!file || !dreamRole || isLoadingLinkedin) : (!isValidUrl || !dreamRole || isLoadingLinkedin)}
+                        onClick={urlType === "resume" ? handleResumeSubmit : detectedType === "legend" ? () => handleLegendSearch(smartInput) : handleMagicLinkSubmit}
+                        disabled={isXHandle(smartInput) || (urlType === "resume" ? (!file || !dreamRole || isLoadingLinkedin) : detectedType === "legend" ? (!legendPreview.verified || !legendPreview.isFamous || !dreamRole || isLoadingLinkedin) : (!isValidUrl || !dreamRole || isLoadingLinkedin))}
                         className="w-full h-12 bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 text-white font-bold text-base hover:from-orange-600 hover:via-red-600 hover:to-pink-600 transition-all shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:scale-[1.02] disabled:opacity-50 disabled:shadow-none disabled:hover:scale-100"
                       >
                         {isLoadingLinkedin ? (
@@ -1860,6 +2134,10 @@ export default function Home() {
                               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                             </svg>
                             Analyzing...
+                          </span>
+                        ) : detectedType === "legend" ? (
+                          <span className="flex items-center gap-2">
+                            ✨ Roast Celebrity
                           </span>
                         ) : (
                           <span className="flex items-center gap-2">

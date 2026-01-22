@@ -1520,3 +1520,22 @@ export function getRandomFamousCard(): FamousCard {
 export function getFamousCardById(id: string): FamousCard | undefined {
   return FAMOUS_CARDS.find(card => card.id === id);
 }
+
+// Search famous cards by name (case-insensitive fuzzy match)
+export function searchFamousCards(query: string): FamousCard[] {
+  const normalizedQuery = query.toLowerCase().trim();
+  if (!normalizedQuery) return [];
+
+  return FAMOUS_CARDS.filter(card => {
+    const name = card.name.toLowerCase();
+    const company = card.company.toLowerCase();
+    // Match by name or company
+    return name.includes(normalizedQuery) || company.includes(normalizedQuery);
+  }).slice(0, 5); // Return top 5 matches
+}
+
+// Get famous card by exact name match (case-insensitive)
+export function getFamousCardByName(name: string): FamousCard | undefined {
+  const normalizedName = name.toLowerCase().trim();
+  return FAMOUS_CARDS.find(card => card.name.toLowerCase() === normalizedName);
+}
