@@ -6,7 +6,7 @@ export const runtime = "edge";
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
-    const cardId = url.searchParams.get("cardId");
+    const cardId = url.searchParams.get("cid");
 
     // If no card ID, show fallback
     if (!cardId) {
