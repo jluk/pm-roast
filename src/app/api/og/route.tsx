@@ -70,16 +70,6 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-// Element type colors
-const PM_ELEMENTS: Record<string, { color: string; bgStart: string; bgEnd: string }> = {
-  data: { color: "#3b82f6", bgStart: "#1e3a8a", bgEnd: "#2563eb" },
-  chaos: { color: "#ef4444", bgStart: "#7f1d1d", bgEnd: "#dc2626" },
-  strategy: { color: "#8b5cf6", bgStart: "#4c1d95", bgEnd: "#7c3aed" },
-  shipping: { color: "#22c55e", bgStart: "#14532d", bgEnd: "#16a34a" },
-  politics: { color: "#f59e0b", bgStart: "#78350f", bgEnd: "#d97706" },
-  vision: { color: "#ec4899", bgStart: "#831843", bgEnd: "#db2777" },
-};
-
 // Cache headers for OG images
 const OG_CACHE_HEADERS = {
   'Cache-Control': 'public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400',
@@ -131,18 +121,33 @@ export async function GET(request: NextRequest) {
     }
 
     if (!card) {
-      return getFallbackImage();
+      // Return debug info as image
+      return new ImageResponse(
+        (
+          <div
+            style={{
+              height: "100%",
+              width: "100%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "#0a0a0a",
+              color: "white",
+            }}
+          >
+            <div style={{ fontSize: 32, fontWeight: "bold" }}>Card not found</div>
+            <div style={{ fontSize: 18, color: "#a3a3a3", marginTop: 16 }}>ID: {cardId || "none"}</div>
+            <div style={{ fontSize: 18, color: "#a3a3a3", marginTop: 8 }}>Base: {baseUrl}</div>
+          </div>
+        ),
+        { width: 1200, height: 630, headers: OG_CACHE_HEADERS }
+      );
     }
 
-    const element = PM_ELEMENTS[card.el] || PM_ELEMENTS.chaos;
-    const move1 = card.m?.[0];
-    const move2 = card.m?.[1];
     const archetypeName = stripMarkdown(card.n || "Unknown");
-    const description = stripMarkdown(card.d || "");
-    const quote = stripMarkdown(card.q || "").slice(0, 100);
-    const elementLabel = (card.el || "chaos").charAt(0).toUpperCase() + (card.el || "chaos").slice(1);
 
-    // Minimal test version
+    // Minimal test version - card found
     return new ImageResponse(
       (
         <div
@@ -157,9 +162,9 @@ export async function GET(request: NextRequest) {
             color: "white",
           }}
         >
-          <div style={{ fontSize: 64 }}>{card.e}</div>
+          <div style={{ fontSize: 64 }}>{card.e || "?"}</div>
           <div style={{ fontSize: 48, fontWeight: "bold", marginTop: 20 }}>{archetypeName}</div>
-          <div style={{ fontSize: 72, fontWeight: "bold", color: "#ef4444", marginTop: 20 }}>{card.s}/100</div>
+          <div style={{ fontSize: 72, fontWeight: "bold", color: "#ef4444", marginTop: 20 }}>{card.s || 0}/100</div>
           <div style={{ fontSize: 24, color: "#a3a3a3", marginTop: 20 }}>pmroast.com</div>
         </div>
       ),
