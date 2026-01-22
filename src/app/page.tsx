@@ -11,6 +11,7 @@ import { ExampleGallery } from "@/components/ExampleGallery";
 import { FamousCardsGallery } from "@/components/FamousCardsGallery";
 import { Step, DreamRole, RoastResult, DREAM_ROLES } from "@/lib/types";
 import { HeroCard } from "@/components/InteractiveCard";
+import { FAMOUS_CARDS } from "@/lib/famous-cards";
 
 // LinkedIn URL validation regex
 const LINKEDIN_URL_REGEX = /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[\w-]+\/?$/i;
@@ -31,12 +32,25 @@ function logUsage(type: UsageType, input?: string, success?: boolean) {
   });
 }
 
-// Rotating placeholder examples
+// Shuffle array helper
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+// Get shuffled legend names from Mt. Roastmore
+const LEGEND_NAMES = shuffleArray(FAMOUS_CARDS.map(card => card.name));
+
+// Rotating placeholder examples - mix URLs with random legend names
 const PLACEHOLDER_EXAMPLES = [
   { text: "linkedin.com/in/yourprofile", type: "linkedin" as const },
+  ...LEGEND_NAMES.slice(0, 8).map(name => ({ text: name, type: "legend" as const })),
   { text: "yoursite.com/about", type: "website" as const },
-  { text: "Elon Musk", type: "legend" as const },
-  { text: "Nikita Bier", type: "legend" as const },
+  ...LEGEND_NAMES.slice(8, 16).map(name => ({ text: name, type: "legend" as const })),
 ];
 
 // Auto-detect input type from value
