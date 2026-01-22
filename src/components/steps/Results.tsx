@@ -422,7 +422,7 @@ Get your PM card: ${shareUrl}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.7, type: "spring", stiffness: 200, damping: 15 }}
-            className="relative group shrink-0"
+            className="relative group shrink-0 z-20"
           >
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500/20 via-indigo-500/20 to-purple-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             <div className="relative p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl space-y-3">
