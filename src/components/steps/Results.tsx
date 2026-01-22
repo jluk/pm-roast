@@ -163,11 +163,12 @@ Get your PM card: ${shareUrl}
       const effectOverlays = card.querySelectorAll('[style*="pointer-events: none"]');
       const originalStyles: string[] = [];
 
-      // Hide effect overlays by setting opacity to 0
+      // Hide effect overlays by setting opacity to 0 and removing boxShadow
       effectOverlays.forEach((overlay, i) => {
         const el = overlay as HTMLElement;
         originalStyles[i] = el.style.cssText;
         el.style.opacity = '0';
+        el.style.boxShadow = 'none';
       });
 
       // Capture the card without effects
