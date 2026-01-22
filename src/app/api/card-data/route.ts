@@ -36,6 +36,8 @@ export async function GET(request: NextRequest) {
       })),
       w: result.archetype.weakness,
       st: result.archetype.stage,
+      img: result.archetypeImage,
+      userName: result.userName,
     });
   } catch (error) {
     console.error("Failed to fetch card data:", error);
