@@ -1,39 +1,39 @@
 import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
+import { kv } from "@vercel/kv";
 
 export const runtime = "edge";
 
-interface OGCardData {
-  n: string;  // archetype name
-  d: string;  // description
-  e: string;  // emoji
-  s: number;  // score
-  el: string; // element
-  q: string;  // banger quote
-  m: { n: string; c: number; d: number }[];  // moves
-  w: string;  // weakness
-  st: string; // stage
+interface StoredCard {
+  result: {
+    archetype: {
+      name: string;
+      description: string;
+      emoji: string;
+      element: string;
+      weakness?: string;
+      stage?: string;
+    };
+    careerScore: number;
+    bangerQuote?: string;
+    moves?: { name: string; energyCost: number; damage: number }[];
+  };
+  dreamRole: string;
+  createdAt: number;
+  isLegend?: boolean;
 }
 
-// Decode card data from URL-safe base64
-function decodeCardData(encoded: string): OGCardData | null {
+// Fetch card from KV storage
+async function getCardFromKV(cardId: string): Promise<StoredCard | null> {
   try {
-    // Convert URL-safe base64 back to regular base64
-    let base64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
-    // Add padding if needed
-    while (base64.length % 4) {
-      base64 += "=";
+    const data = await kv.get<string>(`card:${cardId}`);
+    if (!data) return null;
+    if (typeof data === 'string') {
+      return JSON.parse(data);
     }
-    // Decode base64 to UTF-8 string
-    const binaryString = atob(base64);
-    const utf8Bytes = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      utf8Bytes[i] = binaryString.charCodeAt(i);
-    }
-    const json = new TextDecoder().decode(utf8Bytes);
-    return JSON.parse(json);
-  } catch (err) {
-    console.error("Failed to decode card data:", err);
+    return data as unknown as StoredCard;
+  } catch (error) {
+    console.error("Failed to retrieve card from KV:", error);
     return null;
   }
 }
@@ -41,10 +41,10 @@ function decodeCardData(encoded: string): OGCardData | null {
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
-    const data = url.searchParams.get("data");
+    const cardId = url.searchParams.get("id");
 
-    // If no data param, show fallback
-    if (!data) {
+    // If no card ID, show fallback
+    if (!cardId) {
       return new ImageResponse(
         (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", backgroundColor: "#0a0a0a", color: "white" }}>
@@ -56,32 +56,34 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Decode card data from URL
-    const card = decodeCardData(data);
+    // Fetch card from KV storage
+    const storedCard = await getCardFromKV(cardId);
 
-    // If decoding failed, show error
-    if (!card) {
+    // If card not found, show fallback
+    if (!storedCard) {
       return new ImageResponse(
         (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", backgroundColor: "#0a0a0a", color: "white" }}>
             <div style={{ fontSize: 48, fontWeight: 700 }}>PM Roast</div>
-            <div style={{ fontSize: 24, color: "#888", marginTop: 16 }}>Card decode failed</div>
+            <div style={{ fontSize: 24, color: "#888", marginTop: 16 }}>Card not found</div>
           </div>
         ),
         { width: 1200, height: 630 }
       );
     }
 
+    const { result } = storedCard;
+
     // Safely extract values with String() conversion for Satori
-    const name = String(card.n || "Unknown").replace(/\*+/g, "").trim();
-    const score = String(card.s ?? 0);
-    const emoji = String(card.e || "X");  // Use X as fallback instead of emoji
-    const description = String(card.d || "No description").slice(0, 80);
-    const element = String(card.el || "chaos");
-    const weakness = String(card.w || "Meetings");
-    const stage = String(card.st || "Senior");
-    const move1 = card.m?.[0];
-    const move2 = card.m?.[1];
+    const name = String(result.archetype?.name || "Unknown").replace(/\*+/g, "").trim();
+    const score = String(result.careerScore ?? 0);
+    const emoji = String(result.archetype?.emoji || "X");
+    const description = String(result.archetype?.description || "No description").slice(0, 80);
+    const element = String(result.archetype?.element || "chaos");
+    const weakness = String(result.archetype?.weakness || "Meetings");
+    const stage = String(result.archetype?.stage || "Senior");
+    const move1 = result.moves?.[0];
+    const move2 = result.moves?.[1];
 
     // Element colors
     const elementColors: Record<string, string> = {
@@ -129,15 +131,15 @@ export async function GET(request: NextRequest) {
               {move1 && (
                 <div style={{ display: "flex", alignItems: "center", padding: "6px 8px", borderBottom: "1px solid #e5e5e5" }}>
                   <div style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: color, marginRight: 6 }} />
-                  <span style={{ flex: 1, fontSize: 10, fontWeight: 600, color: "#1a1a1a" }}>{String(move1.n)}</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1a1a" }}>{String(move1.d)}</span>
+                  <span style={{ flex: 1, fontSize: 10, fontWeight: 600, color: "#1a1a1a" }}>{String(move1.name)}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1a1a" }}>{String(move1.damage)}</span>
                 </div>
               )}
               {move2 && (
                 <div style={{ display: "flex", alignItems: "center", padding: "6px 8px" }}>
                   <div style={{ width: 14, height: 14, borderRadius: 7, backgroundColor: color, marginRight: 6 }} />
-                  <span style={{ flex: 1, fontSize: 10, fontWeight: 600, color: "#1a1a1a" }}>{String(move2.n)}</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1a1a" }}>{String(move2.d)}</span>
+                  <span style={{ flex: 1, fontSize: 10, fontWeight: 600, color: "#1a1a1a" }}>{String(move2.name)}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#1a1a1a" }}>{String(move2.damage)}</span>
                 </div>
               )}
             </div>
