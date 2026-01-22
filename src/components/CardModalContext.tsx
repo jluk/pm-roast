@@ -105,7 +105,7 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[9999] grid place-items-center bg-black/90 backdrop-blur-md isolate p-0 m-0"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md isolate"
             onClick={handleCloseModal}
           >
             {/* Close hint */}
@@ -113,11 +113,11 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="absolute top-8 left-1/2 -translate-x-1/2 text-white/60 text-sm flex items-center gap-2"
+              className="absolute top-4 sm:top-8 left-1/2 -translate-x-1/2 text-white/60 text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap px-4"
             >
-              <span>Click card to flip</span>
+              <span>Tap card to flip</span>
               <span className="text-white/40">|</span>
-              <span>Click outside to close</span>
+              <span>Tap outside to close</span>
             </motion.div>
 
             {/* Flippable Card Container - fixed dimensions to prevent layout shift */}
@@ -130,12 +130,13 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
                 e.stopPropagation();
                 handleModalClick();
               }}
-              className="cursor-pointer isolate overflow-visible"
+              className="cursor-pointer isolate overflow-visible max-w-[90vw] max-h-[80vh]"
               style={{
                 perspective: "1000px",
                 // Full-size card dimensions (2.5:3.5 aspect ratio)
-                width: 360,
-                height: 504,
+                width: "min(360px, 90vw)",
+                height: "min(504px, calc(90vw * 1.4))",
+                aspectRatio: "2.5 / 3.5",
               }}
             >
               <motion.div
@@ -209,7 +210,7 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
                 handleDownload(e);
               }}
               disabled={isDownloading}
-              className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white text-sm font-medium disabled:opacity-50 z-[10000]"
+              className="fixed bottom-4 sm:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white text-sm font-medium disabled:opacity-50 z-[10000]"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -223,7 +224,7 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.3 }}
               onClick={handleCloseModal}
-              className="absolute top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
             >
               <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
