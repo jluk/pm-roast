@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
+import { domToPng } from "modern-screenshot";
 import { RoastResult, DreamRole, DREAM_ROLES } from "@/lib/types";
-import { generateShareUrl, encodeCardData } from "@/lib/share";
+import { generateShareUrl } from "@/lib/share";
 import { PokemonCard, PMElement } from "@/components/PokemonCard";
 import { CardBack } from "@/components/CardBack";
 import { getCardRarity, CardRarity } from "@/components/HoloCard";
@@ -88,6 +89,8 @@ function stripMarkdown(text: string): string {
 export function Results({ result, dreamRole, onStartOver, isSharePage = false, cardId }: ResultsProps) {
   const [copied, setCopied] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Generate the shareable URL - prefer cardId if available (permanent storage)
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -149,67 +152,29 @@ Get your PM card: ${shareUrl}
   };
 
   const downloadCard = async () => {
-    // Encode card data for OG image endpoint
-    const cardData = {
-      s: result.careerScore,
-      n: stripMarkdown(result.archetype.name).slice(0, 30),
-      e: result.archetype.emoji,
-      d: stripMarkdown(result.archetype.description).slice(0, 95),
-      el: result.archetype.element || "chaos",
-      st: result.archetype.stage || "Senior",
-      w: result.archetype.weakness || "Meetings",
-      f: stripMarkdown(result.archetype.flavor || result.archetype.description).slice(0, 95),
-      m: (result.moves || []).slice(0, 2).map(m => ({
-        n: m.name.slice(0, 20),
-        c: Math.min(m.energyCost, 2),
-        d: m.damage,
-        ...(m.effect ? { e: m.effect.slice(0, 50) } : {}),
-      })),
-      ps: result.capabilities?.productSense || 70,
-      ex: result.capabilities?.execution || 70,
-      ld: result.capabilities?.leadership || 70,
-      dr: dreamRole,
-      q: stripMarkdown(result.bangerQuote).slice(0, 140),
-      rr: result.dreamRoleReaction?.slice(0, 80) || "",
-      u: result.userName?.slice(0, 50),
-    };
+    if (!cardRef.current || isDownloading) return;
 
-    const encoded = encodeCardData(cardData);
-    const ogUrl = `${baseUrl}/api/og?data=${encoded}`;
+    setIsDownloading(true);
     const fileName = `pm-roast-${(result.userName || 'card').toLowerCase().replace(/\s+/g, '-')}.png`;
 
     try {
-      const response = await fetch(ogUrl);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch image: ${response.status}`);
-      }
-      const blob = await response.blob();
+      // Capture the actual rendered card using domToPng
+      const dataUrl = await domToPng(cardRef.current, {
+        scale: 2,
+        quality: 1,
+      });
 
       // Create download link
-      const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.style.display = 'none';
-      a.href = url;
+      a.href = dataUrl;
       a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-
-      // Cleanup after a short delay to ensure download starts
-      setTimeout(() => {
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      }, 100);
-    } catch (error) {
-      console.error('Download failed:', error);
-      // Fallback: use direct link with download attribute
-      const a = document.createElement('a');
-      a.href = ogUrl;
-      a.download = fileName;
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
+    } catch (error) {
+      console.error('Download failed:', error);
+    } finally {
+      setIsDownloading(false);
     }
   };
 
@@ -277,6 +242,7 @@ Get your PM card: ${shareUrl}
             >
               {/* Front of card - use opacity for visibility since backfaceVisibility breaks with HoloCard's nested 3D context */}
               <div
+                ref={cardRef}
                 className="absolute inset-0 transition-opacity duration-150"
                 style={{
                   opacity: isFlipped ? 0 : 1,
@@ -463,12 +429,13 @@ Get your PM card: ${shareUrl}
               <div className="flex gap-2">
                 <button
                   onClick={downloadCard}
-                  className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors"
+                  disabled={isDownloading}
+                  className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors disabled:opacity-50"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  Save
+                  {isDownloading ? 'Saving...' : 'Save'}
                 </button>
                 <button
                   onClick={copyLink}
