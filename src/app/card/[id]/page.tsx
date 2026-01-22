@@ -26,9 +26,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const { result } = storedCard;
-  const title = `I'm a "${result.archetype.name}" - ${result.careerScore}/100 | PM Roast`;
-  const description = result.bangerQuote;
+  const { result, isLegend } = storedCard;
+  const legendName = result.userName || "This legend";
+  const title = isLegend
+    ? `${legendName} got PM roasted - ${result.careerScore}/100 | PM Roast`
+    : `I'm a "${result.archetype.name}" - ${result.careerScore}/100 | PM Roast`;
+  const description = isLegend
+    ? `${legendName} is a "${result.archetype.name}". ${result.archetype.description}`
+    : result.bangerQuote;
 
   // Generate OG image URL
   const ogImageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?id=${id}`;
