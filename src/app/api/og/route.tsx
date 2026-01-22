@@ -15,9 +15,11 @@ interface OGCardData {
   st: string;
 }
 
-async function getCardById(cardId: string, baseUrl: string): Promise<OGCardData | null> {
+async function getCardById(cardId: string): Promise<OGCardData | null> {
   try {
-    const response = await fetch(`${baseUrl}/api/card-data?id=${cardId}`);
+    // Use hardcoded URL since edge runtime has issues with self-referential fetches
+    const fetchUrl = `https://www.pmroast.com/api/card-data?id=${cardId}`;
+    const response = await fetch(fetchUrl);
     if (!response.ok) return null;
     const data = await response.json();
     if (data.error) return null;
@@ -46,10 +48,9 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const cardId = url.searchParams.get("id");
   const data = url.searchParams.get("data");
-  const baseUrl = `${url.protocol}//${url.host}`;
 
   let card: OGCardData | null = null;
-  if (cardId) card = await getCardById(cardId, baseUrl);
+  if (cardId) card = await getCardById(cardId);
   else if (data) card = decodeCardData(data);
 
   // If no card, show fallback
