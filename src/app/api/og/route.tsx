@@ -7,13 +7,19 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const cardId = url.searchParams.get("c");
 
-  // If card ID provided, try to redirect to blob storage
+  // If card ID provided, fetch and serve image from blob storage
   if (cardId) {
     const blobUrl = `https://ee3jrhyuiuxmfuri.public.blob.vercel-storage.com/og/${cardId}.png`;
     try {
-      const response = await fetch(blobUrl, { method: "HEAD" });
+      const response = await fetch(blobUrl);
       if (response.ok) {
-        return Response.redirect(blobUrl, 302);
+        // Serve the image directly instead of redirecting
+        return new Response(response.body, {
+          headers: {
+            "Content-Type": "image/png",
+            "Cache-Control": "public, max-age=31536000, immutable",
+          },
+        });
       }
     } catch {
       // Blob not found, fall through to default
