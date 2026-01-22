@@ -8,9 +8,10 @@ interface CardPageClientProps {
   dreamRole: DreamRole;
   dreamRoleLabel: string;
   cardId: string;
+  isLegend?: boolean;
 }
 
-export function CardPageClient({ result, dreamRole, cardId }: CardPageClientProps) {
+export function CardPageClient({ result, dreamRole, cardId, isLegend }: CardPageClientProps) {
   const handleStartOver = () => {
     window.location.href = "/";
   };
@@ -56,6 +57,7 @@ export function CardPageClient({ result, dreamRole, cardId }: CardPageClientProp
           onStartOver={handleStartOver}
           isSharePage
           cardId={cardId}
+          isLegend={isLegend}
         />
       </section>
 

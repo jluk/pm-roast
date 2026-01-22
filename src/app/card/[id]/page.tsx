@@ -12,8 +12,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const storedCard = await getCard(id);
 
   if (!storedCard) {
+    const fallbackOgUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?id=${id}`;
     return {
       title: "PM Roast | Get Brutally Honest Career Feedback",
+      openGraph: {
+        title: "PM Roast | Get Brutally Honest Career Feedback",
+        images: [{ url: fallbackOgUrl, width: 1200, height: 630 }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        images: [fallbackOgUrl],
+      },
     };
   }
 
@@ -67,8 +76,8 @@ export default async function CardPage({ params }: PageProps) {
     );
   }
 
-  const { result, dreamRole } = storedCard;
+  const { result, dreamRole, isLegend } = storedCard;
   const dreamRoleLabel = DREAM_ROLES[dreamRole as DreamRole]?.label || dreamRole;
 
-  return <CardPageClient result={result} dreamRole={dreamRole} dreamRoleLabel={dreamRoleLabel} cardId={id} />;
+  return <CardPageClient result={result} dreamRole={dreamRole} dreamRoleLabel={dreamRoleLabel} cardId={id} isLegend={isLegend} />;
 }

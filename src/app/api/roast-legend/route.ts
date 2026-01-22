@@ -391,7 +391,7 @@ export async function POST(request: NextRequest) {
       const exactMatch = getFamousCardByName(normalizedName);
       if (exactMatch) {
         const result = famousCardToRoastResult(exactMatch, dreamRole as DreamRole);
-        const cardId = await storeCard(result, dreamRole as DreamRole);
+        const cardId = await storeCard(result, dreamRole as DreamRole, true);
 
         return NextResponse.json({
           success: true,
@@ -413,7 +413,7 @@ export async function POST(request: NextRequest) {
         // If it's a clear match (starts with same chars or is very similar)
         if (matchLower.startsWith(queryLower) || queryLower.startsWith(matchLower.split(" ")[0])) {
           const result = famousCardToRoastResult(bestMatch, dreamRole as DreamRole);
-          const cardId = await storeCard(result, dreamRole as DreamRole);
+          const cardId = await storeCard(result, dreamRole as DreamRole, true);
 
           return NextResponse.json({
             success: true,
@@ -434,7 +434,7 @@ export async function POST(request: NextRequest) {
 
       if (cached) {
         const cachedResult = typeof cached === "string" ? JSON.parse(cached) : cached;
-        const cardId = await storeCard(cachedResult as RoastResult, dreamRole as DreamRole);
+        const cardId = await storeCard(cachedResult as RoastResult, dreamRole as DreamRole, true);
 
         return NextResponse.json({
           success: true,
@@ -538,7 +538,7 @@ Remember: This is a fun roast card, keep it entertaining and witty!`;
     await kv.set(cacheKey, JSON.stringify(validatedResult), { ex: 30 * 24 * 60 * 60 });
 
     // Store in KV for sharing
-    const cardId = await storeCard(validatedResult, dreamRole as DreamRole);
+    const cardId = await storeCard(validatedResult, dreamRole as DreamRole, true);
 
     return NextResponse.json({
       success: true,

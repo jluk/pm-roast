@@ -144,8 +144,11 @@ export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage 
     const archetype = stripMarkdown(result.archetype.name);
     const legendName = result.userName || "this legend";
     const rankBrag = rankInfo ? `\n\n🏆 Ranked #${rankInfo.rank.toLocaleString()} of ${rankInfo.totalRoasts.toLocaleString()} PMs` : "";
+
+    // For legends, make it funny with the card description
+    const description = stripMarkdown(result.archetype.description || "").slice(0, 80);
     const text = isLegend
-      ? `I roasted ${legendName} as a PM and they scored ${result.careerScore}/100 💀\n\nArchetype: "${archetype}"\n\nRoast your favorite celebrity:`
+      ? `${legendName} got PM roasted 😭\n\n"${description}${description.length >= 80 ? "..." : ""}"\n\nPM Score: ${result.careerScore}/100\n\nWho should I roast next?`
       : `I got roasted as a PM and I'm a "${archetype}" 💀${rankBrag}\n\nGet your PM roast card:`;
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,

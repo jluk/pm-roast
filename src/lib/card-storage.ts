@@ -17,6 +17,7 @@ export interface StoredCard {
   result: RoastResult;
   dreamRole: DreamRole;
   createdAt: number;
+  isLegend?: boolean;
 }
 
 // Rank info for a card
@@ -35,12 +36,13 @@ function generateCardId(): string {
 }
 
 // Store a card and return its ID
-export async function storeCard(result: RoastResult, dreamRole: DreamRole): Promise<string> {
+export async function storeCard(result: RoastResult, dreamRole: DreamRole, isLegend?: boolean): Promise<string> {
   const cardId = generateCardId();
   const storedCard: StoredCard = {
     result,
     dreamRole,
     createdAt: Date.now(),
+    isLegend,
   };
 
   // Store in KV with 30 day expiration (in seconds) to manage 256MB limit
