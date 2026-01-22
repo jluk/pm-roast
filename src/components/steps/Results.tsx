@@ -146,9 +146,9 @@ export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage 
     const rankBrag = rankInfo ? `\n\n🏆 Ranked #${rankInfo.rank.toLocaleString()} of ${rankInfo.totalRoasts.toLocaleString()} PMs` : "";
 
     // For legends, make it funny with the card description
-    const description = stripMarkdown(result.archetype.description || "").slice(0, 80);
+    const description = stripMarkdown(result.archetype.description || "");
     const text = isLegend
-      ? `${legendName} got PM roasted 😭\n\n"${description}${description.length >= 80 ? "..." : ""}"\n\nPM Score: ${result.careerScore}/100\n\nWho should I roast next?`
+      ? `${legendName} got PM roasted 😭\n\n"${description}"\n\nPM Score: ${result.careerScore}/100\n\nWho should I roast next?`
       : `I got roasted as a PM and I'm a "${archetype}" 💀${rankBrag}\n\nGet your PM roast card:`;
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
