@@ -37,12 +37,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? `${legendName} is a "${result.archetype.name}". ${result.archetype.description}`
     : result.bangerQuote;
 
-  // Generate OG image URL with query params (avoids KV issues in edge runtime)
+  // Generate OG image URL with query params
   const ogParams = new URLSearchParams({
     name: result.archetype.name,
     score: String(result.careerScore),
-    desc: result.archetype.description.slice(0, 100),
-    elem: result.archetype.element,
   });
   const ogImageUrl = `${baseUrl}/api/og?${ogParams.toString()}`;
 
