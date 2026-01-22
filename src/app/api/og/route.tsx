@@ -1,10 +1,57 @@
 import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
+import { kv } from "@vercel/kv";
 
 export const runtime = "edge";
 
-// Decode card data from URL (handles UTF-8/Unicode)
-function decodeCardData(encoded: string) {
+// Card data format for OG image rendering
+interface OGCardData {
+  n: string;  // archetype name
+  d: string;  // description
+  e: string;  // emoji
+  s: number;  // score
+  el: string; // element
+  q: string;  // banger quote
+  m: { n: string; c: number; d: number; e?: string }[]; // moves
+  w: string;  // weakness
+  st: string; // stage
+}
+
+// Fetch card from KV storage by ID
+async function getCardById(cardId: string): Promise<OGCardData | null> {
+  try {
+    const data = await kv.get<string>(`card:${cardId}`);
+    if (!data) return null;
+
+    // Handle both string and object responses from KV
+    const stored = typeof data === 'string' ? JSON.parse(data) : data;
+    const result = stored.result;
+
+    // Transform RoastResult to OG card format
+    return {
+      n: result.archetype.name,
+      d: result.archetype.description,
+      e: result.archetype.emoji,
+      s: result.careerScore,
+      el: result.archetype.element,
+      q: result.bangerQuote,
+      m: result.moves.map((move: { name: string; energyCost: number; damage: number; effect?: string }) => ({
+        n: move.name,
+        c: move.energyCost,
+        d: move.damage,
+        e: move.effect,
+      })),
+      w: result.archetype.weakness,
+      st: result.archetype.stage,
+    };
+  } catch (error) {
+    console.error("Failed to fetch card for OG:", error);
+    return null;
+  }
+}
+
+// Decode card data from URL (handles UTF-8/Unicode) - for legacy /share URLs
+function decodeCardData(encoded: string): OGCardData | null {
   try {
     let base64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
     while (base64.length % 4) {
@@ -69,9 +116,19 @@ const PM_ELEMENTS: Record<string, { color: string; bg: string; textColor: string
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const cardId = searchParams.get("id");
   const data = searchParams.get("data");
 
-  if (!data) {
+  // Try to get card data from ID (for /card/[id] pages) or from data param (for legacy /share pages)
+  let card: OGCardData | null = null;
+
+  if (cardId) {
+    card = await getCardById(cardId);
+  } else if (data) {
+    card = decodeCardData(data);
+  }
+
+  if (!card) {
     return new ImageResponse(
       (
         <div
@@ -95,8 +152,6 @@ export async function GET(request: NextRequest) {
       { width: 1200, height: 630 }
     );
   }
-
-  const card = decodeCardData(data);
 
   if (!card) {
     return new ImageResponse(
