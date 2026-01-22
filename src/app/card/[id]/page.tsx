@@ -39,10 +39,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   // Generate OG image URL with query params (avoids KV issues in edge runtime)
   const ogParams = new URLSearchParams({
-    n: result.archetype.name,
-    s: String(result.careerScore),
-    d: result.archetype.description.slice(0, 100),
-    e: result.archetype.element,
+    name: result.archetype.name,
+    score: String(result.careerScore),
+    desc: result.archetype.description.slice(0, 100),
+    elem: result.archetype.element,
   });
   const ogImageUrl = `${baseUrl}/api/og?${ogParams.toString()}`;
 

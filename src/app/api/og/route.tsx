@@ -8,10 +8,10 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
 
     // Get card data from query params
-    const name = url.searchParams.get("n") || "";
-    const score = url.searchParams.get("s") || "";
-    const desc = url.searchParams.get("d") || "";
-    const element = url.searchParams.get("e") || "chaos";
+    const name = url.searchParams.get("name") || "";
+    const score = url.searchParams.get("score") || "";
+    const desc = url.searchParams.get("desc") || "";
+    const element = url.searchParams.get("elem") || "chaos";
 
     // If no data, show fallback
     if (!name || !score) {
