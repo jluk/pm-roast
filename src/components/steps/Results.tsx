@@ -90,6 +90,7 @@ export function Results({ result, dreamRole, onStartOver, isSharePage = false, c
   const [copied, setCopied] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [screenshotMode, setScreenshotMode] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Generate the shareable URL - prefer cardId if available (permanent storage)
@@ -158,30 +159,20 @@ Get your PM card: ${shareUrl}
     const fileName = `pm-roast-${(result.userName || 'card').toLowerCase().replace(/\s+/g, '-')}.png`;
 
     try {
-      // Find and temporarily hide all holo effect overlays inside the card
-      const card = cardRef.current;
-      const effectOverlays = card.querySelectorAll('[style*="pointer-events: none"]');
-      const originalStyles: string[] = [];
+      // Enable screenshot mode to disable holo effects
+      setScreenshotMode(true);
 
-      // Hide effect overlays by setting opacity to 0 and removing boxShadow
-      effectOverlays.forEach((overlay, i) => {
-        const el = overlay as HTMLElement;
-        originalStyles[i] = el.style.cssText;
-        el.style.opacity = '0';
-        el.style.boxShadow = 'none';
-      });
+      // Wait for React to re-render with effects disabled
+      await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Capture the card without effects
-      const dataUrl = await domToPng(card, {
-        scale: 2,
+      // Capture the clean card at high resolution
+      const dataUrl = await domToPng(cardRef.current, {
+        scale: 4, // Higher resolution for better quality
         quality: 1,
       });
 
-      // Restore original styles
-      effectOverlays.forEach((overlay, i) => {
-        const el = overlay as HTMLElement;
-        el.style.cssText = originalStyles[i];
-      });
+      // Disable screenshot mode to restore effects
+      setScreenshotMode(false);
 
       // Create download link
       const a = document.createElement('a');
@@ -192,6 +183,7 @@ Get your PM card: ${shareUrl}
       document.body.removeChild(a);
     } catch (error) {
       console.error('Download failed:', error);
+      setScreenshotMode(false);
     } finally {
       setIsDownloading(false);
     }
@@ -280,6 +272,7 @@ Get your PM card: ${shareUrl}
                   weakness={result.archetype.weakness || "Meetings"}
                   flavor={stripMarkdown(result.archetype.flavor || result.archetype.description)}
                   userName={result.userName}
+                  disableHoloEffects={screenshotMode}
                 />
               </div>
 
