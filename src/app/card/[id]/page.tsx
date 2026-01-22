@@ -12,7 +12,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const storedCard = await getCard(id);
 
   if (!storedCard) {
-    const fallbackOgUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?id=${id}`;
+    const fallbackOgUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?cardId=${id}`;
     return {
       title: "PM Roast | Get Brutally Honest Career Feedback",
       openGraph: {
@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : result.bangerQuote;
 
   // Generate OG image URL with card ID (fetches from KV in edge runtime)
-  const ogImageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?id=${id}`;
+  const ogImageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?cardId=${id}`;
 
   return {
     title,
