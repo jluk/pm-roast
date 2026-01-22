@@ -2317,7 +2317,7 @@ export default function Home() {
                       </div>
 
                       {/* Social Proof Ticker */}
-                      <p className="text-[10px] text-white/40 text-center">
+                      <p className="text-xs text-white/60 text-center font-medium">
                         {roastCount.toLocaleString()} PMs roasted
                       </p>
                     </motion.div>
