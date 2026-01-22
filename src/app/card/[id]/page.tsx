@@ -37,9 +37,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? `${legendName} is a "${result.archetype.name}". ${result.archetype.description}`
     : result.bangerQuote;
 
-  // OG image with sanitized params (t=title, p=points)
+  // OG image with sanitized params (a=name, b=score)
   const safeName = result.archetype.name.replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 30);
-  const ogImageUrl = `${baseUrl}/api/og?t=${encodeURIComponent(safeName)}&p=${result.careerScore}`;
+  const ogImageUrl = `${baseUrl}/api/og?a=${encodeURIComponent(safeName)}&b=${result.careerScore}`;
 
   return {
     title,

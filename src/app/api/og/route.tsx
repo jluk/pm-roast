@@ -7,8 +7,8 @@ export async function GET(request: NextRequest) {
   const url = new URL(request.url);
 
   // Get simple params - all optional
-  const name = url.searchParams.get("t") || ""; // t for title
-  const pts = url.searchParams.get("p") || "";  // p for points
+  const name = url.searchParams.get("a") || "";
+  const pts = url.searchParams.get("b") || "";
 
   // Fallback image
   if (!name || !pts) {
