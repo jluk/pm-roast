@@ -4,14 +4,14 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const runtime = "edge";
 
-// Element color schemes
-const ELEMENT_COLORS: Record<string, { bg: string; accent: string; border: string }> = {
-  data: { bg: "#0c1929", accent: "#3b82f6", border: "#1e40af" },
-  chaos: { bg: "#1a0a1a", accent: "#ec4899", border: "#9d174d" },
-  strategy: { bg: "#0f0a1a", accent: "#8b5cf6", border: "#5b21b6" },
-  shipping: { bg: "#0a1a14", accent: "#22c55e", border: "#166534" },
-  politics: { bg: "#1a1408", accent: "#f59e0b", border: "#b45309" },
-  vision: { bg: "#0a0f1a", accent: "#06b6d4", border: "#0e7490" },
+// Element color schemes - matching the actual card colors
+const ELEMENT_COLORS: Record<string, { bg: string; accent: string; glow: string }> = {
+  data: { bg: "#0f172a", accent: "#3b82f6", glow: "#3b82f640" },
+  chaos: { bg: "#1f0a1f", accent: "#f472b6", glow: "#f472b640" },
+  strategy: { bg: "#1a0f2e", accent: "#a78bfa", glow: "#a78bfa40" },
+  shipping: { bg: "#0a1f14", accent: "#4ade80", glow: "#4ade8040" },
+  politics: { bg: "#1f1708", accent: "#fbbf24", glow: "#fbbf2440" },
+  vision: { bg: "#0a1520", accent: "#22d3ee", glow: "#22d3ee40" },
 };
 
 export async function POST(request: NextRequest) {
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     const safeUserName = userName ? String(userName).slice(0, 25) : null;
     const colors = ELEMENT_COLORS[element] || ELEMENT_COLORS.chaos;
 
-    // Generate OG image with card preview
+    // Generate OG image with centered card preview
     const imageResponse = new ImageResponse(
       (
         <div style={{
@@ -35,102 +35,112 @@ export async function POST(request: NextRequest) {
           width: "100%",
           height: "100%",
           backgroundColor: "#0a0a0a",
+          alignItems: "center",
+          justifyContent: "center",
           padding: 40,
         }}>
-          {/* Left side - Card preview */}
+          {/* Centered container */}
           <div style={{
             display: "flex",
-            flexDirection: "column",
-            width: 380,
-            height: 550,
-            backgroundColor: colors.bg,
-            borderRadius: 20,
-            border: `3px solid ${colors.border}`,
-            overflow: "hidden",
-            boxShadow: `0 0 60px ${colors.accent}33`,
-          }}>
-            {/* Card header */}
-            <div style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "16px 20px",
-              backgroundColor: `${colors.accent}22`,
-              borderBottom: `1px solid ${colors.border}`,
-            }}>
-              <span style={{ fontSize: 22, fontWeight: 700, color: "white" }}>{safeArchetype}</span>
-              <span style={{ fontSize: 20, fontWeight: 700, color: colors.accent }}>{safeScore}</span>
-            </div>
-
-            {/* Card image area */}
-            <div style={{
-              display: "flex",
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 20,
-            }}>
-              {archetypeImage ? (
-                <img
-                  src={archetypeImage.startsWith('data:') ? archetypeImage : `data:image/png;base64,${archetypeImage}`}
-                  style={{
-                    width: 300,
-                    height: 300,
-                    objectFit: "contain",
-                    borderRadius: 12,
-                  }}
-                />
-              ) : (
-                <div style={{
-                  display: "flex",
-                  width: 300,
-                  height: 300,
-                  backgroundColor: `${colors.accent}11`,
-                  borderRadius: 12,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}>
-                  <span style={{ fontSize: 80 }}>🎴</span>
-                </div>
-              )}
-            </div>
-
-            {/* Card footer */}
-            <div style={{
-              display: "flex",
-              padding: "12px 20px",
-              backgroundColor: `${colors.accent}11`,
-              borderTop: `1px solid ${colors.border}`,
-              justifyContent: "center",
-            }}>
-              <span style={{ fontSize: 14, color: `${colors.accent}`, textTransform: "uppercase", letterSpacing: 2 }}>
-                {element || "chaos"} type
-              </span>
-            </div>
-          </div>
-
-          {/* Right side - Info */}
-          <div style={{
-            display: "flex",
-            flexDirection: "column",
-            flex: 1,
-            paddingLeft: 50,
+            alignItems: "center",
             justifyContent: "center",
+            gap: 60,
           }}>
-            {safeUserName && (
-              <span style={{ fontSize: 28, color: "#888", marginBottom: 8 }}>{safeUserName}</span>
-            )}
-            <span style={{ fontSize: 48, fontWeight: 700, color: "white", marginBottom: 16 }}>
-              PM Roast Card
-            </span>
-            <div style={{ display: "flex", alignItems: "baseline", marginBottom: 24 }}>
-              <span style={{ fontSize: 96, fontWeight: 800, color: colors.accent }}>{safeScore}</span>
-              <span style={{ fontSize: 36, fontWeight: 600, color: "#666", marginLeft: 8 }}>/100</span>
+            {/* Card preview */}
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              width: 320,
+              height: 450,
+              backgroundColor: colors.bg,
+              borderRadius: 16,
+              border: `2px solid ${colors.accent}50`,
+              overflow: "hidden",
+              boxShadow: `0 0 80px ${colors.glow}, 0 0 40px ${colors.glow}`,
+            }}>
+              {/* Card header with name and score */}
+              <div style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                padding: "12px 16px",
+                borderBottom: `1px solid ${colors.accent}30`,
+              }}>
+                <span style={{ fontSize: 16, fontWeight: 600, color: "white", maxWidth: 200 }}>{safeArchetype}</span>
+                <span style={{ fontSize: 18, fontWeight: 700, color: colors.accent }}>{safeScore}</span>
+              </div>
+
+              {/* Card image area */}
+              <div style={{
+                display: "flex",
+                flex: 1,
+                alignItems: "center",
+                justifyContent: "center",
+                padding: 16,
+                backgroundColor: `${colors.accent}08`,
+              }}>
+                {archetypeImage ? (
+                  <img
+                    src={archetypeImage.startsWith("data:") ? archetypeImage : `data:image/png;base64,${archetypeImage}`}
+                    width={260}
+                    height={260}
+                    style={{
+                      objectFit: "contain",
+                      borderRadius: 8,
+                    }}
+                  />
+                ) : (
+                  <div style={{
+                    display: "flex",
+                    width: 260,
+                    height: 260,
+                    backgroundColor: `${colors.accent}15`,
+                    borderRadius: 8,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}>
+                    <span style={{ fontSize: 72 }}>🎴</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Card footer */}
+              <div style={{
+                display: "flex",
+                padding: "10px 16px",
+                borderTop: `1px solid ${colors.accent}30`,
+                justifyContent: "center",
+                backgroundColor: `${colors.accent}10`,
+              }}>
+                <span style={{ fontSize: 11, color: colors.accent, textTransform: "uppercase", letterSpacing: 3, fontWeight: 600 }}>
+                  {element || "chaos"} type
+                </span>
+              </div>
             </div>
-            <span style={{ fontSize: 24, color: "#888", marginBottom: 40 }}>
-              &ldquo;{safeArchetype}&rdquo;
-            </span>
-            <span style={{ fontSize: 20, color: "#6366f1" }}>pmroast.com</span>
+
+            {/* Right side - Info */}
+            <div style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              justifyContent: "center",
+              maxWidth: 450,
+            }}>
+              {safeUserName && (
+                <span style={{ fontSize: 24, color: "#666", marginBottom: 4 }}>{safeUserName}</span>
+              )}
+              <span style={{ fontSize: 42, fontWeight: 700, color: "white", marginBottom: 20 }}>
+                PM Roast Card
+              </span>
+              <div style={{ display: "flex", alignItems: "baseline", marginBottom: 20 }}>
+                <span style={{ fontSize: 88, fontWeight: 800, color: colors.accent, lineHeight: 1 }}>{safeScore}</span>
+                <span style={{ fontSize: 32, fontWeight: 600, color: "#555", marginLeft: 6 }}>/100</span>
+              </div>
+              <span style={{ fontSize: 22, color: "#777", marginBottom: 30 }}>
+                &ldquo;{safeArchetype}&rdquo;
+              </span>
+              <span style={{ fontSize: 18, color: "#6366f1", fontWeight: 500 }}>pmroast.com</span>
+            </div>
           </div>
         </div>
       ),
