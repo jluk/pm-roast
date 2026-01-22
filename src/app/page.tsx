@@ -1022,6 +1022,7 @@ export default function Home() {
           <div className="hidden sm:flex items-center gap-1">
             <a
               href="/#roast-me"
+              onClick={() => setActiveSection("roast-me")}
               className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
                 activeSection === "roast-me"
                   ? "text-foreground bg-white/5 border-b-2 border-indigo-500"
@@ -1032,6 +1033,7 @@ export default function Home() {
             </a>
             <a
               href="/#mt-roastmore"
+              onClick={() => setActiveSection("mt-roastmore")}
               className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
                 activeSection === "mt-roastmore"
                   ? "text-foreground bg-white/5 border-b-2 border-indigo-500"
@@ -1042,6 +1044,7 @@ export default function Home() {
             </a>
             <a
               href="/#archetypes"
+              onClick={() => setActiveSection("archetypes")}
               className={`px-3 py-1.5 text-sm rounded-lg transition-all ${
                 activeSection === "archetypes"
                   ? "text-foreground bg-white/5 border-b-2 border-indigo-500"
