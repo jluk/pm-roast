@@ -260,7 +260,13 @@ CRITICAL RULES:
 2. Keep it fun and roast-y but not mean-spirited or libelous
 3. Reference specific things they're known for - companies founded, products shipped, famous quotes, public controversies
 4. The roast should feel like something their colleagues might joke about at a roast dinner
-5. Make the archetype name clever and specific to them
+
+ARCHETYPE NAME RULES (VERY IMPORTANT):
+- NEVER start with "The" - just the punchy title (e.g., "Rocket Tweeter" not "The Rocket Tweeter")
+- Maximum 2-3 words, shorter is better
+- Make it funny, meme-worthy, and specific to THIS person
+- Should sound like a nickname their coworkers would use behind their back
+- Examples: "Pivot King", "Safety Sage", "Chaos Merchant", "Tweet Deleter", "Vaporware Visionary"
 
 PM ELEMENT TYPES (choose the most fitting one):
 - "data": Obsessed with metrics, analytics, A/B tests
@@ -281,7 +287,7 @@ Your response MUST be valid JSON with this exact structure (no markdown, no code
   "userName": "Their FULL NAME as commonly known (e.g., 'Elon Musk', not just 'Elon')",
   "roastBullets": ["4 roasts based on their public persona, max 100 chars each"],
   "archetype": {
-    "name": "2-3 word archetype name specific to them",
+    "name": "2-3 word punchy nickname, NO 'The' prefix (e.g., 'Rocket Tweeter' not 'The Rocket Tweeter')",
     "description": "A punchy description of their PM/tech persona, 60-80 chars",
     "emoji": "Single emoji matching their vibe",
     "element": "data|chaos|strategy|shipping|politics|vision",

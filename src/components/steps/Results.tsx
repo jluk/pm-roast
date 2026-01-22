@@ -398,19 +398,19 @@ Get your PM card: ${shareUrl}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="relative group shrink-0"
+              className="relative group shrink-0 z-10"
             >
               <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/15 via-orange-500/15 to-red-500/15 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-              <div className="relative px-4 py-3 rounded-xl bg-white/[0.03] backdrop-blur-xl border border-red-500/20 shadow-xl">
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-md bg-red-500/15 flex items-center justify-center shrink-0">
+              <div className="relative px-4 py-3 rounded-xl bg-black/60 backdrop-blur-xl border border-red-500/20 shadow-xl">
+                <div className="flex items-start gap-3">
+                  <div className="w-5 h-5 rounded-md bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
                     <svg className="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                     </svg>
                   </div>
-                  <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="text-xs uppercase tracking-wider text-red-400/70 font-medium shrink-0">Rival:</span>
-                    <span className="text-sm text-white/80 italic truncate">{result.naturalRival}</span>
+                  <div className="flex-1">
+                    <span className="text-xs uppercase tracking-wider text-red-400/70 font-medium">Rival: </span>
+                    <span className="text-sm text-white/90 italic">{result.naturalRival}</span>
                   </div>
                 </div>
               </div>
