@@ -340,27 +340,9 @@ Get your PM card: ${shareUrl}
               </div>
             </motion.div>
           </motion.div>
-          {/* Rank badge and flip hint */}
-          <div className="flex items-center justify-center gap-3 mt-3">
-            {rankInfo && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30"
-              >
-                <span className="text-amber-400 text-xs">🏆</span>
-                <span className="text-xs font-semibold text-amber-300">
-                  #{rankInfo.rank.toLocaleString()}
-                </span>
-                <span className="text-xs text-amber-400/70">
-                  of {rankInfo.totalCards.toLocaleString()} PMs
-                </span>
-              </motion.div>
-            )}
-            <p className="text-xs text-muted-foreground">
-              {isRerolling ? "Regenerating..." : "Click card to flip"}
-            </p>
-          </div>
+          <p className="text-xs text-muted-foreground mt-3">
+            {isRerolling ? "Regenerating..." : "Click card to flip"}
+          </p>
         </motion.div>
 
         {/* Right: Bento Glass Tiles - justify-between for flush alignment with card */}
@@ -378,14 +360,39 @@ Get your PM card: ${shareUrl}
               <div className="h-[2px] bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 shrink-0" />
 
               <div className="p-5 flex-1 flex flex-col justify-center">
-                {/* Header */}
-                <div className="flex items-center gap-2 mb-5">
-                  <div className="w-7 h-7 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
-                    <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.5 1.5-4.5 3-6.5s3-4.5 3-7.5c0 0 1 2 2 4 .5-1 1-2 1-3 2.5 3.5 5 6.5 5 13 0 3.866-3.134 7-7 7zm0-2c2.761 0 5-2.239 5-5 0-2.5-1.5-5-3-7-.5 1-1 2-2 3-.5-1-1-2-1.5-3-1 1.5-2.5 3.5-2.5 7 0 2.761 2.239 5 5 5z"/>
-                    </svg>
+                {/* Header with Global Rank badge */}
+                <div className="flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
+                      <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.5 1.5-4.5 3-6.5s3-4.5 3-7.5c0 0 1 2 2 4 .5-1 1-2 1-3 2.5 3.5 5 6.5 5 13 0 3.866-3.134 7-7 7zm0-2c2.761 0 5-2.239 5-5 0-2.5-1.5-5-3-7-.5 1-1 2-2 3-.5-1-1-2-1.5-3-1 1.5-2.5 3.5-2.5 7 0 2.761 2.239 5 5 5z"/>
+                      </svg>
+                    </div>
+                    <h3 className="text-base font-semibold text-white">The Roast</h3>
                   </div>
-                  <h3 className="text-base font-semibold text-white">The Roast</h3>
+
+                  {/* Global Rank Badge */}
+                  {rankInfo && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.6 }}
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-900/40 to-yellow-900/40 border border-amber-500/50 shadow-lg shadow-amber-500/10"
+                    >
+                      <span className="text-lg">🏆</span>
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] uppercase tracking-wider text-amber-400/70 font-medium leading-none">Global Rank</span>
+                        <div className="flex items-baseline gap-1">
+                          <span className="text-xl font-bold text-amber-300 leading-none">
+                            #{rankInfo.rank.toLocaleString()}
+                          </span>
+                          <span className="text-xs text-amber-400/60">
+                            / {rankInfo.totalCards.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
 
                 {/* Roast bullets - limit to 3 */}

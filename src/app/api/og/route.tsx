@@ -297,14 +297,16 @@ export async function GET(request: NextRequest) {
               </div>
             </div>
 
-            {/* Image frame */}
+            {/* Image frame - calibrated for 16:9 generated images */}
+            {/* Width: 420 - 12 (border) - 32 (margin) - 8 (img border) = 368px */}
+            {/* Height for 16:9: 368 / 1.778 = 207px */}
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 margin: "0 16px",
-                height: 190,
+                height: 207,
                 borderRadius: 10,
                 border: `4px solid ${element.color}66`,
                 background: element.bg,

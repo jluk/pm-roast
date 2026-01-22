@@ -234,9 +234,13 @@ export function PokemonCard({
         </div>
 
         {/* Image Frame with elemental background - responsive height */}
+        {/* Image Frame - heights calibrated for 16:9 generated images */}
+        {/* Compact: 256px width → 144px height (h-36) = 1.78:1 ✓ */}
+        {/* Mobile: 316px width → 178px height = 1.78:1 */}
+        {/* Desktop: 348px width → 196px height = 1.78:1 */}
         <div className={`${compact ? "mx-3 mb-2" : "mx-3 sm:mx-4 mb-2 sm:mb-3"}`}>
           <div
-            className={`relative rounded-lg overflow-hidden border-4 ${compact ? "h-36" : "h-44 sm:h-52"}`}
+            className={`relative rounded-lg overflow-hidden border-4 ${compact ? "h-36" : "h-[178px] sm:h-[196px]"}`}
             style={{ borderColor: `${elementData.borderColor}66` }}
           >
             {/* Elemental gradient background */}
