@@ -409,6 +409,13 @@ export async function POST(request: NextRequest) {
         const result = famousCardToRoastResult(exactMatch, dreamRole as DreamRole);
         const cardId = await storeCard(result, dreamRole as DreamRole, true);
 
+        // Generate OG image in background
+        fetch(new URL("/api/og-generate", request.url).toString(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cardId, name: result.archetype.name, score: result.careerScore }),
+        }).catch(() => {});
+
         return NextResponse.json({
           success: true,
           source: "pre-generated",
@@ -431,6 +438,13 @@ export async function POST(request: NextRequest) {
           const result = famousCardToRoastResult(bestMatch, dreamRole as DreamRole);
           const cardId = await storeCard(result, dreamRole as DreamRole, true);
 
+          // Generate OG image in background
+          fetch(new URL("/api/og-generate", request.url).toString(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ cardId, name: result.archetype.name, score: result.careerScore }),
+          }).catch(() => {});
+
           return NextResponse.json({
             success: true,
             source: "pre-generated",
@@ -451,6 +465,13 @@ export async function POST(request: NextRequest) {
       if (cached) {
         const cachedResult = typeof cached === "string" ? JSON.parse(cached) : cached;
         const cardId = await storeCard(cachedResult as RoastResult, dreamRole as DreamRole, true);
+
+        // Generate OG image in background
+        fetch(new URL("/api/og-generate", request.url).toString(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ cardId, name: (cachedResult as RoastResult).archetype.name, score: (cachedResult as RoastResult).careerScore }),
+        }).catch(() => {});
 
         return NextResponse.json({
           success: true,
@@ -555,6 +576,13 @@ Remember: This is a fun roast card, keep it entertaining and witty!`;
 
     // Store in KV for sharing
     const cardId = await storeCard(validatedResult, dreamRole as DreamRole, true);
+
+    // Generate OG image in background
+    fetch(new URL("/api/og-generate", request.url).toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cardId, name: validatedResult.archetype.name, score: validatedResult.careerScore }),
+    }).catch(() => {});
 
     return NextResponse.json({
       success: true,

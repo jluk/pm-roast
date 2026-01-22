@@ -37,9 +37,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? `${legendName} is a "${result.archetype.name}". ${result.archetype.description}`
     : result.bangerQuote;
 
-  // OG image with sanitized params (a=name, b=score)
-  const safeName = result.archetype.name.replace(/[^a-zA-Z0-9 ]/g, "").slice(0, 30);
-  const ogImageUrl = `${baseUrl}/api/og?a=${encodeURIComponent(safeName)}&b=${result.careerScore}`;
+  // OG image - pass card ID to check blob storage
+  const ogImageUrl = `${baseUrl}/api/og?c=${id}`;
 
   return {
     title,

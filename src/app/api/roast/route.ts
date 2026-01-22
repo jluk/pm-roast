@@ -918,6 +918,19 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
       // Continue without cardId - fallback to encoded URL sharing
     }
 
+    // Generate OG image in background (fire and forget - don't block response)
+    if (cardId) {
+      fetch(new URL("/api/og-generate", request.url).toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cardId,
+          name: roastResult.archetype.name,
+          score: roastResult.careerScore,
+        }),
+      }).catch((err) => console.error("OG generation failed:", err));
+    }
+
     // Increment roast count (fire and forget - don't block response)
     fetch(new URL("/api/stats", request.url).toString(), { method: "POST" }).catch(() => {});
 
