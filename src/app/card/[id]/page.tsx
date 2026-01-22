@@ -11,8 +11,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { id } = await params;
   const storedCard = await getCard(id);
 
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com";
+
   if (!storedCard) {
-    const fallbackOgUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?cid=${id}`;
+    const fallbackOgUrl = `${baseUrl}/api/og`;
     return {
       title: "PM Roast | Get Brutally Honest Career Feedback",
       openGraph: {
@@ -35,8 +37,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? `${legendName} is a "${result.archetype.name}". ${result.archetype.description}`
     : result.bangerQuote;
 
-  // Generate OG image URL with card ID (fetches from KV in edge runtime)
-  const ogImageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?cid=${id}`;
+  // Generate OG image URL with query params (avoids KV issues in edge runtime)
+  const ogParams = new URLSearchParams({
+    n: result.archetype.name,
+    s: String(result.careerScore),
+    d: result.archetype.description.slice(0, 100),
+    e: result.archetype.element,
+  });
+  const ogImageUrl = `${baseUrl}/api/og?${ogParams.toString()}`;
 
   return {
     title,
