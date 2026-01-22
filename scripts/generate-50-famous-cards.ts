@@ -135,7 +135,7 @@ function generateCard(person: typeof FAMOUS_PEOPLE[0], index: number) {
     name: person.name,
     title: person.title,
     company: person.company,
-    imageUrl: `/famous/${person.id}.jpg`,
+    imageUrl: `/famous/sv/${person.id}.jpg`,
     score: baseScore,
     archetypeName: archetype,
     archetypeEmoji: emojis[person.element],
@@ -240,7 +240,7 @@ ${cards.map(card => `  {
     name: "${card.name}",
     title: "${card.title}",
     company: "${card.company}",
-    imageUrl: "/famous/generated/${card.id}-card.png",
+    imageUrl: "/famous/sv/generated/${card.id}-card.png",
     score: ${card.score},
     archetypeName: "${card.archetypeName}",
     archetypeEmoji: "${card.archetypeEmoji}",
@@ -261,7 +261,7 @@ ${cards.map(card => `  {
   console.log(`TypeScript code written to: ${tsPath}`);
 
   console.log("\n=== Next Steps ===");
-  console.log("1. Download profile images for each person to /public/famous/");
+  console.log("1. Download profile images for each person to /public/famous/sv/");
   console.log("2. Run generate-famous-cards.ts to create AI-stylized card images");
   console.log("3. Add the card definitions to src/lib/famous-cards.ts");
 }

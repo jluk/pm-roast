@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenAI } from "@google/genai";
 import { RoastResult, DreamRole, DREAM_ROLES, PMElement } from "@/lib/types";
 import { storeCard } from "@/lib/card-storage";
+import { ELEMENT_SETTINGS } from "@/lib/image-generation";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const genAINew = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -14,7 +15,6 @@ async function parsePdf(buffer: Buffer): Promise<{ text: string }> {
   return pdfParse(buffer);
 }
 
-// Element settings for image generation - Pokemon-style nostalgic vibes with internet humor
 // Funny fallback names when no name is provided - concept names organized by element
 const FUNNY_FALLBACK_NAMES: Record<PMElement, string[]> = {
   data: [
@@ -48,51 +48,6 @@ function getFunnyFallbackName(element: PMElement): string {
   const names = FUNNY_FALLBACK_NAMES[element] || FUNNY_FALLBACK_NAMES.chaos;
   return names[Math.floor(Math.random() * names.length)];
 }
-
-const ELEMENT_SETTINGS: Record<PMElement, { bg: string; setting: string; creature: string; colors: string; props: string }> = {
-  data: {
-    bg: "glowing crystal cave with floating holographic charts and data streams, Pokemon TCG style",
-    setting: "surrounded by floating glowing orbs of data, analyzing patterns in the air",
-    creature: "mysterious creature with glowing eyes and digital patterns on its form",
-    colors: "electric blue, cyan glow, and deep purple shadows",
-    props: "floating crystals showing metrics, mystical dashboard runes, glowing spreadsheet tablets"
-  },
-  chaos: {
-    bg: "swirling vortex dimension with multiple portals and chaotic energy, classic Pokemon battle arena",
-    setting: "surfing on a wave of notifications while juggling multiple glowing objects",
-    creature: "wild-eyed creature crackling with chaotic energy, fur/feathers standing on end",
-    colors: "hot pink, electric orange, warning red, and purple lightning",
-    props: "floating notification bubbles, swirling task tornados, coffee cup meteors"
-  },
-  strategy: {
-    bg: "ancient temple library with floating scrolls and mystical strategy boards, Pokemon Gym aesthetic",
-    setting: "contemplating a glowing 3D chess board hovering in midair",
-    creature: "wise sage-like creature with ancient markings and knowing eyes",
-    colors: "royal purple, gold accents, and mystical green glow",
-    props: "floating framework scrolls, glowing 2x2 matrices, ancient strategy tomes"
-  },
-  shipping: {
-    bg: "rocket launch platform with countdown displays and epic deployment energy, Pokemon Stadium vibes",
-    setting: "dramatically pressing a giant glowing launch button as rockets ignite",
-    creature: "determined warrior creature with battle scars and intense focus",
-    colors: "launch orange, victory green, and midnight blue",
-    props: "countdown holographics, feature flag banners, deployment aurora effects"
-  },
-  politics: {
-    bg: "grand Pokemon League hall with multiple faction banners and political intrigue",
-    setting: "standing confidently between two opposing groups, playing both sides",
-    creature: "charming trickster creature with a knowing smirk and diplomatic pose",
-    colors: "royal gold, power red, and alliance purple",
-    props: "floating alliance symbols, relationship web threads, influence auras"
-  },
-  vision: {
-    bg: "cosmic dreamscape with nebulas, floating islands, and reality-bending horizons",
-    setting: "floating in space surrounded by visions of possible futures",
-    creature: "ethereal visionary creature with starlight in its eyes and cosmic energy",
-    colors: "dream pink, cosmic purple, and infinite blue gradient",
-    props: "floating future visions, hockey stick constellations, reality distortion waves"
-  },
-};
 
 // Fetch image from URL and convert to base64
 async function fetchImageAsBase64(imageUrl: string): Promise<{ data: string; mimeType: string } | null> {
@@ -533,7 +488,7 @@ FORMATTING RULES:
 - Archetype description: A punchy roast about them, 1 sentence, around 60-80 chars ideal.
 - Archetype flavor: Nature-doc style observation, 1 sentence, around 60-80 chars ideal.
 - Archetype stage: Junior|Mid|Senior|Lead|Staff|Principal
-- Archetype weakness: ONE word only
+- Archetype weakness: 1-2 words MAXIMUM (e.g., "Meetings", "Ship Dates", "Excel", "User Research", "Deadlines"). Keep it punchy and ironic.
 - Moves: 2 attacks. Names should be 2-3 words (like Pokemon moves). Energy 1-2. Damage 10-100. Effect is a funny quip, around 30-50 chars ideal.
 - Gap items: MUST be skills/experience they need FOR THEIR SPECIFIC DREAM ROLE, not generic PM gaps. Be specific about what the dream role requires that they're missing. Max 60 chars each.
 - Roadmap: A 4-month plan specifically designed to move them TOWARD THEIR DREAM ROLE. Each month should address a specific gap between current state and dream role requirements. Max 20 char titles, max 40 char actions.
@@ -552,7 +507,7 @@ Your responses MUST be valid JSON with this exact structure (no markdown, no cod
     "element": "data|chaos|strategy|shipping|politics|vision",
     "flavor": "Nature-doc style observation, 1 sentence, 60-80 chars",
     "stage": "Their actual level: Junior|Mid|Senior|Lead|Staff|Principal|etc",
-    "weakness": "One ironic word based on their profile"
+    "weakness": "1-2 word ironic weakness (max 2 words, e.g., 'Meetings', 'Ship Dates', 'Excel')"
   },
   "moves": [
     {

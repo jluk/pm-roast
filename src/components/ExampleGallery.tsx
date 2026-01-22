@@ -189,7 +189,7 @@ const EXAMPLE_CARDS: {
 function GalleryCard({ card, index }: { card: typeof EXAMPLE_CARDS[0]; index: number }) {
   const rarity = getCardRarity(card.score);
   const isUltraRare = rarity === "ultra" || rarity === "rainbow" || rarity === "gold";
-  const isRainbowOrGold = rarity === "rainbow" || rarity === "gold";
+  const isHighScore = card.score >= 90; // 90+ score for special effects
 
   return (
     <motion.div
@@ -203,11 +203,11 @@ function GalleryCard({ card, index }: { card: typeof EXAMPLE_CARDS[0]; index: nu
       {isUltraRare && (
         <motion.div
           className={`absolute -inset-4 rounded-3xl blur-2xl pointer-events-none ${
-            isRainbowOrGold
+            isHighScore
               ? "bg-gradient-to-r from-pink-500/40 via-purple-500/40 to-cyan-500/40"
               : "bg-pink-500/30"
           }`}
-          animate={isRainbowOrGold ? {
+          animate={isHighScore ? {
             opacity: [0.4, 0.7, 0.4],
             scale: [1, 1.05, 1],
           } : {}}
@@ -220,7 +220,7 @@ function GalleryCard({ card, index }: { card: typeof EXAMPLE_CARDS[0]; index: nu
       )}
 
       {/* Sparkle effects for rainbow/gold cards - pointer-events-none so clicks pass through */}
-      {isRainbowOrGold && (
+      {isHighScore && (
         <div className="pointer-events-none">
           <motion.div
             className="absolute -top-2 -left-2 w-3 h-3 bg-white rounded-full"
@@ -304,7 +304,7 @@ export function ExampleGallery() {
         className="text-center mb-12"
       >
         <h2 className="text-3xl font-bold text-white mb-3">
-          What archetype are you?
+          What PM archetype are you?
         </h2>
         <p className="text-muted-foreground text-base">
           Join thousands of PMs who&apos;ve discovered their true career identity

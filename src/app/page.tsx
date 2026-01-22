@@ -12,6 +12,7 @@ import { FamousCardsGallery } from "@/components/FamousCardsGallery";
 import { Step, DreamRole, RoastResult, DREAM_ROLES } from "@/lib/types";
 import { HeroCard } from "@/components/InteractiveCard";
 import { FAMOUS_CARDS } from "@/lib/famous-cards";
+import { CELEBRITY_CARDS } from "@/lib/celebrity-cards";
 
 // LinkedIn URL validation regex
 const LINKEDIN_URL_REGEX = /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[\w-]+\/?$/i;
@@ -32,9 +33,10 @@ function logUsage(type: UsageType, input?: string, success?: boolean) {
   });
 }
 
-// Get a random legend name from Mt. Roastmore
+// Get a random legend name from Mt. Roastmore (tech or celebrity)
 function getRandomLegendName(): string {
-  return FAMOUS_CARDS[Math.floor(Math.random() * FAMOUS_CARDS.length)].name;
+  const allCards = [...FAMOUS_CARDS, ...CELEBRITY_CARDS];
+  return allCards[Math.floor(Math.random() * allCards.length)].name;
 }
 
 // Placeholder examples for rotation: linkedin -> website -> legend
@@ -149,6 +151,29 @@ export default function Home() {
       observerRef.current?.disconnect();
     };
   }, [step]);
+
+  // Handle hash navigation on page load (e.g., coming from /card/[id] to /#mt-roastmore)
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const sectionId = hash.slice(1);
+      // Immediately set the active section to match the hash
+      if (["roast-me", "mt-roastmore", "archetypes"].includes(sectionId)) {
+        setActiveSection(sectionId);
+      }
+      // Wait for DOM to be ready, then scroll to the element
+      const scrollToHash = () => {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+      };
+      // Use requestAnimationFrame to ensure DOM is painted
+      requestAnimationFrame(() => {
+        requestAnimationFrame(scrollToHash);
+      });
+    }
+  }, []);
 
   // Fetch initial roast count on mount
   useEffect(() => {
@@ -977,6 +1002,7 @@ export default function Home() {
     }
   };
 
+  // Go to pack selection with a pending action
   // Handle searching for any celebrity by name
   const handleLegendSearch = async (name: string) => {
     if (!dreamRole || !name.trim()) return;
@@ -985,9 +1011,9 @@ export default function Home() {
     logUsage("legend", name.trim());
 
     setInputSource("legend");
-    setIsLoadingLinkedin(true);
     setStep("analyzing");
     setError(null);
+    setIsLoadingLinkedin(true);
 
     try {
       const response = await fetch("/api/roast-legend", {
@@ -1004,7 +1030,6 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        // Handle "not a legend" error gracefully
         setError(data.error || "Failed to generate roast");
         setStep("upload");
         return;
@@ -1145,11 +1170,10 @@ export default function Home() {
 
     if (profileText.trim().length >= 50) {
       setInputSource("manual");
-      // Go directly to analyzing
+      setError(null);
       await handleAnalyzeWithData(profileText, null);
     } else if (file) {
       setInputSource("pdf");
-      // For PDF, handle file upload directly
       setStep("analyzing");
       setError(null);
 
@@ -1492,8 +1516,8 @@ export default function Home() {
                             type="text"
                             value={smartInput}
                             onChange={(e) => setSmartInput(e.target.value)}
-                            className={`w-full h-12 pl-11 bg-white/10 backdrop-blur-sm border rounded-lg text-base text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/50 focus:border-transparent transition-all ${
-                              isValidUrl ? "border-green-500/50 pr-10" : detectedType === "legend" ? "border-yellow-500/50 pr-10" : "border-white/20 pr-4"
+                            className={`w-full h-12 pl-11 pr-10 bg-white/10 backdrop-blur-sm border rounded-lg text-base text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-[#6366f1]/50 focus:border-transparent transition-all ${
+                              isValidUrl ? "border-green-500/50" : detectedType === "legend" ? "border-yellow-500/50" : "border-white/20"
                             }`}
                           />
 
@@ -1528,23 +1552,27 @@ export default function Home() {
                             </motion.div>
                           )}
 
-                          {/* Sparkle icon for legend mode */}
-                          {detectedType === "legend" && !isValidUrl && (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.5 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-yellow-400"
+                          {/* Random legend dice button - always show unless valid URL detected */}
+                          {!isValidUrl && (
+                            <motion.button
+                              type="button"
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              whileHover={{ scale: 1.1 }}
+                              whileTap={{ scale: 0.95, rotate: 180 }}
+                              onClick={() => setSmartInput(getRandomLegendName())}
+                              className={`absolute right-3 top-1/2 -translate-y-1/2 transition-colors ${
+                                detectedType === "legend" ? "text-yellow-400 hover:text-yellow-300" : "text-white/40 hover:text-yellow-400"
+                              }`}
+                              title="Random legend"
                             >
-                              <motion.svg
-                                className="w-5 h-5"
-                                fill="currentColor"
-                                viewBox="0 0 24 24"
-                                animate={{ scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }}
-                                transition={{ duration: 2, repeat: Infinity }}
-                              >
-                                <path d="M12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21L12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2z"/>
-                              </motion.svg>
-                            </motion.div>
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <rect x="4" y="4" width="16" height="16" rx="2" strokeWidth={2} />
+                                <circle cx="8" cy="8" r="1" fill="currentColor" />
+                                <circle cx="12" cy="12" r="1" fill="currentColor" />
+                                <circle cx="16" cy="16" r="1" fill="currentColor" />
+                              </svg>
+                            </motion.button>
                           )}
                         </div>
 

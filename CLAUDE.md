@@ -75,16 +75,25 @@ src/
 │   └── ui/                    # Shadcn/UI components
 ├── lib/
 │   ├── types.ts               # TypeScript types for roast result
-│   ├── famous-cards.ts        # Mt. Roastmore card definitions
+│   ├── famous-cards.ts        # Tech/SV Mt. Roastmore card definitions (50 cards)
+│   ├── celebrity-cards.ts     # Celebrity Mt. Roastmore card definitions (50 cards)
+│   ├── image-generation.ts    # Shared ELEMENT_SETTINGS for card image prompts
 │   ├── linkedin.ts            # LinkedIn data parsing utilities
 │   ├── share.ts               # URL sharing/encoding utilities
 │   └── utils.ts               # cn() utility
 scripts/
-└── generate-famous-cards.ts   # Generate AI card images for famous people
+├── generate-famous-cards.ts   # Generate AI card images for SV/tech people
+├── generate-celebrity-cards.ts # Generate AI card images for celebrities
+├── download-profile-images.ts # Download SV profile photos from Twitter
+└── download-celebrity-images.ts # Download celebrity photos from Wikipedia
 public/
 └── famous/
-    ├── generated/             # AI-generated card images
-    └── *.jpg                  # Source profile photos
+    ├── sv/                    # Silicon Valley / tech personalities
+    │   ├── *.jpg              # Source profile photos
+    │   └── generated/         # AI-generated card images
+    └── celebrities/           # Entertainment / celebrity personalities
+        ├── *.jpg              # Source profile photos
+        └── generated/         # AI-generated card images
 ```
 
 ## API Routes
@@ -138,16 +147,27 @@ public/
 ## Card System
 
 ### Rarity Tiers (based on career score)
-- **Common** (0-40): Gray styling
-- **Uncommon** (41-55): Blue styling
-- **Rare** (56-70): Purple styling
-- **Ultra Rare** (71-85): Pink styling
-- **Rainbow Rare** (86-95): Animated gradient
-- **Gold Crown** (96-100): Gold styling
+- **Common** (0-39): Subtle shine
+- **Uncommon** (40-59): Radial effect
+- **Rare** (60-74): Cosmic sparkle
+- **Ultra** (75-84): Galaxy swirl
+- **Rainbow** (85-94): Rainbow spectrum
+- **Gold** (95-100): Gold shimmer
+
+### Special Effects (90+ score)
+Cards with 90+ score get additional effects:
+- Holographic rainbow border (animated gradient)
+- Floating sparkle particles (ExampleGallery)
+- Enhanced glow effects
 
 ### Card Components
-- `HoloCard.tsx`: Base card with holographic shimmer effects, rarity-based styling
+- `HoloCard.tsx`: Base card with holographic effects. Key props:
+  - `rarity`: Controls effect intensity
+  - `score`: 90+ triggers holographic border and sparkle
+  - `disableScale`: Prevents hover scale (use for compact cards to avoid layout shift)
+  - `disableEffects`: Renders children without any effects
 - `PokemonCard.tsx`: Card front with archetype, moves, stats, element typing
+  - Compact mode: fixed 300px width, full mode: 360-400px
 - `CardBack.tsx`: Card back with roast quote, stats, and rival info
 - `InteractiveCard.tsx`: 3D tilt on hover, click to flip
 - `CardModalContext.tsx`: Global modal provider for expanded flippable card view
@@ -158,35 +178,79 @@ public/
 
 ## Mt. Roastmore (Famous Cards)
 
-Pre-generated cards for 50+ famous tech/PM personalities displayed in a carousel on the homepage.
+Pre-generated cards for 100 famous personalities (50 tech + 50 celebrities) displayed on the homepage with pack selection UX.
 
-### Adding New Famous Cards
-1. Add profile photo to `public/famous/`
+### Card Sets
+- **SV Cards** (`src/lib/famous-cards.ts`): 50 Silicon Valley / tech personalities
+- **Celebrity Cards** (`src/lib/celebrity-cards.ts`): 50 entertainment / celebrity personalities
+
+### Pack Selection
+First row shows a mix of 2 tech + 2 celebrity cards. Users then choose a booster pack:
+- **Chaos Pack** (red, 🎬): Reveals celebrity cards - "BOLD PULL!"
+- **SV Pack** (blue, 💻): Reveals tech cards - "NERDY PULL!"
+
+Selecting a pack reveals 4 more cards with flip animation. Cards with 90+ score get holographic border treatment.
+
+### Adding New Cards
+
+**For SV/Tech cards:**
+1. Add profile photo to `public/famous/sv/`
 2. Add card definition to `src/lib/famous-cards.ts`
-3. Optionally add to `scripts/regenerate-famous-card.ts` for image regeneration
+3. Run: `npx tsx scripts/generate-famous-cards.ts <card-id>`
 
-### Regenerating Famous Card Images
-Use `scripts/regenerate-famous-card.ts` to regenerate card images with updated prompts:
+**For Celebrity cards:**
+1. Add profile photo to `public/famous/celebrities/`
+2. Add card definition to `src/lib/celebrity-cards.ts`
+3. Run: `npx tsx scripts/generate-celebrity-cards.ts <card-id>`
+
+### Generating Card Images
 
 ```bash
-npx tsx scripts/regenerate-famous-card.ts <card-id>
-# Example: npx tsx scripts/regenerate-famous-card.ts dario-amodei
+# Generate all SV card images
+npx tsx scripts/generate-famous-cards.ts
+
+# Generate specific SV cards
+npx tsx scripts/generate-famous-cards.ts paul-graham marc-andreessen
+
+# Generate all celebrity card images
+npx tsx scripts/generate-celebrity-cards.ts
+
+# Generate specific celebrity cards
+npx tsx scripts/generate-celebrity-cards.ts john-cena dwayne-johnson
 ```
 
-The script:
-- Loads GEMINI_API_KEY from `.env.local`
-- Fetches Wikipedia image (falls back to local `public/famous/*.jpg`)
-- Generates scene-based illustration using archetype + moves data
-- Saves to `public/famous/generated/<card-id>-card.png`
+The scripts:
+- Load GEMINI_API_KEY from `.env.local`
+- Read source photo from `public/famous/{sv|celebrities}/`
+- Generate scene-based illustration using archetype + creative scene prompt
+- Save to `public/famous/{sv|celebrities}/generated/<card-id>-card.png`
+- 3 second delay between generations to avoid rate limits
+
+### Downloading Profile Images
+
+```bash
+# Download SV profile photos (from Twitter handles)
+npx tsx scripts/download-profile-images.ts
+
+# Download celebrity photos (from Wikipedia)
+npx tsx scripts/download-celebrity-images.ts
+```
 
 ### Card Data Structure
-Each famous card in `src/lib/famous-cards.ts` includes:
+Both `famous-cards.ts` and `celebrity-cards.ts` share the same structure:
 - `id`, `name`, `title`, `company`
+- `imageUrl` - path to generated card image
 - `archetypeName`, `archetypeDescription`, `archetypeEmoji`
 - `element` (data/chaos/strategy/shipping/politics/vision)
 - `moves[]` with name, energyCost, damage, effect
-- `score`, `stage`, `weakness`, `flavor`
+- `score`, `stage`, `weakness` (1-2 words max), `flavor`
 - `roastBullets[]`, `bangerQuote`, `naturalRival`
+
+### Generation Script Data Structure
+The generation scripts (`generate-famous-cards.ts`, `generate-celebrity-cards.ts`) use:
+- `id`, `name`, `sourceImage`, `outputImage`
+- `archetypeName`, `element`
+- `creativeScene` - detailed comedic scene description for the AI to illustrate
 
 ## Image Generation Guidelines
 
@@ -225,6 +289,11 @@ The homepage has anchor-linked navigation to three main sections:
 - `#roast-me` - Hero and input form
 - `#mt-roastmore` - Famous Cards Gallery (curated celebrity PM cards)
 - `#archetypes` - Example Gallery (archetype showcases)
+
+### Navigation State
+- `activeSection` tracks which nav item is highlighted
+- Intersection Observer updates state as user scrolls
+- Hash navigation from other pages (e.g., `/card/[id]` to `/#mt-roastmore`) uses a `useEffect` with double `requestAnimationFrame` to scroll after React hydration completes
 
 ## User Flow
 

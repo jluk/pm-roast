@@ -1,53 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { PMElement } from "@/lib/types";
+import { ELEMENT_SETTINGS } from "@/lib/image-generation";
 
 const genAINew = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
-
-const ELEMENT_SETTINGS: Record<PMElement, { bg: string; setting: string; creature: string; colors: string; props: string }> = {
-  data: {
-    bg: "glowing crystal cave with floating holographic charts and data streams, Pokemon TCG style",
-    setting: "surrounded by floating glowing orbs of data, analyzing patterns in the air",
-    creature: "mysterious creature with glowing eyes and digital patterns on its form",
-    colors: "electric blue, cyan glow, and deep purple shadows",
-    props: "floating crystals showing metrics, mystical dashboard runes, glowing spreadsheet tablets"
-  },
-  chaos: {
-    bg: "swirling vortex dimension with multiple portals and chaotic energy, classic Pokemon battle arena",
-    setting: "surfing on a wave of notifications while juggling multiple glowing objects",
-    creature: "wild-eyed creature crackling with chaotic energy, fur/feathers standing on end",
-    colors: "hot pink, electric orange, warning red, and purple lightning",
-    props: "floating notification bubbles, swirling task tornados, coffee cup meteors"
-  },
-  strategy: {
-    bg: "ancient temple library with floating scrolls and mystical strategy boards, Pokemon Gym aesthetic",
-    setting: "contemplating a glowing 3D chess board hovering in midair",
-    creature: "wise sage-like creature with ancient markings and knowing eyes",
-    colors: "royal purple, gold accents, and mystical green glow",
-    props: "floating framework scrolls, glowing 2x2 matrices, ancient strategy tomes"
-  },
-  shipping: {
-    bg: "rocket launch platform with countdown displays and epic deployment energy, Pokemon Stadium vibes",
-    setting: "dramatically pressing a giant glowing launch button as rockets ignite",
-    creature: "determined warrior creature with battle scars and intense focus",
-    colors: "launch orange, victory green, and midnight blue",
-    props: "countdown holographics, feature flag banners, deployment aurora effects"
-  },
-  politics: {
-    bg: "grand Pokemon League hall with multiple faction banners and political intrigue",
-    setting: "standing confidently between two opposing groups, playing both sides",
-    creature: "charming trickster creature with a knowing smirk and diplomatic pose",
-    colors: "royal gold, power red, and alliance purple",
-    props: "floating alliance symbols, relationship web threads, influence auras"
-  },
-  vision: {
-    bg: "cosmic dreamscape with nebulas, floating islands, and reality-bending horizons",
-    setting: "floating in space surrounded by visions of possible futures",
-    creature: "ethereal visionary creature with starlight in its eyes and cosmic energy",
-    colors: "dream pink, cosmic purple, and infinite blue gradient",
-    props: "floating future visions, hockey stick constellations, reality distortion waves"
-  },
-};
 
 // Generate archetype image using Gemini
 async function generateArchetypeImage(
@@ -93,14 +49,16 @@ ART STYLE (CRITICAL - POKEMON TCG NOSTALGIC):
 - Premium quality - polished, engaging, and memorable
 - Should evoke nostalgia for classic Pokemon cards
 
-CRITICAL - NO TEXT:
-- NEVER generate ANY text, words, letters, numbers, labels, signs, or writing
+CRITICAL - NO TEXT IN IMAGE:
+- NEVER generate ANY text, words, letters, numbers, labels, signs, or writing of any kind
+- This includes: names, titles, speech bubbles, captions, watermarks, logos with text
 - AI-generated text always looks wrong - avoid it completely
+- The image should be PURELY visual with no readable characters
 
-DO NOT:
+ABSOLUTELY DO NOT:
 - Cut off the creature's head, ears, or any body parts
 - Make it photorealistic, 3D rendered, or AI-looking
-- Generate any text, words, labels, signs, or writing of any kind
+- Generate ANY text, words, letters, numbers, signs, labels, speech bubbles, or writing (AI text always looks wrong)
 - Make portrait/vertical orientation - MUST be landscape/horizontal
 - Make it generic or boring - should have personality and charm`;
 

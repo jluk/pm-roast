@@ -3,6 +3,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FAMOUS_CARDS, FamousCard } from "@/lib/famous-cards";
+import { CELEBRITY_CARDS, CelebrityCard } from "@/lib/celebrity-cards";
+
+// Union type for both card types (they share the same structure)
+type AnyCard = FamousCard | CelebrityCard;
 import { PokemonCard } from "./PokemonCard";
 import { CardBack } from "./CardBack";
 import { getCardRarity, CardRarity } from "./HoloCard";
@@ -43,7 +47,7 @@ function GridCard({
   card,
   onClick,
 }: {
-  card: FamousCard;
+  card: AnyCard;
   onClick: () => void;
 }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -74,53 +78,62 @@ function GridCard({
   return (
     <div
       className="group cursor-pointer"
-      style={{ perspective: "1000px" }}
       onMouseEnter={() => !isMobile && setIsFlipped(true)}
       onMouseLeave={() => !isMobile && setIsFlipped(false)}
       onClick={handleClick}
     >
-      <motion.div
-        className="relative w-full"
-        style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{ duration: 0.6, type: "spring", stiffness: 100, damping: 15 }}
+      {/* Container with fixed dimensions matching the 300px x 420px card (aspect 5:7) */}
+      <div
+        className="relative w-[300px] h-[420px] mx-auto"
+        style={{ perspective: "1000px" }}
       >
-        {/* Front - The Card */}
-        <div
-          className="w-full"
-          style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
-        >
-          <PokemonCard
-            score={card.score}
-            archetypeName={card.archetypeName}
-            archetypeEmoji={card.archetypeEmoji}
-            archetypeDescription={card.archetypeDescription}
-            archetypeImage={card.imageUrl}
-            element={card.element}
-            moves={card.moves}
-            stage={card.stage}
-            weakness={card.weakness}
-            flavor={card.flavor}
-            compact
-            userName={card.name}
-          />
-          {/* Mobile tap hint */}
-          {isMobile && (
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full">
-              <span className="text-white/70 text-xs">Tap to flip</span>
-            </div>
-          )}
-        </div>
-
-        {/* Back - Roast Preview */}
-        <div
-          className="absolute inset-0 w-full h-full rounded-xl overflow-hidden"
-          style={{
-            backfaceVisibility: "hidden",
-            WebkitBackfaceVisibility: "hidden",
-            transform: "rotateY(180deg)",
+        <motion.div
+          className="absolute inset-0"
+          style={{ transformStyle: "preserve-3d" }}
+          animate={{ rotateY: isFlipped ? 180 : 0 }}
+          transition={{
+            duration: 0.6,
+            type: "spring",
+            stiffness: 100,
+            damping: 15,
           }}
         >
+          {/* Front - The Card */}
+          <div
+            className="absolute inset-0"
+            style={{ backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden" }}
+          >
+            <PokemonCard
+              score={card.score}
+              archetypeName={card.archetypeName}
+              archetypeEmoji={card.archetypeEmoji}
+              archetypeDescription={card.archetypeDescription}
+              archetypeImage={card.imageUrl}
+              element={card.element}
+              moves={card.moves}
+              stage={card.stage}
+              weakness={card.weakness}
+              flavor={card.flavor}
+              compact
+              userName={card.name}
+            />
+            {/* Mobile tap hint */}
+            {isMobile && (
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full">
+                <span className="text-white/70 text-xs">Tap to flip</span>
+              </div>
+            )}
+          </div>
+
+          {/* Back - Roast Preview */}
+          <div
+            className="absolute inset-0 w-full h-full rounded-xl overflow-hidden"
+            style={{
+              backfaceVisibility: "hidden",
+              WebkitBackfaceVisibility: "hidden",
+              transform: "rotateY(180deg)",
+            }}
+          >
           <div className="w-full h-full bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 border-4 border-orange-500/50 rounded-xl p-4 flex flex-col">
             {/* Header */}
             <div className="flex items-center gap-3 mb-4">
@@ -167,7 +180,8 @@ function GridCard({
             </button>
           </div>
         </div>
-      </motion.div>
+        </motion.div>
+      </div>
     </div>
   );
 }
@@ -177,7 +191,7 @@ function ExpandedCardView({
   card,
   onClose,
 }: {
-  card: FamousCard;
+  card: AnyCard;
   onClose: () => void;
 }) {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -630,121 +644,308 @@ function ExpandedCardView({
   );
 }
 
-// Sealed Booster Pack Component
-function SealedBoosterPack({ onClick, isOpening }: { onClick: () => void; isOpening: boolean }) {
+type PackColor = "red" | "blue";
+
+// Single Holographic Booster Pack
+function HolographicPack({
+  color,
+  onSelect,
+  isHovered,
+  onHover,
+}: {
+  color: PackColor;
+  onSelect: () => void;
+  isHovered: boolean;
+  onHover: (hovered: boolean) => void;
+}) {
+  const isRed = color === "red";
+
+  const gradients = isRed
+    ? {
+        main: "from-red-600 via-red-500 to-orange-500",
+        accent: "from-red-400 to-orange-400",
+        glow: "rgba(239, 68, 68, 0.5)",
+        border: "#dc2626",
+        highlight: "#fca5a5",
+      }
+    : {
+        main: "from-blue-600 via-blue-500 to-cyan-500",
+        accent: "from-blue-400 to-cyan-400",
+        glow: "rgba(59, 130, 246, 0.5)",
+        border: "#2563eb",
+        highlight: "#93c5fd",
+      };
+
   return (
     <motion.div
-      className="relative cursor-pointer group"
-      onClick={onClick}
-      whileHover={{ scale: 1.02 }}
+      className="relative cursor-pointer"
+      onMouseEnter={() => onHover(true)}
+      onMouseLeave={() => onHover(false)}
+      onClick={onSelect}
+      whileHover={{ scale: 1.05, y: -10 }}
       whileTap={{ scale: 0.98 }}
+      animate={isHovered ? { y: -5 } : { y: 0 }}
     >
       {/* Glow effect */}
       <motion.div
-        className="absolute -inset-4 bg-gradient-to-r from-orange-500/30 via-yellow-500/30 to-orange-500/30 rounded-3xl blur-xl"
+        className={`absolute -inset-4 rounded-3xl blur-2xl bg-gradient-to-b ${gradients.main}`}
         animate={{
-          opacity: [0.5, 0.8, 0.5],
-          scale: [1, 1.05, 1],
+          opacity: isHovered ? 0.6 : 0.3,
+          scale: isHovered ? 1.1 : 1,
         }}
-        transition={{ duration: 2, repeat: Infinity }}
+        transition={{ duration: 0.3 }}
       />
 
-      {/* Pack container */}
-      <motion.div
-        className="relative w-64 md:w-80 h-96 md:h-[28rem] mx-auto"
-        animate={isOpening ? {
-          rotateY: [0, 10, -10, 0],
-          scale: [1, 1.1, 0.9, 0],
-        } : {}}
-        transition={{ duration: 0.6 }}
+      {/* Pack container - sized to match gallery cards */}
+      <div
+        className="relative w-[140px] sm:w-[200px] md:w-[220px] aspect-[5/7] rounded-2xl overflow-hidden"
+        style={{
+          background: `linear-gradient(145deg, ${gradients.border}, #1a1a2e)`,
+          boxShadow: isHovered
+            ? `0 20px 60px ${gradients.glow}, 0 0 40px ${gradients.glow}`
+            : `0 10px 30px rgba(0,0,0,0.5)`,
+        }}
       >
-        {/* Pack background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-zinc-800 via-zinc-900 to-black rounded-2xl border-2 border-orange-500/50 overflow-hidden shadow-2xl">
-          {/* Holographic shimmer */}
+        {/* Inner pack */}
+        <div
+          className={`absolute inset-1 rounded-xl bg-gradient-to-br ${gradients.main} overflow-hidden`}
+        >
+          {/* Holographic overlay - animated */}
           <motion.div
-            className="absolute inset-0 bg-gradient-to-br from-orange-500/20 via-transparent to-yellow-500/20"
+            className="absolute inset-0 opacity-60"
+            style={{
+              background: `linear-gradient(
+                135deg,
+                transparent 0%,
+                rgba(255,255,255,0.1) 25%,
+                rgba(255,255,255,0.3) 50%,
+                rgba(255,255,255,0.1) 75%,
+                transparent 100%
+              )`,
+              backgroundSize: "200% 200%",
+            }}
             animate={{
               backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"],
             }}
-            transition={{ duration: 3, repeat: Infinity }}
+            transition={{
+              duration: 3,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
           />
 
-          {/* Pack design */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-6">
-            {/* Logo area */}
-            <div className="text-center mb-4">
-              <motion.div
-                className="text-5xl md:text-6xl mb-2"
-                animate={{
-                  rotate: [0, -5, 5, 0],
-                  scale: [1, 1.1, 1],
+          {/* Rainbow holographic shimmer */}
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(
+                45deg,
+                rgba(255,0,0,0.1) 0%,
+                rgba(255,127,0,0.1) 14%,
+                rgba(255,255,0,0.1) 28%,
+                rgba(0,255,0,0.1) 42%,
+                rgba(0,0,255,0.1) 57%,
+                rgba(75,0,130,0.1) 71%,
+                rgba(148,0,211,0.1) 85%,
+                rgba(255,0,0,0.1) 100%
+              )`,
+              backgroundSize: "400% 400%",
+            }}
+            animate={{
+              backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+
+          {/* Diagonal shine sweep */}
+          <motion.div
+            className="absolute inset-0"
+            style={{
+              background: "linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.4) 50%, transparent 60%)",
+            }}
+            animate={{
+              x: ["-100%", "200%"],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+              repeatDelay: 1,
+            }}
+          />
+
+          {/* Pack design elements */}
+          <div className="absolute inset-0 flex flex-col items-center justify-between py-4 sm:py-6 px-3 sm:px-4">
+            {/* Top seal line */}
+            <div className="w-full">
+              <div
+                className="h-2 sm:h-3 md:h-4 rounded-full mx-2"
+                style={{
+                  background: `linear-gradient(90deg, transparent, ${gradients.highlight}, transparent)`,
+                  boxShadow: `0 0 10px ${gradients.highlight}`,
                 }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                🔥
-              </motion.div>
-              <h3 className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-yellow-400 to-orange-400">
-                PM ROAST
-              </h3>
-              <p className="text-orange-400/70 text-xs uppercase tracking-[0.3em] mt-1">
-                Booster Pack
-              </p>
+              />
+              <div className="flex justify-center mt-1">
+                <div className="w-8 sm:w-10 h-1 rounded-full bg-white/30" />
+              </div>
             </div>
 
-            {/* Card preview silhouettes */}
-            <div className="relative w-32 h-40 md:w-40 md:h-48 my-4">
-              {[0, 1, 2].map((i) => (
-                <motion.div
-                  key={i}
-                  className="absolute inset-0 bg-gradient-to-br from-zinc-700 to-zinc-800 rounded-lg border border-orange-500/30"
-                  style={{
-                    transform: `rotate(${(i - 1) * 8}deg) translateY(${i * 4}px)`,
-                    zIndex: 3 - i,
-                  }}
-                  animate={{
-                    rotate: [(i - 1) * 8, (i - 1) * 8 + 2, (i - 1) * 8],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity, delay: i * 0.2 }}
+            {/* Center logo area */}
+            <div className="flex-1 flex flex-col items-center justify-center">
+              {/* PM ROAST text */}
+              <div className="text-center mb-3">
+                <div
+                  className="text-[10px] sm:text-xs md:text-sm font-black tracking-[0.3em] text-white/90"
+                  style={{ textShadow: "0 2px 4px rgba(0,0,0,0.5)" }}
                 >
-                  <div className="absolute inset-2 border border-orange-500/20 rounded" />
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-3xl opacity-30">
-                    ?
-                  </div>
-                </motion.div>
-              ))}
+                  PM ROAST
+                </div>
+              </div>
+
+              {/* Card icon */}
+              <motion.div
+                className="w-14 h-20 sm:w-20 sm:h-28 md:w-24 md:h-32 rounded-lg bg-white/20 backdrop-blur-sm border-2 border-white/40 flex items-center justify-center relative overflow-hidden"
+                animate={isHovered ? { rotateY: [0, 10, -10, 0] } : {}}
+                transition={{ duration: 0.5 }}
+              >
+                {/* Mini holographic effect on card */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-br from-white/40 via-transparent to-white/20"
+                  animate={{ opacity: [0.3, 0.6, 0.3] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                />
+                <span className="text-2xl sm:text-3xl md:text-4xl relative z-10">{isRed ? "🎬" : "💻"}</span>
+              </motion.div>
+
+              {/* Booster Pack label */}
+              <div
+                className="mt-3 sm:mt-4 px-3 sm:px-4 py-1.5 rounded-full text-[9px] sm:text-[11px] md:text-xs font-bold uppercase tracking-wider"
+                style={{
+                  background: `linear-gradient(135deg, ${gradients.highlight}40, ${gradients.border}60)`,
+                  color: "white",
+                  textShadow: "0 1px 2px rgba(0,0,0,0.5)",
+                }}
+              >
+                Booster Pack
+              </div>
             </div>
 
-            {/* CTA */}
-            <motion.div
-              className="mt-4 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 rounded-full text-white font-bold text-sm md:text-base shadow-lg shadow-orange-500/30"
-              animate={{
-                scale: [1, 1.05, 1],
-                boxShadow: [
-                  "0 10px 30px rgba(249, 115, 22, 0.3)",
-                  "0 15px 40px rgba(249, 115, 22, 0.5)",
-                  "0 10px 30px rgba(249, 115, 22, 0.3)",
-                ],
-              }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              🎴 Rip Open Pack
-            </motion.div>
-
-            <p className="text-white/40 text-xs mt-3">
-              Contains {FAMOUS_CARDS.length > 8 ? 4 : Math.min(4, FAMOUS_CARDS.length - 4)} more legends
-            </p>
+            {/* Bottom seal */}
+            <div className="w-full">
+              <div className="flex justify-center mb-1">
+                <div className="w-8 sm:w-10 h-1 rounded-full bg-white/30" />
+              </div>
+              <div
+                className="h-2 sm:h-2.5 rounded-full mx-4"
+                style={{
+                  background: `linear-gradient(90deg, transparent, ${gradients.highlight}80, transparent)`,
+                }}
+              />
+            </div>
           </div>
 
-          {/* Tear line */}
-          <div className="absolute top-8 left-0 right-0 border-t-2 border-dashed border-orange-500/30" />
-
-          {/* Corner decorations */}
-          <div className="absolute top-2 left-2 w-4 h-4 border-l-2 border-t-2 border-orange-500/50 rounded-tl" />
-          <div className="absolute top-2 right-2 w-4 h-4 border-r-2 border-t-2 border-orange-500/50 rounded-tr" />
-          <div className="absolute bottom-2 left-2 w-4 h-4 border-l-2 border-b-2 border-orange-500/50 rounded-bl" />
-          <div className="absolute bottom-2 right-2 w-4 h-4 border-r-2 border-b-2 border-orange-500/50 rounded-br" />
+          {/* Corner triangles for sealed look */}
+          <div
+            className="absolute top-0 right-0 w-8 sm:w-10 md:w-12 h-8 sm:h-10 md:h-12"
+            style={{
+              background: `linear-gradient(135deg, transparent 50%, ${gradients.highlight}40 50%)`,
+            }}
+          />
+          <div
+            className="absolute bottom-0 left-0 w-8 sm:w-10 md:w-12 h-8 sm:h-10 md:h-12"
+            style={{
+              background: `linear-gradient(-45deg, transparent 50%, ${gradients.highlight}40 50%)`,
+            }}
+          />
         </div>
+      </div>
+
+      {/* Pack label */}
+      <motion.div
+        className="mt-4 sm:mt-5 text-center"
+        animate={{ opacity: isHovered ? 1 : 0.7 }}
+      >
+        <p className={`text-sm sm:text-base md:text-lg font-bold bg-gradient-to-r ${gradients.accent} bg-clip-text text-transparent`}>
+          {isRed ? "Chaos" : "SV"}
+        </p>
+        <p className="text-[10px] sm:text-xs md:text-sm text-muted-foreground mt-0.5">
+          {isRed ? "Celebrities & Icons" : "Tech Founders & VCs"}
+        </p>
       </motion.div>
+    </motion.div>
+  );
+}
+
+// Two-Pack Selection Component
+function PackSelection({ onSelectPack, isOpening }: { onSelectPack: (color: PackColor) => void; isOpening: boolean }) {
+  const [hoveredPack, setHoveredPack] = useState<PackColor | null>(null);
+
+  return (
+    <motion.div
+      className="w-full max-w-2xl mx-auto text-center py-4 sm:py-8"
+      animate={isOpening ? { opacity: 0, scale: 0.8 } : { opacity: 1, scale: 1 }}
+      transition={{ duration: 0.4 }}
+    >
+      {/* Title */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-6 sm:mb-8"
+      >
+        <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
+          🎁 Free Booster Pack
+        </h3>
+        <p className="text-muted-foreground text-sm">
+          Choose a pack to reveal more legends
+        </p>
+      </motion.div>
+
+      {/* Packs */}
+      <div className="flex justify-center gap-6 sm:gap-8 md:gap-16">
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <HolographicPack
+            color="red"
+            onSelect={() => onSelectPack("red")}
+            isHovered={hoveredPack === "red"}
+            onHover={(h) => setHoveredPack(h ? "red" : null)}
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <HolographicPack
+            color="blue"
+            onSelect={() => onSelectPack("blue")}
+            isHovered={hoveredPack === "blue"}
+            onHover={(h) => setHoveredPack(h ? "blue" : null)}
+          />
+        </motion.div>
+      </div>
+
+      {/* Hint text */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+        className="text-xs text-muted-foreground mt-6 sm:mt-8"
+      >
+        Click a pack to open it
+      </motion.p>
+
+      <p className="text-white/40 text-xs mt-2">
+        Contains {FAMOUS_CARDS.length > 8 ? 4 : Math.min(4, FAMOUS_CARDS.length - 4)} more legends
+      </p>
     </motion.div>
   );
 }
@@ -755,7 +956,7 @@ function RevealedCard({
   index,
   onClick
 }: {
-  card: FamousCard;
+  card: AnyCard;
   index: number;
   onClick: () => void;
 }) {
@@ -780,7 +981,7 @@ function RevealedCard({
         stiffness: 100,
         damping: 12,
       }}
-      className="w-full max-w-[320px] mx-auto md:max-w-none"
+      className="w-[300px] mx-auto relative"
     >
       {/* Reveal sparkle effect */}
       <motion.div
@@ -818,29 +1019,49 @@ function RevealedCard({
 }
 
 export function FamousCardsGallery() {
-  const [selectedCard, setSelectedCard] = useState<FamousCard | null>(null);
+  const [selectedCard, setSelectedCard] = useState<AnyCard | null>(null);
   const [packOpened, setPackOpened] = useState(false);
   const [isOpening, setIsOpening] = useState(false);
   const [randomSeed, setRandomSeed] = useState<number | null>(null);
+  const [selectedPackColor, setSelectedPackColor] = useState<PackColor | null>(null);
 
   // Generate random seed on mount (client-side only)
   useEffect(() => {
     setRandomSeed(Math.random() * 100000);
   }, []);
 
-  // Memoize the shuffled cards - random on each page load
+  // Memoize the shuffled cards - first row is a mix, second row depends on pack selection
   const { firstRowCards, secondRowCards } = useMemo(() => {
-    // Use a fixed seed during SSR, random seed after mount
     const seed = randomSeed ?? 42;
-    const shuffled = shuffleArray(FAMOUS_CARDS, seed);
-    const firstRowCount = Math.min(4, Math.ceil(shuffled.length / 2));
-    return {
-      firstRowCards: shuffled.slice(0, firstRowCount),
-      secondRowCards: shuffled.slice(firstRowCount, firstRowCount + 4),
-    };
-  }, [randomSeed]);
 
-  const handleOpenPack = () => {
+    // Mix both card sets for the first row (2 tech + 2 celebrity)
+    const shuffledTech = shuffleArray(FAMOUS_CARDS, seed);
+    const shuffledCeleb = shuffleArray(CELEBRITY_CARDS, seed + 1);
+
+    // First row: alternating tech and celebrity for variety
+    const firstRowCards: AnyCard[] = [
+      shuffledTech[0],
+      shuffledCeleb[0],
+      shuffledTech[1],
+      shuffledCeleb[1],
+    ];
+
+    // Second row depends on pack selection
+    // Chaos (red) = celebrities, SV (blue) = tech famous cards
+    let secondRowCards: AnyCard[];
+    if (selectedPackColor === "red") {
+      // Chaos pack - show celebrities (skip first 2 already used)
+      secondRowCards = shuffledCeleb.slice(2, 6);
+    } else {
+      // SV pack (blue) or not yet selected - show tech cards (skip first 2 already used)
+      secondRowCards = shuffledTech.slice(2, 6);
+    }
+
+    return { firstRowCards, secondRowCards };
+  }, [randomSeed, selectedPackColor]);
+
+  const handleOpenPack = (color: PackColor) => {
+    setSelectedPackColor(color);
     setIsOpening(true);
     // Delay the reveal for the pack animation
     setTimeout(() => {
@@ -850,24 +1071,27 @@ export function FamousCardsGallery() {
   };
 
   return (
-    <div className="py-8 md:py-12">
+    <div className={`pt-8 md:pt-12 ${packOpened ? "pb-8 md:pb-12" : "pb-0"}`}>
       {/* Section Header */}
       <div id="mt-roastmore" className="text-center mb-8 md:mb-10 px-4 scroll-mt-16">
         <h2 className="text-2xl md:text-3xl font-black text-white mb-2">
           Mt. Roastmore
         </h2>
         <p className="text-white/50 text-sm max-w-md mx-auto">
-          The legends immortalized in roast. <span className="hidden md:inline">Hover to peek the burn.</span><span className="md:hidden">Tap to flip.</span>
+          The best and worst PMs, immortalized in roast.
+        </p>
+        <p className="text-white/40 text-xs mt-1">
+          <span className="hidden md:inline">Hover to peek the burn.</span><span className="md:hidden">Tap to flip.</span>
         </p>
       </div>
 
       {/* First Row - Always visible */}
-      <div className="px-4 md:px-8 md:max-w-7xl md:mx-auto">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-6">
+      <div className="px-4 md:px-8 md:max-w-7xl md:mx-auto overflow-visible">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 md:gap-6 overflow-visible">
           {firstRowCards.map((card) => (
             <div
               key={card.id}
-              className="w-full max-w-[300px] mx-auto sm:max-w-none"
+              className="w-full max-w-[300px] mx-auto sm:max-w-none overflow-visible"
             >
               <GridCard
                 card={card}
@@ -889,7 +1113,7 @@ export function FamousCardsGallery() {
               exit={{ opacity: 0, scale: 0.8 }}
               className="flex justify-center"
             >
-              <SealedBoosterPack onClick={handleOpenPack} isOpening={isOpening} />
+              <PackSelection onSelectPack={handleOpenPack} isOpening={isOpening} />
             </motion.div>
           ) : (
             <motion.div
@@ -1029,7 +1253,7 @@ export function FamousCardsGallery() {
                           textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 3px 6px rgba(0,0,0,0.4)'
                         }}
                       >
-                        LEGENDARY PULL!
+                        {selectedPackColor === "red" ? "BOLD PULL!" : "NERDY PULL!"}
                       </span>
                     </div>
                   </div>
@@ -1045,7 +1269,7 @@ export function FamousCardsGallery() {
               </motion.div>
 
               {/* Second Row Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 pt-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 pt-8 overflow-visible">
                 {secondRowCards.map((card, index) => (
                   <RevealedCard
                     key={card.id}
@@ -1058,16 +1282,6 @@ export function FamousCardsGallery() {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      {/* Card count */}
-      <div className="text-center mt-6 md:mt-8">
-        <p className="text-white/30 text-xs">
-          {packOpened
-            ? `${firstRowCards.length + secondRowCards.length} legends revealed`
-            : `${firstRowCards.length} legends shown • ${secondRowCards.length} more in the pack`
-          }
-        </p>
       </div>
 
       {/* Expanded View Modal */}

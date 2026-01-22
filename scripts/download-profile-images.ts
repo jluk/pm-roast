@@ -110,7 +110,7 @@ async function downloadImage(url: string, filepath: string): Promise<boolean> {
 async function main() {
   console.log("=== Downloading Profile Images ===\n");
 
-  const outputDir = path.join(process.cwd(), "public", "famous");
+  const outputDir = path.join(process.cwd(), "public", "famous", "sv");
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
@@ -153,7 +153,7 @@ async function main() {
     console.log(`\nFailed downloads (manual download needed):`);
     failed.forEach(f => console.log(`  - ${f}`));
     console.log(`\nTo manually download, search for their profile picture and save to:`);
-    console.log(`  /public/famous/<id>.jpg`);
+    console.log(`  /public/famous/sv/<id>.jpg`);
   }
 }
 

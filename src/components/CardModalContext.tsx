@@ -105,7 +105,7 @@ export function CardModalProvider({ children }: { children: ReactNode }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-md isolate"
+            className="fixed inset-0 z-[9999] grid place-items-center bg-black/90 backdrop-blur-md isolate p-0 m-0"
             onClick={handleCloseModal}
           >
             {/* Close hint */}

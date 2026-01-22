@@ -173,21 +173,13 @@ export function PokemonCard({
   };
 
   return (
-    <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"} rarity={rarity} disableEffects={disableHoloEffects}>
+    <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"} rarity={rarity} disableEffects={disableHoloEffects} disableScale={compact} score={score}>
       <div
-        className={`relative rounded-xl overflow-hidden border-[6px] flex flex-col ${
-          rarity === "rainbow"
-            ? "border-transparent"
-            : ""
-        }`}
+        className="relative rounded-xl overflow-hidden border-[6px] flex flex-col"
         style={{
           background: elementData.cardBackground,
           aspectRatio: "2.5/3.5",
-          borderColor: rarity === "rainbow" ? undefined : elementData.borderColor,
-          // Rainbow border using gradient for highest rarity
-          ...(rarity === "rainbow" && {
-            borderImage: "linear-gradient(135deg, #ec4899, #8b5cf6, #3b82f6, #22c55e, #eab308, #ec4899) 1",
-          }),
+          borderColor: elementData.borderColor,
         }}
       >
         {/* Inner border effect */}

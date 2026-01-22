@@ -50,53 +50,61 @@ async function generateCelebrityImage(
     if (profileImage) {
       console.log("=== GENERATING PERSONALIZED CELEBRITY IMAGE ===");
 
-      const personalizedPrompt = `Create a HILARIOUS MEME-STYLE trading card illustration of THIS EXACT PERSON as "${archetypeName}".
+      const personalizedPrompt = `Create a HILARIOUS Pokemon trading card illustration of THIS EXACT PERSON as "${archetypeName}".
 
-THE ROAST CONCEPT - THIS IS THE JOKE:
-"${archetypeDescription}"
+CRITICAL - NO TEXT IN IMAGE:
+- NEVER generate ANY text, words, letters, numbers, labels, signs, or writing of any kind
+- This includes: names, titles, speech bubbles, captions, watermarks, logos with text
+- AI-generated text always looks wrong - avoid it completely
+- The image should be PURELY visual with no readable characters
 
-SHOW THEM IN ACTION - NOT JUST A HEADSHOT:
-- Depict ${name} DOING something funny that matches their roast archetype
-- Show them in a comedic scene or situation that illustrates the joke
-- Include props, items, or background elements that tell the story of their roast
+CRITICAL - PRESERVE THE PERSON'S LIKENESS:
+- This is THE MOST IMPORTANT requirement - the output MUST look like this specific person
+- Copy their EXACT face: same eyes, nose, mouth, face shape, skin tone, hair color, hairstyle
+- The person in the output should be IMMEDIATELY RECOGNIZABLE as the person in the input photo
+- Study every facial detail in the input and replicate it faithfully
+- If they have glasses, facial hair, distinctive features - KEEP THEM
+- Think caricature energy - exaggerate the situation for humor but preserve their identity
+- Fans should IMMEDIATELY know who this is
+
+THE HILARIOUS SCENE:
+- Depict ${name} in a comedic scene as "${archetypeName}"
+- The roast concept: "${archetypeDescription}"
+- Show them DOING something funny that matches their archetype
+- Include props, items, or background elements that tell the story
 - Think "internet meme meets Pokemon card" - visually funny, shareable humor
-- Examples: if they're "The Feature Factory" show them surrounded by half-built products; if they're "The Pivot Master" show them spinning on a pivot point
-- The scene should make someone laugh when they see it
 
-CRITICAL - FACIAL LIKENESS (MUST BE RECOGNIZABLE):
-- ${name} MUST be IMMEDIATELY RECOGNIZABLE - this is essential!
-- Copy their EXACT face from the reference: eye shape, nose, lips, face shape, jawline, skin tone
-- Keep their distinctive features: glasses, facial hair, hairstyle, expressions they're known for
-- The face should be the clear focal point even in a scene
-- Do NOT beautify or idealize - their real features are funnier!
+HUMOR & VIBE (Internet meme energy):
+- FUNNY expressions - smug confidence, existential dread, manic energy, "this is fine" vibes
+- Internet humor and meme relevance - the kind of image people would share
+- Absurd but relatable situations that make people laugh
+- The humor comes from "that's definitely ${name} in this ridiculous situation"
 
-IMAGE COMPOSITION (CRITICAL - READ CAREFULLY):
-- LANDSCAPE aspect ratio, approximately 2:1 (twice as wide as tall)
-- The image will be displayed in a wide rectangular frame on a trading card
-- CENTER THE FACE horizontally in the middle of the image
-- Face should be in the UPPER HALF of the image, not cut off at top
-- Face must be FULLY VISIBLE - do not crop forehead, chin, or sides of face
-- Head and shoulders visible, with room for props/scene around them
-- Leave breathing room above the head (10-15% margin from top edge)
-- The entire face from forehead to chin must fit within the frame
-
-STYLE:
-- Bold, vibrant, saturated colors - eye-catching and fun
-- Stylized cartoon/illustration style (NOT photorealistic, NOT anime)
-- Comic book energy with dynamic poses and expressions
+ART STYLE (POKEMON TCG - CRITICAL):
+- Classic 90s/2000s Pokemon trading card illustration style
+- Hand-painted watercolor aesthetic with vibrant saturated colors
+- Dynamic energy effects, magical auras, elemental powers
 - ${element} element theme in colors and effects
-- Trading card collectible quality - premium and polished
+- Premium collectible card quality - like a legendary rare Pokemon card
+- Ken Sugimori inspired artwork - nostalgic and iconic
 
-ABSOLUTELY NO TEXT:
-- NEVER generate ANY text, words, letters, numbers, or writing anywhere
+COMPOSITION:
+- LANDSCAPE 16:9 aspect ratio (wider than tall)
+- Person prominently featured, face clearly visible and LARGE
+- Face should take up at least 30-40% of the image
+- Upper body or head/shoulders framing preferred
+- Front-facing or 3/4 view (never profile or from behind)
+- Room for comedic props and scene elements
 
-DO NOT:
-- Crop or cut off ANY part of the face (forehead, chin, ears)
-- Place the face at the edge of the frame where it might be cut off
-- Make the face too small or unrecognizable
-- Use portrait/vertical framing - MUST be landscape/horizontal
-- Make it photorealistic or uncanny valley
-- Be mean-spirited (affectionate roasting, not cruel)`;
+ABSOLUTELY DO NOT:
+- Create abstract art, surreal nightmare imagery, or body horror
+- Distort the face beyond recognition or make it monstrous
+- Make the person look ugly, scary, or disturbing
+- Obscure, shrink, or hide the face
+- Generate ANY text, words, letters, numbers, signs, labels, speech bubbles, or writing (AI text always looks wrong)
+- Create photorealistic renders
+- Make the person unidentifiable
+- Use portrait/vertical orientation - MUST be landscape/horizontal`;
 
       try {
         const response = await genAINew.models.generateContent({
@@ -138,46 +146,48 @@ DO NOT:
     // Fallback: Generate illustration without reference photo
     console.log("=== GENERATING CELEBRITY ILLUSTRATION (NO PHOTO) ===");
 
-    const illustrationPrompt = `Create a HILARIOUS MEME-STYLE trading card illustration of "${name}" as "${archetypeName}".
+    const illustrationPrompt = `Create a HILARIOUS Pokemon trading card illustration of "${name}" as "${archetypeName}".
 
-THE ROAST CONCEPT - THIS IS THE JOKE:
-"${archetypeDescription}"
+CRITICAL - NO TEXT IN IMAGE:
+- NEVER generate ANY text, words, letters, numbers, labels, signs, or writing of any kind
+- This includes: names, titles, speech bubbles, captions, watermarks, logos with text
+- AI-generated text always looks wrong - avoid it completely
+- The image should be PURELY visual with no readable characters
 
-SHOW THEM IN ACTION - NOT JUST A HEADSHOT:
-- Depict ${name} DOING something funny that matches their roast archetype
-- Show them in a comedic scene or situation that illustrates the joke
-- Include props, items, or background elements that tell the story of their roast
+THE HILARIOUS SCENE:
+- Depict ${name} in a comedic scene as "${archetypeName}"
+- The roast concept: "${archetypeDescription}"
+- Show them DOING something funny that matches their archetype
+- Include props, items, or background elements that tell the story
 - Think "internet meme meets Pokemon card" - visually funny, shareable humor
-- The scene should make someone laugh when they see it
 
 MAKE THEM RECOGNIZABLE:
 - If ${name} is a known figure, capture their recognizable features
 - Exaggerate their distinctive traits for caricature effect
 - The face should be the clear focal point even in a scene
+- Fans should be able to identify who this is
 
-IMAGE COMPOSITION (CRITICAL - READ CAREFULLY):
-- LANDSCAPE aspect ratio, approximately 2:1 (twice as wide as tall)
-- The image will be displayed in a wide rectangular frame on a trading card
-- CENTER THE FACE horizontally in the middle of the image
-- Face should be in the UPPER HALF of the image, not cut off at top
-- Face must be FULLY VISIBLE - do not crop forehead, chin, or sides of face
-- Head and shoulders visible, with room for props/scene around them
-- Leave breathing room above the head (10-15% margin from top edge)
-
-STYLE:
-- Bold, vibrant, saturated colors - eye-catching and fun
-- Stylized cartoon/caricature style (NOT photorealistic)
-- Comic book energy with dynamic poses and expressions
+ART STYLE (POKEMON TCG - CRITICAL):
+- Classic 90s/2000s Pokemon trading card illustration style
+- Hand-painted watercolor aesthetic with vibrant saturated colors
+- Dynamic energy effects, magical auras, elemental powers
 - ${element} element theme in colors and effects
-- Trading card collectible quality
+- Premium collectible card quality - like a legendary rare Pokemon card
+- Ken Sugimori inspired artwork - nostalgic and iconic
 
-ABSOLUTELY NO TEXT:
-- NEVER generate ANY text, words, letters, numbers, or writing anywhere
+COMPOSITION:
+- LANDSCAPE 16:9 aspect ratio (wider than tall)
+- Person prominently featured, face clearly visible and LARGE
+- Face should take up at least 30-40% of the image
+- Upper body or head/shoulders framing preferred
+- Front-facing or 3/4 view (never profile or from behind)
+- Room for comedic props and scene elements
 
-DO NOT:
+ABSOLUTELY DO NOT:
 - Crop or cut off ANY part of the face
 - Place the face at the edge of the frame
-- Use portrait/vertical framing - MUST be landscape/horizontal
+- Generate ANY text, words, letters, numbers, signs, labels, or writing (AI text always looks wrong)
+- Use portrait/vertical orientation - MUST be landscape/horizontal
 - Make it photorealistic
 - Be mean-spirited (affectionate roasting, not cruel)`;
 
@@ -314,7 +324,7 @@ Your response MUST be valid JSON with this exact structure (no markdown, no code
     "element": "data|chaos|strategy|shipping|politics|vision (pick the closest fit, even for non-tech people)",
     "flavor": "Nature-doc style observation about them, 60-80 chars",
     "stage": "Senior|Elite|Legendary|Mythical",
-    "weakness": "One ironic word based on their known weaknesses"
+    "weakness": "1-2 word ironic weakness MAX (e.g., 'Meetings', 'Ship Dates', 'Deadlines')"
   },
   "moves": [
     {

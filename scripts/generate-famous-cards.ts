@@ -494,15 +494,6 @@ const FAMOUS_CARDS = [
     creativeScene: `This person patiently explaining React concepts while the internet argues around them. Redux state management flows in perfect order. They're the calm center of every JavaScript framework storm. Blue (React) energy radiates peacefully. Their expression is patient teacher energy - the face of someone who could explain hooks to anyone and has probably already done it a thousand times.`,
   },
   {
-    id: "kent-c-dodds",
-    name: "Kent C. Dodds",
-    sourceImage: "kent-c-dodds.jpg",
-    outputImage: "kent-c-dodds-card.png",
-    archetypeName: "The Testing Evangelist",
-    element: "shipping",
-    creativeScene: `This person surrounded by green checkmarks as tests pass everywhere. The "Testing Trophy" glows as their holy grail (not the pyramid!). Developers who skip tests feel guilty in their presence. Epic Web courses spawn like helpful tutorials. Their expression is wholesome educator energy - the face of someone who made testing... actually kind of appealing?`,
-  },
-  {
     id: "emad-mostaque",
     name: "Emad Mostaque",
     sourceImage: "emad-mostaque.jpg",
@@ -537,8 +528,8 @@ function getImageMimeType(filename: string): string {
 async function generateFamousCard(card: typeof FAMOUS_CARDS[0]): Promise<void> {
   console.log(`\nGenerating card for: ${card.name} (${card.archetypeName})...`);
 
-  const inputPath = path.join(process.cwd(), "public", "famous", card.sourceImage);
-  const outputPath = path.join(process.cwd(), "public", "famous", "generated", card.outputImage);
+  const inputPath = path.join(process.cwd(), "public", "famous", "sv", card.sourceImage);
+  const outputPath = path.join(process.cwd(), "public", "famous", "sv", "generated", card.outputImage);
 
   // Read the source image
   if (!fs.existsSync(inputPath)) {
@@ -670,7 +661,7 @@ async function main() {
   }
 
   // Ensure output directory exists
-  const outputDir = path.join(process.cwd(), "public", "famous", "generated");
+  const outputDir = path.join(process.cwd(), "public", "famous", "sv", "generated");
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
     console.log(`Created output directory: ${outputDir}`);
@@ -685,7 +676,7 @@ async function main() {
 
   console.log("\n=== Generation Complete ===");
   console.log("\nNext steps:");
-  console.log("1. Review generated images in /public/famous/generated/");
+  console.log("1. Review generated images in /public/famous/sv/generated/");
   console.log("2. Update /src/lib/famous-cards.ts to use the new image paths");
 }
 

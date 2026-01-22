@@ -41,44 +41,30 @@ export function getHoloEffectForElement(element?: string): HoloEffect {
 const RARITY_CONFIG: Record<CardRarity, {
   holoIntensity: number;
   glareIntensity: number;
-  sparkleCount: number;
-  edgeGlow: string;
 }> = {
   common: {
     holoIntensity: 0.08,
     glareIntensity: 0.1,
-    sparkleCount: 2,
-    edgeGlow: "rgba(156, 163, 175, 0.15)",
   },
   uncommon: {
     holoIntensity: 0.15,
     glareIntensity: 0.15,
-    sparkleCount: 3,
-    edgeGlow: "rgba(59, 130, 246, 0.25)",
   },
   rare: {
     holoIntensity: 0.25,
     glareIntensity: 0.2,
-    sparkleCount: 5,
-    edgeGlow: "rgba(139, 92, 246, 0.3)",
   },
   ultra: {
     holoIntensity: 0.3,
     glareIntensity: 0.25,
-    sparkleCount: 6,
-    edgeGlow: "rgba(236, 72, 153, 0.3)",
   },
   rainbow: {
     holoIntensity: 0.4,
     glareIntensity: 0.3,
-    sparkleCount: 10,
-    edgeGlow: "rgba(168, 85, 247, 0.35)",
   },
   gold: {
     holoIntensity: 0.45,
     glareIntensity: 0.35,
-    sparkleCount: 12,
-    edgeGlow: "rgba(251, 191, 36, 0.4)",
   },
 };
 
@@ -192,9 +178,11 @@ interface HoloCardProps {
   rarity?: CardRarity;
   holoEffect?: HoloEffect;
   disableEffects?: boolean;
+  disableScale?: boolean; // Disable scale on hover to prevent layout shift
+  score?: number; // Score for determining holographic border (90+ gets border)
 }
 
-export function HoloCard({ children, className = "", rarity = "rare", holoEffect, disableEffects = false }: HoloCardProps) {
+export function HoloCard({ children, className = "", rarity = "rare", holoEffect, disableEffects = false, disableScale = false, score }: HoloCardProps) {
   const config = RARITY_CONFIG[rarity];
   // Use rarity-based effect unless explicitly overridden
   const effectType = holoEffect || getHoloEffectForRarity(rarity);
@@ -248,7 +236,7 @@ export function HoloCard({ children, className = "", rarity = "rare", holoEffect
       rotateY,
       glareX,
       glareY,
-      scale: 1.05,
+      scale: disableScale ? 1 : 1.05,
     });
   }, [isTouchDevice]);
 
@@ -281,12 +269,54 @@ export function HoloCard({ children, className = "", rarity = "rare", holoEffect
     });
   }, []);
 
+  const showHolographicBorder = score !== undefined && score >= 90;
+
   return (
     // Outer wrapper: defines perspective for 3D transforms
+    // overflow-visible prevents clipping of scaled card, fixed dimensions prevent layout shift
     <div
       className={`relative ${className}`}
-      style={{ perspective: "1000px" }}
+      style={{
+        perspective: "1000px",
+        overflow: "visible",
+      }}
     >
+      {/* Holographic rainbow border for high-score cards (90+ score) */}
+      {showHolographicBorder && (
+        <motion.div
+          className="absolute -inset-1 rounded-xl pointer-events-none z-0"
+          style={{
+            background: "linear-gradient(45deg, #ff0080, #ff8c00, #40e0d0, #ff0080)",
+            backgroundSize: "400% 400%",
+          }}
+          animate={{
+            backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
+          }}
+          transition={{
+            duration: 3,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        >
+          {/* Inner blur for glow effect */}
+          <motion.div
+            className="absolute inset-0 rounded-xl blur-sm"
+            style={{
+              background: "inherit",
+              backgroundSize: "inherit",
+            }}
+            animate={{
+              opacity: [0.6, 1, 0.6],
+            }}
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+          />
+        </motion.div>
+      )}
+
       {/* Inner card wrapper: handles mouse events and 3D transforms */}
       <motion.div
         ref={cardRef}
@@ -304,9 +334,11 @@ export function HoloCard({ children, className = "", rarity = "rare", holoEffect
           stiffness: 400,
           damping: 30,
         }}
-        className="relative transform-gpu isolate"
+        className="relative transform-gpu isolate z-10"
         style={{
           transformStyle: "preserve-3d",
+          willChange: "transform",
+          transitionTimingFunction: "cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       >
         {/* Card content - rendered first so overlays appear on top */}
@@ -343,42 +375,33 @@ export function HoloCard({ children, className = "", rarity = "rare", holoEffect
           }}
         />
 
-        {/* Sparkle/glitter texture overlay */}
-        <div
-          className="absolute inset-0 rounded-xl z-10 overflow-hidden transition-opacity duration-300"
-          style={{
-            pointerEvents: "none",
-            opacity: isHovering ? config.holoIntensity * 0.5 : 0,
-          }}
-        >
+        {/* Sparkle/glitter texture overlay - only for 90+ score cards */}
+        {showHolographicBorder && (
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 rounded-xl z-10 overflow-hidden"
             style={{
-              backgroundImage: `
-                radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px),
-                radial-gradient(circle at 80% 20%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px),
-                radial-gradient(circle at 40% 70%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px),
-                radial-gradient(circle at 60% 50%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px),
-                radial-gradient(circle at 10% 80%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px),
-                radial-gradient(circle at 90% 60%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px)
-              `,
-              backgroundSize: "100% 100%",
-              transform: `translate(${(style.glareX - 50) * 0.15}px, ${(style.glareY - 50) * 0.15}px)`,
+              pointerEvents: "none",
+              opacity: 0.4,
             }}
-          />
-        </div>
+          >
+            <div
+              className="absolute inset-0"
+              style={{
+                backgroundImage: `
+                  radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px),
+                  radial-gradient(circle at 80% 20%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px),
+                  radial-gradient(circle at 40% 70%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px),
+                  radial-gradient(circle at 60% 50%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px),
+                  radial-gradient(circle at 10% 80%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px),
+                  radial-gradient(circle at 90% 60%, rgba(255,255,255,0.8) 0.5px, transparent 0.5px)
+                `,
+                backgroundSize: "100% 100%",
+                transform: `translate(${(style.glareX - 50) * 0.15}px, ${(style.glareY - 50) * 0.15}px)`,
+              }}
+            />
+          </div>
+        )}
 
-        {/* Edge glow effect - contained within the card */}
-        <div
-          className="absolute inset-0 rounded-xl z-0"
-          style={{
-            pointerEvents: "none",
-            boxShadow: isHovering
-              ? `inset 0 0 20px ${config.edgeGlow}, 0 0 ${20 + config.holoIntensity * 20}px ${config.edgeGlow}`
-              : `0 0 15px ${config.edgeGlow}`,
-            transition: "box-shadow 0.3s ease",
-          }}
-        />
       </motion.div>
     </div>
   );
