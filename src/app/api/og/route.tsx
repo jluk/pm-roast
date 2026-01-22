@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     // Safely extract values
     const name = String(result.archetype?.name || "Unknown").replace(/\*+/g, "").trim();
     const score = String(result.careerScore ?? 0);
-    const emoji = String(result.archetype?.emoji || "X");
+    // Skip emoji rendering - use element color indicator instead
     const description = String(result.archetype?.description || "No description").slice(0, 80);
     const element = String(result.archetype?.element || "chaos");
     const weakness = String(result.archetype?.weakness || "Meetings");
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
           <div style={{ display: "flex", flexDirection: "column", width: 380, height: 530, borderRadius: 16, border: "5px solid " + color, backgroundColor: "#f5f5f5", overflow: "hidden" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", backgroundColor: "white" }}>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <span style={{ fontSize: 26, marginRight: 8 }}>{emoji}</span>
+                <div style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: color, marginRight: 8 }} />
                 <span style={{ fontSize: 15, fontWeight: 700, color: "#1a1a1a" }}>{name}</span>
               </div>
               <div style={{ display: "flex", alignItems: "center" }}>
@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", margin: "0 12px", height: 160, borderRadius: 8, backgroundColor: color }}>
-              <span style={{ fontSize: 64 }}>{emoji}</span>
+              <span style={{ fontSize: 48, fontWeight: 700, color: "white" }}>{score}</span>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "8px 12px" }}>
               <div style={{ padding: "3px 8px", borderRadius: 10, backgroundColor: color, color: "white", fontSize: 9, fontWeight: 600 }}>
