@@ -17,24 +17,27 @@ interface OGCardData {
 
 async function getCardById(cardId: string): Promise<OGCardData | null> {
   try {
-    const fetchUrl = `https://www.pmroast.com/api/card-data?id=${cardId}`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com";
+    const fetchUrl = `${baseUrl}/api/card-data?id=${cardId}`;
+    console.log("Fetching card from:", fetchUrl);
+
     const response = await fetch(fetchUrl, {
       method: "GET",
       headers: {
-        "Content-Type": "application/json",
+        "Accept": "application/json",
       },
-      cache: "no-store",
     });
+
+    console.log("Response status:", response.status);
+
     if (!response.ok) {
-      console.error("Card fetch failed:", response.status, response.statusText);
+      console.error("Card fetch failed:", response.status);
       return null;
     }
-    const text = await response.text();
-    if (!text) {
-      console.error("Empty response from card-data");
-      return null;
-    }
-    const data = JSON.parse(text);
+
+    const data = await response.json();
+    console.log("Card data received:", data ? "yes" : "no");
+
     if (data.error) {
       console.error("Card data error:", data.error);
       return null;
