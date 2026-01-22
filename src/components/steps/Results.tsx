@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { domToPng } from "modern-screenshot";
 import { RoastResult, DreamRole, DREAM_ROLES } from "@/lib/types";
@@ -90,7 +90,7 @@ export function Results({ result, dreamRole, onStartOver, isSharePage = false, c
   const [copied, setCopied] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const screenshotCardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   // Generate the shareable URL - prefer cardId if available (permanent storage)
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -151,17 +151,35 @@ Get your PM card: ${shareUrl}
     }
   };
 
-  const downloadCard = async () => {
-    if (!screenshotCardRef.current || isDownloading) return;
+  const downloadCard = useCallback(async () => {
+    if (!cardRef.current || isDownloading) return;
 
     setIsDownloading(true);
     const fileName = `pm-roast-${(result.userName || 'card').toLowerCase().replace(/\s+/g, '-')}.png`;
 
     try {
-      // Capture the clean card (without holo effects) using domToPng
-      const dataUrl = await domToPng(screenshotCardRef.current, {
+      // Find and temporarily hide all holo effect overlays inside the card
+      const card = cardRef.current;
+      const effectOverlays = card.querySelectorAll('[style*="pointer-events: none"]');
+      const originalStyles: string[] = [];
+
+      // Hide effect overlays by setting opacity to 0
+      effectOverlays.forEach((overlay, i) => {
+        const el = overlay as HTMLElement;
+        originalStyles[i] = el.style.cssText;
+        el.style.opacity = '0';
+      });
+
+      // Capture the card without effects
+      const dataUrl = await domToPng(card, {
         scale: 2,
         quality: 1,
+      });
+
+      // Restore original styles
+      effectOverlays.forEach((overlay, i) => {
+        const el = overlay as HTMLElement;
+        el.style.cssText = originalStyles[i];
       });
 
       // Create download link
@@ -176,7 +194,7 @@ Get your PM card: ${shareUrl}
     } finally {
       setIsDownloading(false);
     }
-  };
+  }, [isDownloading, result.userName]);
 
   // Only show first 4 roadmap phases
   const roadmapPhases = result.roadmap.slice(0, 4);
@@ -210,28 +228,6 @@ Get your PM card: ${shareUrl}
       animate={{ opacity: 1 }}
       className="w-full max-w-6xl mx-auto space-y-8 pb-12"
     >
-      {/* Hidden card for clean screenshot (no holo effects) */}
-      <div
-        ref={screenshotCardRef}
-        className="absolute -left-[9999px] -top-[9999px]"
-        aria-hidden="true"
-      >
-        <PokemonCard
-          score={result.careerScore}
-          archetypeName={stripMarkdown(result.archetype.name)}
-          archetypeEmoji={result.archetype.emoji}
-          archetypeDescription={stripMarkdown(result.archetype.description)}
-          archetypeImage={result.archetypeImage}
-          element={(result.archetype.element as PMElement) || "chaos"}
-          moves={result.moves || []}
-          stage={result.archetype.stage || "Senior"}
-          weakness={result.archetype.weakness || "Meetings"}
-          flavor={stripMarkdown(result.archetype.flavor || result.archetype.description)}
-          userName={result.userName}
-          disableHoloEffects
-        />
-      </div>
-
       {/* Hero Section - Card + Bento boxes - matches ExpandedCardView layout */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
         {/* Left: Flippable Card - Fixed width on desktop with overflow visible for hover effects */}
@@ -264,6 +260,7 @@ Get your PM card: ${shareUrl}
             >
               {/* Front of card - use opacity for visibility since backfaceVisibility breaks with HoloCard's nested 3D context */}
               <div
+                ref={cardRef}
                 className="absolute inset-0 transition-opacity duration-150"
                 style={{
                   opacity: isFlipped ? 0 : 1,
