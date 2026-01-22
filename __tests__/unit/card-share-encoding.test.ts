@@ -1,14 +1,17 @@
 /**
- * Card Download Unit Tests
+ * Card Data Encoding Unit Tests
  *
- * Tests the card data encoding for the OG image download endpoint.
- * Ensures the download URL is properly constructed with encoded card data
- * so the OG endpoint renders the actual card image (not the default logo).
+ * Tests the card data encoding used for:
+ * 1. Share URLs (/share/[encoded]) - allows sharing card results via URL
+ * 2. OG image endpoint (/api/og?data=[encoded]) - renders card for social previews
+ *
+ * Note: Local card download now uses domToPng to capture the rendered card directly,
+ * but these encoding tests remain important for the sharing functionality.
  */
 
 import { encodeCardData, decodeCardData, ShareableCard } from '@/lib/share';
 
-describe('Card Download Data Encoding', () => {
+describe('Card Share Data Encoding', () => {
   // Sample card data matching what downloadCard() creates
   const sampleCardData: ShareableCard = {
     s: 85,                           // score
@@ -123,12 +126,14 @@ describe('Card Download Data Encoding', () => {
     });
   });
 
-  describe('Regression: Download must use data param, not individual params', () => {
+  describe('Regression: OG endpoint must use data param, not individual params', () => {
     /**
-     * This test documents the bug where downloadCard() was passing
-     * individual query params (name, archetype, score, rarity) instead
-     * of a single encoded 'data' param. The OG endpoint only recognizes
-     * the 'data' param - without it, it returns the default PM Roast logo.
+     * This test documents the OG endpoint's expected format. The endpoint
+     * only recognizes the 'data' param with encoded card data - without it,
+     * it returns the default PM Roast logo instead of the card image.
+     *
+     * This is important for social sharing previews (Twitter, LinkedIn, etc.)
+     * where the OG image is fetched by the platform.
      */
     it('encoded data should be decodable by OG endpoint format', () => {
       const encoded = encodeCardData(sampleCardData);
