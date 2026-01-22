@@ -142,11 +142,11 @@ export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage 
 
   const shareToTwitter = () => {
     const archetype = stripMarkdown(result.archetype.name);
-    const legendName = result.userName || "a legend";
-    const rankBrag = rankInfo ? ` Ranked #${rankInfo.rank.toLocaleString()} of ${rankInfo.totalCards.toLocaleString()} PMs.` : "";
+    const legendName = result.userName || "this legend";
+    const rankBrag = rankInfo ? `\n\n🏆 Ranked #${rankInfo.rank.toLocaleString()} of ${rankInfo.totalCards.toLocaleString()} PMs` : "";
     const text = isLegend
-      ? `I PM roasted ${legendName} and they're a "${archetype}" 💀\n\nRoast your favorite celebrity:`
-      : `I got turned into a Pokémon card and I'm a "${archetype}" 💀${rankBrag}\n\nGet your PM roast card:`;
+      ? `I roasted ${legendName} as a PM and they scored ${result.careerScore}/100 💀\n\nArchetype: "${archetype}"\n\nRoast your favorite celebrity:`
+      : `I got roasted as a PM and I'm a "${archetype}" 💀${rankBrag}\n\nGet your PM roast card:`;
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
       "_blank"
@@ -496,8 +496,8 @@ Get your PM card: ${shareUrl}
                       </svg>
                       <p className="text-xs text-white/90 leading-relaxed">
                         {isLegend
-                          ? <>I PM roasted {result.userName || "a legend"} and they&apos;re a &quot;{stripMarkdown(result.archetype.name)}&quot; 💀</>
-                          : <>I got turned into a Pokémon card and I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; 💀{rankInfo && <> Ranked #{rankInfo.rank.toLocaleString()} of {rankInfo.totalCards.toLocaleString()} PMs.</>}</>
+                          ? <>I roasted {result.userName || "this legend"} as a PM and they scored {result.careerScore}/100 💀</>
+                          : <>I got roasted as a PM and I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; 💀{rankInfo && <> 🏆 Ranked #{rankInfo.rank.toLocaleString()}</>}</>
                         }
                       </p>
                     </div>
