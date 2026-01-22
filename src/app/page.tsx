@@ -89,6 +89,7 @@ export default function Home() {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Set up Intersection Observer for nav section tracking
+  // Re-run when step changes since mt-roastmore is inside conditionally rendered FamousCardsGallery
   useEffect(() => {
     const sections = ["roast-me", "mt-roastmore", "archetypes"];
 
@@ -117,7 +118,7 @@ export default function Home() {
     return () => {
       observerRef.current?.disconnect();
     };
-  }, []);
+  }, [step]);
 
   // LinkedIn preview state
   const [linkedinPreview, setLinkedinPreview] = useState<{
