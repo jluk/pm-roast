@@ -23,12 +23,21 @@ export const metadata: Metadata = {
     description:
       "Upload your resume or LinkedIn. Get roasted by AI trained on 200+ interviews with world-class product leaders.",
     type: "website",
+    images: [
+      {
+        url: "https://www.pmroast.com/api/og",
+        width: 1200,
+        height: 630,
+        alt: "PM Roast - Get your PM trading card",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "PM Roast | Get Brutally Honest Career Feedback",
     description:
       "Upload your resume or LinkedIn. Get roasted by AI trained on 200+ interviews with world-class product leaders.",
+    images: ["https://www.pmroast.com/api/og"],
   },
 };
 
