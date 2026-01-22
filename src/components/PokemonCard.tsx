@@ -104,6 +104,7 @@ interface PokemonCardProps {
   flavor?: string; // Pokédex-style text (unused but kept for API compatibility)
   compact?: boolean;
   userName?: string; // User's actual name for personalized cards
+  disableHoloEffects?: boolean; // Disable holo effects for screenshots
 }
 
 function EnergySymbol({ element, size = "sm" }: { element: PMElement; size?: "sm" | "md" }) {
@@ -133,6 +134,7 @@ export function PokemonCard({
   flavor,
   compact = false,
   userName,
+  disableHoloEffects = false,
 }: PokemonCardProps) {
   const elementData = PM_ELEMENTS[element];
   const rarity = getCardRarity(score);
@@ -170,7 +172,7 @@ export function PokemonCard({
   };
 
   return (
-    <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"} rarity={rarity}>
+    <HoloCard className={compact ? "w-[300px]" : "w-[360px] sm:w-[400px]"} rarity={rarity} disableEffects={disableHoloEffects}>
       <div
         className={`relative rounded-xl overflow-hidden border-[6px] flex flex-col ${
           rarity === "rainbow"

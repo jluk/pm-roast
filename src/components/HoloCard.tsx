@@ -191,12 +191,22 @@ interface HoloCardProps {
   className?: string;
   rarity?: CardRarity;
   holoEffect?: HoloEffect;
+  disableEffects?: boolean;
 }
 
-export function HoloCard({ children, className = "", rarity = "rare", holoEffect }: HoloCardProps) {
+export function HoloCard({ children, className = "", rarity = "rare", holoEffect, disableEffects = false }: HoloCardProps) {
   const config = RARITY_CONFIG[rarity];
   // Use rarity-based effect unless explicitly overridden
   const effectType = holoEffect || getHoloEffectForRarity(rarity);
+
+  // When effects are disabled, render just the children without any wrapper effects
+  if (disableEffects) {
+    return (
+      <div className={`relative ${className}`}>
+        {children}
+      </div>
+    );
+  }
   const cardRef = useRef<HTMLDivElement>(null);
   const [style, setStyle] = useState({
     rotateX: 0,

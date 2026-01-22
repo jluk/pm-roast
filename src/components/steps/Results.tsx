@@ -90,7 +90,7 @@ export function Results({ result, dreamRole, onStartOver, isSharePage = false, c
   const [copied, setCopied] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
+  const screenshotCardRef = useRef<HTMLDivElement>(null);
 
   // Generate the shareable URL - prefer cardId if available (permanent storage)
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -152,14 +152,14 @@ Get your PM card: ${shareUrl}
   };
 
   const downloadCard = async () => {
-    if (!cardRef.current || isDownloading) return;
+    if (!screenshotCardRef.current || isDownloading) return;
 
     setIsDownloading(true);
     const fileName = `pm-roast-${(result.userName || 'card').toLowerCase().replace(/\s+/g, '-')}.png`;
 
     try {
-      // Capture the actual rendered card using domToPng
-      const dataUrl = await domToPng(cardRef.current, {
+      // Capture the clean card (without holo effects) using domToPng
+      const dataUrl = await domToPng(screenshotCardRef.current, {
         scale: 2,
         quality: 1,
       });
@@ -210,6 +210,28 @@ Get your PM card: ${shareUrl}
       animate={{ opacity: 1 }}
       className="w-full max-w-6xl mx-auto space-y-8 pb-12"
     >
+      {/* Hidden card for clean screenshot (no holo effects) */}
+      <div
+        ref={screenshotCardRef}
+        className="absolute -left-[9999px] -top-[9999px]"
+        aria-hidden="true"
+      >
+        <PokemonCard
+          score={result.careerScore}
+          archetypeName={stripMarkdown(result.archetype.name)}
+          archetypeEmoji={result.archetype.emoji}
+          archetypeDescription={stripMarkdown(result.archetype.description)}
+          archetypeImage={result.archetypeImage}
+          element={(result.archetype.element as PMElement) || "chaos"}
+          moves={result.moves || []}
+          stage={result.archetype.stage || "Senior"}
+          weakness={result.archetype.weakness || "Meetings"}
+          flavor={stripMarkdown(result.archetype.flavor || result.archetype.description)}
+          userName={result.userName}
+          disableHoloEffects
+        />
+      </div>
+
       {/* Hero Section - Card + Bento boxes - matches ExpandedCardView layout */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
         {/* Left: Flippable Card - Fixed width on desktop with overflow visible for hover effects */}
@@ -242,7 +264,6 @@ Get your PM card: ${shareUrl}
             >
               {/* Front of card - use opacity for visibility since backfaceVisibility breaks with HoloCard's nested 3D context */}
               <div
-                ref={cardRef}
                 className="absolute inset-0 transition-opacity duration-150"
                 style={{
                   opacity: isFlipped ? 0 : 1,
