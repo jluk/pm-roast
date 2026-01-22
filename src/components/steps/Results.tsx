@@ -377,10 +377,10 @@ Get your PM card: ${shareUrl}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.6 }}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-900/40 to-yellow-900/40 border border-amber-500/50"
+                      className="flex items-center gap-3 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-900/40 to-yellow-900/40 border border-amber-500/50"
                       style={{ boxShadow: '0 0 20px rgba(251, 191, 36, 0.15), 0 0 40px rgba(251, 191, 36, 0.08), inset 0 1px 0 rgba(251, 191, 36, 0.1)' }}
                     >
-                      <span className="text-lg">🏆</span>
+                      <span className="text-xl">🏆</span>
                       <div className="flex flex-col items-end">
                         <span className="text-[10px] uppercase tracking-wider text-amber-400/70 font-medium leading-none">Global Rank</span>
                         <div className="flex items-baseline gap-1">
@@ -456,8 +456,8 @@ Get your PM card: ${shareUrl}
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <span className="text-xs uppercase tracking-wider text-red-400/70 font-medium">Rival: </span>
-                    <span className="text-sm text-white/90 italic">{result.naturalRival}</span>
+                    <span className="text-sm uppercase tracking-wider text-red-400/80 font-semibold">Rival: </span>
+                    <span className="text-base text-white/95 italic font-medium">{result.naturalRival}</span>
                   </div>
                 </div>
               </div>
