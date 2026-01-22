@@ -176,21 +176,40 @@ Get your PM card: ${shareUrl}
 
     const encoded = encodeCardData(cardData);
     const ogUrl = `${baseUrl}/api/og?data=${encoded}`;
+    const fileName = `pm-roast-${(result.userName || 'card').toLowerCase().replace(/\s+/g, '-')}.png`;
 
     try {
       const response = await fetch(ogUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch image: ${response.status}`);
+      }
       const blob = await response.blob();
+
+      // Create download link
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
+      a.style.display = 'none';
       a.href = url;
-      a.download = `pm-roast-${(result.userName || 'card').toLowerCase().replace(/\s+/g, '-')}.png`;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+
+      // Cleanup after a short delay to ensure download starts
+      setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error('Download failed:', error);
+      // Fallback: use direct link with download attribute
+      const a = document.createElement('a');
+      a.href = ogUrl;
+      a.download = fileName;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-    } catch {
-      // Fallback: open OG image in new tab
-      window.open(ogUrl, '_blank');
     }
   };
 
