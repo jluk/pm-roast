@@ -70,27 +70,31 @@ CRITICAL - FACIAL LIKENESS (MUST BE RECOGNIZABLE):
 - The face should be the clear focal point even in a scene
 - Do NOT beautify or idealize - their real features are funnier!
 
-CARD-FRIENDLY COMPOSITION:
-- PORTRAIT aspect ratio (taller than wide) - this will be cropped to fit a trading card
-- Face should be prominent and fill at least 35-45% of the frame
-- Upper body and scene context visible
-- Leave some margin at edges for card border cropping
-- Subject centered or slightly off-center for dynamic composition
+IMAGE COMPOSITION (CRITICAL - READ CAREFULLY):
+- LANDSCAPE aspect ratio, approximately 2:1 (twice as wide as tall)
+- The image will be displayed in a wide rectangular frame on a trading card
+- CENTER THE FACE horizontally in the middle of the image
+- Face should be in the UPPER HALF of the image, not cut off at top
+- Face must be FULLY VISIBLE - do not crop forehead, chin, or sides of face
+- Head and shoulders visible, with room for props/scene around them
+- Leave breathing room above the head (10-15% margin from top edge)
+- The entire face from forehead to chin must fit within the frame
 
 STYLE:
 - Bold, vibrant, saturated colors - eye-catching and fun
 - Stylized cartoon/illustration style (NOT photorealistic, NOT anime)
 - Comic book energy with dynamic poses and expressions
-- ${element} element theme in colors and effects (fire, ice, lightning, etc)
+- ${element} element theme in colors and effects
 - Trading card collectible quality - premium and polished
 
 ABSOLUTELY NO TEXT:
 - NEVER generate ANY text, words, letters, numbers, or writing anywhere
 
 DO NOT:
-- Make it a boring headshot or passport photo
+- Crop or cut off ANY part of the face (forehead, chin, ears)
+- Place the face at the edge of the frame where it might be cut off
 - Make the face too small or unrecognizable
-- Use landscape/wide framing
+- Use portrait/vertical framing - MUST be landscape/horizontal
 - Make it photorealistic or uncanny valley
 - Be mean-spirited (affectionate roasting, not cruel)`;
 
@@ -151,11 +155,14 @@ MAKE THEM RECOGNIZABLE:
 - Exaggerate their distinctive traits for caricature effect
 - The face should be the clear focal point even in a scene
 
-CARD-FRIENDLY COMPOSITION:
-- PORTRAIT aspect ratio (taller than wide) - this will be cropped to fit a trading card
-- Face should be prominent and fill at least 35-45% of the frame
-- Upper body and scene context visible
-- Subject centered with some margin at edges for cropping
+IMAGE COMPOSITION (CRITICAL - READ CAREFULLY):
+- LANDSCAPE aspect ratio, approximately 2:1 (twice as wide as tall)
+- The image will be displayed in a wide rectangular frame on a trading card
+- CENTER THE FACE horizontally in the middle of the image
+- Face should be in the UPPER HALF of the image, not cut off at top
+- Face must be FULLY VISIBLE - do not crop forehead, chin, or sides of face
+- Head and shoulders visible, with room for props/scene around them
+- Leave breathing room above the head (10-15% margin from top edge)
 
 STYLE:
 - Bold, vibrant, saturated colors - eye-catching and fun
@@ -168,8 +175,9 @@ ABSOLUTELY NO TEXT:
 - NEVER generate ANY text, words, letters, numbers, or writing anywhere
 
 DO NOT:
-- Make it a boring headshot
-- Use landscape/wide framing
+- Crop or cut off ANY part of the face
+- Place the face at the edge of the frame
+- Use portrait/vertical framing - MUST be landscape/horizontal
 - Make it photorealistic
 - Be mean-spirited (affectionate roasting, not cruel)`;
 
