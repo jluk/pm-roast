@@ -300,10 +300,12 @@ export async function POST(request: NextRequest) {
     // Convert to buffer
     const imageBuffer = await imageResponse.arrayBuffer();
 
-    // Store in Vercel Blob
+    // Store in Vercel Blob (allow overwriting for regeneration)
     const blob = await put(`og/${cardId}.png`, imageBuffer, {
       access: "public",
       contentType: "image/png",
+      addRandomSuffix: false,
+      allowOverwrite: true,
     });
 
     return NextResponse.json({ url: blob.url });
