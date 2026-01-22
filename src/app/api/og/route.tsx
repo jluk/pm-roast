@@ -6,7 +6,7 @@ export const runtime = "edge";
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const name = url.searchParams.get("name");
-  const score = url.searchParams.get("score");
+  const score = url.searchParams.get("pts");
 
   // Always return fallback for now to debug
   if (!name || !score) {

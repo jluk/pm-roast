@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // Generate OG image URL with query params
   const ogParams = new URLSearchParams({
     name: result.archetype.name,
-    score: String(result.careerScore),
+    pts: String(result.careerScore),
   });
   const ogImageUrl = `${baseUrl}/api/og?${ogParams.toString()}`;
 
