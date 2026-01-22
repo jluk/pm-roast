@@ -413,7 +413,14 @@ export async function POST(request: NextRequest) {
         fetch(new URL("/api/og-generate", request.url).toString(), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cardId, name: result.archetype.name, score: result.careerScore }),
+          body: JSON.stringify({
+            cardId,
+            score: result.careerScore,
+            archetypeName: result.archetype.name,
+            archetypeImage: result.archetypeImage,
+            element: result.archetype.element,
+            userName: result.userName,
+          }),
         }).catch(() => {});
 
         return NextResponse.json({
@@ -442,7 +449,14 @@ export async function POST(request: NextRequest) {
           fetch(new URL("/api/og-generate", request.url).toString(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ cardId, name: result.archetype.name, score: result.careerScore }),
+            body: JSON.stringify({
+              cardId,
+              score: result.careerScore,
+              archetypeName: result.archetype.name,
+              archetypeImage: result.archetypeImage,
+              element: result.archetype.element,
+              userName: result.userName,
+            }),
           }).catch(() => {});
 
           return NextResponse.json({
@@ -467,10 +481,18 @@ export async function POST(request: NextRequest) {
         const cardId = await storeCard(cachedResult as RoastResult, dreamRole as DreamRole, true);
 
         // Generate OG image in background
+        const cached_result = cachedResult as RoastResult;
         fetch(new URL("/api/og-generate", request.url).toString(), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ cardId, name: (cachedResult as RoastResult).archetype.name, score: (cachedResult as RoastResult).careerScore }),
+          body: JSON.stringify({
+            cardId,
+            score: cached_result.careerScore,
+            archetypeName: cached_result.archetype.name,
+            archetypeImage: cached_result.archetypeImage,
+            element: cached_result.archetype.element,
+            userName: cached_result.userName,
+          }),
         }).catch(() => {});
 
         return NextResponse.json({
@@ -581,7 +603,14 @@ Remember: This is a fun roast card, keep it entertaining and witty!`;
     fetch(new URL("/api/og-generate", request.url).toString(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ cardId, name: validatedResult.archetype.name, score: validatedResult.careerScore }),
+      body: JSON.stringify({
+        cardId,
+        score: validatedResult.careerScore,
+        archetypeName: validatedResult.archetype.name,
+        archetypeImage: validatedResult.archetypeImage,
+        element: validatedResult.archetype.element,
+        userName: validatedResult.userName,
+      }),
     }).catch(() => {});
 
     return NextResponse.json({

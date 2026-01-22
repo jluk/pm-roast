@@ -925,8 +925,11 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cardId,
-          name: roastResult.archetype.name,
           score: roastResult.careerScore,
+          archetypeName: roastResult.archetype.name,
+          archetypeImage: roastResult.archetypeImage,
+          element: roastResult.archetype.element,
+          userName: roastResult.userName,
         }),
       }).catch((err) => console.error("OG generation failed:", err));
     }
