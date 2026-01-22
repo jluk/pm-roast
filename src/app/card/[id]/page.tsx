@@ -1,10 +1,34 @@
 import { Metadata } from "next";
 import { getCard } from "@/lib/card-storage";
-import { DREAM_ROLES, DreamRole } from "@/lib/types";
+import { DREAM_ROLES, DreamRole, RoastResult } from "@/lib/types";
 import { CardPageClient } from "./client";
 
 interface PageProps {
   params: Promise<{ id: string }>;
+}
+
+// Encode card data for OG image URL (avoids edge runtime fetch issues)
+function encodeOGData(result: RoastResult): string {
+  const ogData = {
+    n: result.archetype.name,
+    d: result.archetype.description,
+    e: result.archetype.emoji,
+    s: result.careerScore,
+    el: result.archetype.element,
+    q: result.bangerQuote || result.archetype.description,
+    m: result.moves?.slice(0, 2).map(m => ({
+      n: m.name,
+      c: m.energyCost,
+      d: m.damage,
+    })) || [],
+    w: result.archetype.weakness || "Meetings",
+    st: result.archetype.stage || "Senior",
+  };
+
+  const json = JSON.stringify(ogData);
+  const base64 = Buffer.from(json, "utf-8").toString("base64");
+  // URL-safe base64
+  return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -35,8 +59,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ? `${legendName} is a "${result.archetype.name}". ${result.archetype.description}`
     : result.bangerQuote;
 
-  // Generate OG image URL
-  const ogImageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?id=${id}`;
+  // Generate OG image URL with encoded card data (avoids edge runtime fetch issues)
+  const encodedData = encodeOGData(result);
+  const ogImageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?data=${encodedData}`;
 
   return {
     title,
