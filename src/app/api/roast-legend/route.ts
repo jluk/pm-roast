@@ -270,7 +270,7 @@ STAGE (based on their career level):
 
 Your response MUST be valid JSON with this exact structure (no markdown, no code blocks, just raw JSON):
 {
-  "userName": "Their first name",
+  "userName": "Their FULL NAME as commonly known (e.g., 'Elon Musk', not just 'Elon')",
   "roastBullets": ["4 roasts based on their public persona, max 100 chars each"],
   "archetype": {
     "name": "2-3 word archetype name specific to them",
