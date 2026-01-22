@@ -17,14 +17,31 @@ interface OGCardData {
 
 async function getCardById(cardId: string): Promise<OGCardData | null> {
   try {
-    // Use hardcoded URL since edge runtime has issues with self-referential fetches
     const fetchUrl = `https://www.pmroast.com/api/card-data?id=${cardId}`;
-    const response = await fetch(fetchUrl);
-    if (!response.ok) return null;
-    const data = await response.json();
-    if (data.error) return null;
+    const response = await fetch(fetchUrl, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      cache: "no-store",
+    });
+    if (!response.ok) {
+      console.error("Card fetch failed:", response.status, response.statusText);
+      return null;
+    }
+    const text = await response.text();
+    if (!text) {
+      console.error("Empty response from card-data");
+      return null;
+    }
+    const data = JSON.parse(text);
+    if (data.error) {
+      console.error("Card data error:", data.error);
+      return null;
+    }
     return data as OGCardData;
-  } catch {
+  } catch (err) {
+    console.error("Card fetch exception:", err);
     return null;
   }
 }
