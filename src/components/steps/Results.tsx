@@ -95,7 +95,24 @@ export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage 
   const [isDownloading, setIsDownloading] = useState(false);
   const [isRerolling, setIsRerolling] = useState(false);
   const [screenshotMode, setScreenshotMode] = useState(false);
+  const [rankInfo, setRankInfo] = useState<{ rank: number; totalCards: number; percentile: number } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Fetch rank info when cardId is available
+  useEffect(() => {
+    if (!cardId) return;
+
+    fetch(`/api/card-rank?cardId=${cardId}`)
+      .then((res) => res.ok ? res.json() : null)
+      .then((data) => {
+        if (data && data.rank && data.totalCards) {
+          setRankInfo(data);
+        }
+      })
+      .catch(() => {
+        // Silently fail - rank is optional
+      });
+  }, [cardId]);
 
   // Handle re-roll with loading state
   const handleReroll = async () => {
@@ -126,9 +143,10 @@ export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage 
   const shareToTwitter = () => {
     const archetype = stripMarkdown(result.archetype.name);
     const legendName = result.userName || "a legend";
+    const rankBrag = rankInfo ? ` Ranked #${rankInfo.rank.toLocaleString()} of ${rankInfo.totalCards.toLocaleString()} PMs.` : "";
     const text = isLegend
       ? `I PM roasted ${legendName} and they're a "${archetype}" 💀\n\nRoast your favorite celebrity:`
-      : `I got turned into a Pokémon card and I'm a "${archetype}" 💀\n\nGet your PM roast card:`;
+      : `I got turned into a Pokémon card and I'm a "${archetype}" 💀${rankBrag}\n\nGet your PM roast card:`;
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
       "_blank"
@@ -322,9 +340,27 @@ Get your PM card: ${shareUrl}
               </div>
             </motion.div>
           </motion.div>
-          <p className="text-xs text-muted-foreground mt-3">
-            {isRerolling ? "Regenerating..." : "Click card to flip"}
-          </p>
+          {/* Rank badge and flip hint */}
+          <div className="flex items-center justify-center gap-3 mt-3">
+            {rankInfo && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border border-amber-500/30"
+              >
+                <span className="text-amber-400 text-xs">🏆</span>
+                <span className="text-xs font-semibold text-amber-300">
+                  #{rankInfo.rank.toLocaleString()}
+                </span>
+                <span className="text-xs text-amber-400/70">
+                  of {rankInfo.totalCards.toLocaleString()} PMs
+                </span>
+              </motion.div>
+            )}
+            <p className="text-xs text-muted-foreground">
+              {isRerolling ? "Regenerating..." : "Click card to flip"}
+            </p>
+          </div>
         </motion.div>
 
         {/* Right: Bento Glass Tiles - justify-between for flush alignment with card */}
@@ -450,7 +486,7 @@ Get your PM card: ${shareUrl}
                       <p className="text-xs text-white/90 leading-relaxed">
                         {isLegend
                           ? <>I PM roasted {result.userName || "a legend"} and they&apos;re a &quot;{stripMarkdown(result.archetype.name)}&quot; 💀</>
-                          : <>I got turned into a Pokémon card and I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; 💀</>
+                          : <>I got turned into a Pokémon card and I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; 💀{rankInfo && <> Ranked #{rankInfo.rank.toLocaleString()} of {rankInfo.totalCards.toLocaleString()} PMs.</>}</>
                         }
                       </p>
                     </div>
