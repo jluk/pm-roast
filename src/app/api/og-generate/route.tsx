@@ -114,7 +114,8 @@ export async function POST(request: NextRequest) {
     const safeWeakness = weakness || "Meetings";
     const cardMoves = Array.isArray(moves) ? moves.slice(0, 2) : [];
 
-    // Generate OG image with full card design
+    // Generate OG image with full card design - matching PokemonCard dimensions
+    // Card: 400x560 (aspect ratio 2.5/3.5), 6px border
     const imageResponse = new ImageResponse(
       (
         <div style={{
@@ -125,36 +126,36 @@ export async function POST(request: NextRequest) {
           alignItems: "center",
           justifyContent: "center",
         }}>
-          {/* Full Pokemon-style card */}
+          {/* Full Pokemon-style card - exact dimensions from PokemonCard.tsx */}
           <div style={{
             display: "flex",
             flexDirection: "column",
-            width: 420,
-            height: 588,
-            borderRadius: 16,
+            width: 400,
+            height: 560,
+            borderRadius: 12,
             border: `6px solid ${el.borderColor}`,
             background: `linear-gradient(180deg, ${el.cardBgStart} 0%, ${el.cardBgMid} 30%, ${el.cardBgEnd} 100%)`,
             overflow: "hidden",
             boxShadow: `0 0 60px ${el.color}40`,
           }}>
-            {/* Header: Emoji + Name + Score */}
+            {/* Header: Emoji + Name + Score - px-4 py-3 = 16px 12px */}
             <div style={{
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: "14px 18px",
+              padding: "12px 16px",
             }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 28 }}>{safeEmoji}</span>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: el.textPrimary }}>{displayName}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0 }}>
+                <span style={{ fontSize: 24 }}>{safeEmoji}</span>
+                <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+                  <span style={{ fontSize: 14, fontWeight: 900, color: el.textPrimary }}>{displayName}</span>
                   {userName && archetypeName && userName !== archetypeName && (
-                    <span style={{ fontSize: 11, color: el.textSecondary }}>{archetypeName}</span>
+                    <span style={{ fontSize: 10, color: el.textSecondary, opacity: 0.8 }}>{archetypeName}</span>
                   )}
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <span style={{ fontSize: 22, fontWeight: 800, color: "#dc2626" }}>{score}</span>
+                <span style={{ fontSize: 20, fontWeight: 900, color: "#dc2626" }}>{score}</span>
                 <span style={{ fontSize: 14, fontWeight: 700, color: el.textMuted }}>/100</span>
                 <span style={{ fontSize: 14, fontWeight: 700, color: el.textSecondary, marginLeft: 4 }}>HP</span>
                 <div style={{
@@ -172,12 +173,12 @@ export async function POST(request: NextRequest) {
               </div>
             </div>
 
-            {/* Image Frame */}
+            {/* Image Frame - h-[196px] mx-4 mb-3 border-4 */}
             <div style={{
               display: "flex",
-              margin: "0 14px",
-              height: 200,
-              borderRadius: 10,
+              margin: "0 16px 12px 16px",
+              height: 196,
+              borderRadius: 8,
               border: `4px solid ${el.borderColor}66`,
               background: `linear-gradient(135deg, ${el.bgGradientStart} 0%, ${el.bgGradientEnd} 100%)`,
               overflow: "hidden",
@@ -187,38 +188,38 @@ export async function POST(request: NextRequest) {
               {archetypeImage ? (
                 <img
                   src={archetypeImage.startsWith("data:") ? archetypeImage : `data:image/png;base64,${archetypeImage}`}
-                  width={380}
-                  height={192}
+                  width={360}
+                  height={188}
                   style={{ objectFit: "cover" }}
                 />
               ) : (
-                <span style={{ fontSize: 80, textShadow: "0 4px 20px rgba(0,0,0,0.5)" }}>{safeEmoji}</span>
+                <span style={{ fontSize: 72, textShadow: "0 4px 20px rgba(0,0,0,0.5)" }}>{safeEmoji}</span>
               )}
             </div>
 
-            {/* Type Badge + Stage */}
+            {/* Type Badge + Stage - mx-4 mb-2 */}
             <div style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              margin: "10px 14px",
+              margin: "0 16px 8px 16px",
             }}>
               <div style={{
                 display: "flex",
-                padding: "6px 14px",
+                padding: "4px 12px",
                 borderRadius: 20,
                 backgroundColor: el.color,
               }}>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "white" }}>{el.name} Type PM</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: "white" }}>{el.name} Type PM</span>
               </div>
-              <span style={{ fontSize: 13, fontStyle: "italic", color: el.textSecondary }}>{safeStage}</span>
+              <span style={{ fontSize: 14, fontStyle: "italic", color: el.textSecondary }}>{safeStage}</span>
             </div>
 
-            {/* Moves */}
+            {/* Moves - mx-4 mb-2, px-4 py-2, energy w-14 (56px) with w-5 h-5 (20px) symbols */}
             <div style={{
               display: "flex",
               flexDirection: "column",
-              margin: "0 14px",
+              margin: "0 16px 8px 16px",
               backgroundColor: "rgba(255,255,255,0.7)",
               borderRadius: 8,
               border: `1px solid ${el.borderColor}30`,
@@ -226,32 +227,36 @@ export async function POST(request: NextRequest) {
               {cardMoves.length > 0 ? cardMoves.map((move: { name?: string; energyCost?: number; damage?: number; effect?: string }, idx: number) => (
                 <div key={idx} style={{
                   display: "flex",
-                  alignItems: "center",
-                  padding: "8px 12px",
+                  alignItems: "flex-start",
+                  padding: "8px 16px",
                   borderBottom: idx === 0 ? `1px solid ${el.borderColor}30` : "none",
+                  gap: 8,
                 }}>
-                  <div style={{ display: "flex", gap: 3, width: 50 }}>
+                  {/* Energy Cost - w-14 (56px) with gap-0.5 (2px) */}
+                  <div style={{ display: "flex", gap: 2, width: 56, flexShrink: 0 }}>
                     {Array.from({ length: Math.min(move.energyCost || 1, 3) }).map((_, i) => (
                       <div key={i} style={{
-                        width: 16,
-                        height: 16,
-                        borderRadius: 8,
+                        width: 20,
+                        height: 20,
+                        borderRadius: 10,
                         backgroundColor: el.color,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
                       }}>
-                        <span style={{ fontSize: 9, fontWeight: 700, color: "white" }}>{(element || "C")[0].toUpperCase()}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: "white" }}>{(element || "C")[0].toUpperCase()}</span>
                       </div>
                     ))}
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: el.textPrimary }}>{move.name || "Attack"}</span>
+                  {/* Move Name & Effect */}
+                  <div style={{ display: "flex", flexDirection: "column", flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: el.textPrimary }}>{move.name || "Attack"}</span>
                     {move.effect && (
-                      <span style={{ fontSize: 10, color: el.textMuted }}>{String(move.effect).slice(0, 50)}</span>
+                      <span style={{ fontSize: 11, color: el.textMuted, marginTop: 2 }}>{String(move.effect).slice(0, 45)}</span>
                     )}
                   </div>
-                  <span style={{ fontSize: 16, fontWeight: 800, color: el.textPrimary }}>{move.damage || 0}</span>
+                  {/* Damage */}
+                  <span style={{ fontSize: 18, fontWeight: 900, color: el.textPrimary, flexShrink: 0 }}>{move.damage || 0}</span>
                 </div>
               )) : (
                 <div style={{ display: "flex", padding: "12px", justifyContent: "center" }}>
@@ -260,36 +265,38 @@ export async function POST(request: NextRequest) {
               )}
             </div>
 
-            {/* Description */}
+            {/* Description - mx-4 mb-2 px-3 py-2 */}
             {safeDescription && (
               <div style={{
                 display: "flex",
-                margin: "10px 14px",
-                padding: "10px",
+                margin: "0 16px 8px 16px",
+                padding: "8px 12px",
                 backgroundColor: "rgba(255,255,255,0.5)",
                 borderRadius: 6,
                 border: `1px solid ${el.borderColor}30`,
+                flex: 1,
+                alignItems: "center",
               }}>
-                <span style={{ fontSize: 11, fontStyle: "italic", color: el.textSecondary, textAlign: "center", width: "100%" }}>
+                <span style={{ fontSize: 12, fontStyle: "italic", color: el.textSecondary, textAlign: "center", width: "100%" }}>
                   {safeDescription}
                 </span>
               </div>
             )}
 
-            {/* Footer */}
+            {/* Footer - px-4 py-2 = 16px 8px */}
             <div style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              padding: "10px 14px",
+              padding: "8px 16px",
               marginTop: "auto",
               backgroundColor: `${el.borderColor}33`,
             }}>
-              <div style={{ display: "flex", gap: 6 }}>
-                <span style={{ fontSize: 12, color: el.textSecondary }}>weakness</span>
-                <span style={{ fontSize: 12, fontWeight: 700, color: el.textPrimary }}>{safeWeakness}</span>
+              <div style={{ display: "flex", gap: 8 }}>
+                <span style={{ fontSize: 14, color: el.textSecondary }}>weakness</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: el.textPrimary }}>{safeWeakness}</span>
               </div>
-              <span style={{ fontSize: 12, fontWeight: 600, color: el.textMuted }}>pmroast.com</span>
+              <span style={{ fontSize: 14, fontWeight: 600, color: el.textMuted }}>pmroast.com</span>
             </div>
           </div>
         </div>
