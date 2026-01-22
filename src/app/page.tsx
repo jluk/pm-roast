@@ -2570,15 +2570,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Stats - Compact Row */}
-              <div className="mt-4 flex items-center justify-center gap-4 text-xs text-muted-foreground">
-                <span><span className="font-bold text-white">10k+</span> cards</span>
-                <span className="text-muted-foreground/30">•</span>
-                <span><span className="font-bold text-white">9</span> archetypes</span>
-                <span className="text-muted-foreground/30">•</span>
-                <span><span className="font-bold text-white">6</span> elements</span>
-              </div>
-
               {/* Mobile: Show card preview below form */}
               <div className="lg:hidden mt-6">
                 <p className="text-center text-xs text-muted-foreground mb-3">Your personalized card</p>
