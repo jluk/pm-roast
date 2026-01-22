@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { RoastResult, DreamRole, DREAM_ROLES } from "@/lib/types";
-import { generateShareUrl } from "@/lib/share";
+import { generateShareUrl, encodeCardData } from "@/lib/share";
 import { PokemonCard, PMElement } from "@/components/PokemonCard";
 import { CardBack } from "@/components/CardBack";
 import { getCardRarity, CardRarity } from "@/components/HoloCard";
@@ -149,8 +149,33 @@ Get your PM card: ${shareUrl}
   };
 
   const downloadCard = async () => {
-    // Use the OG image endpoint to get a shareable card image
-    const ogUrl = `${baseUrl}/api/og?name=${encodeURIComponent(result.userName || 'PM')}&archetype=${encodeURIComponent(stripMarkdown(result.archetype.name))}&score=${result.careerScore}&rarity=${rarity}`;
+    // Encode card data for OG image endpoint
+    const cardData = {
+      s: result.careerScore,
+      n: stripMarkdown(result.archetype.name).slice(0, 30),
+      e: result.archetype.emoji,
+      d: stripMarkdown(result.archetype.description).slice(0, 95),
+      el: result.archetype.element || "chaos",
+      st: result.archetype.stage || "Senior",
+      w: result.archetype.weakness || "Meetings",
+      f: stripMarkdown(result.archetype.flavor || result.archetype.description).slice(0, 95),
+      m: (result.moves || []).slice(0, 2).map(m => ({
+        n: m.name.slice(0, 20),
+        c: Math.min(m.energyCost, 2),
+        d: m.damage,
+        ...(m.effect ? { e: m.effect.slice(0, 50) } : {}),
+      })),
+      ps: result.capabilities?.productSense || 70,
+      ex: result.capabilities?.execution || 70,
+      ld: result.capabilities?.leadership || 70,
+      dr: dreamRole,
+      q: stripMarkdown(result.bangerQuote).slice(0, 140),
+      rr: result.dreamRoleReaction?.slice(0, 80) || "",
+      u: result.userName?.slice(0, 50),
+    };
+
+    const encoded = encodeCardData(cardData);
+    const ogUrl = `${baseUrl}/api/og?data=${encoded}`;
 
     try {
       const response = await fetch(ogUrl);
