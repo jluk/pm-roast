@@ -17,6 +17,7 @@ PM Roast - A "Linear-style" web app that provides brutally honest AI career coac
   - Gemini 2.0 Flash Exp for image generation (card artwork)
 - **PDF Parsing**: pdf-parse
 - **Card Storage**: Vercel KV (Redis) for permanent card URLs
+- **OG Images**: Vercel Blob storage for pre-generated social preview images
 
 ## Commands
 
@@ -28,12 +29,14 @@ npm run lint     # Run ESLint
 
 ## Environment Variables
 
-Copy `.env.example` to `.env.local` and add your API key:
+Copy `.env.example` to `.env.local` and add your API keys:
 ```
 GEMINI_API_KEY=your_api_key_here
+BLOB_READ_WRITE_TOKEN=your_vercel_blob_token_here
 ```
 
-Get a free Gemini API key at: https://aistudio.google.com/app/apikey
+- **Gemini API Key**: https://aistudio.google.com/app/apikey
+- **Blob Token**: Created automatically when you connect Vercel Blob storage to your project
 
 ## Design System
 
@@ -55,7 +58,9 @@ src/
 │   │   ├── linkedin/route.ts  # LinkedIn profile scraping via Proxycurl
 │   │   ├── website/route.ts   # Website scraping for portfolio URLs
 │   │   ├── stats/route.ts     # Roast counter stats
-│   │   └── og/route.tsx       # Dynamic OG image generation
+│   │   ├── og/route.tsx       # OG image serving (checks blob, falls back to default)
+│   │   ├── og-generate/route.tsx # Pre-generates OG images, stores in Vercel Blob
+│   │   └── card-data/route.ts # Fetches card data for OG regeneration
 │   ├── card/[id]/             # Permanent shareable card pages (KV storage)
 │   ├── share/[data]/          # Legacy shareable result pages (URL-encoded)
 │   ├── globals.css            # Theme variables, Tailwind config
@@ -144,6 +149,24 @@ public/
 - GET: Returns total roast count
 - POST: Increments roast counter (called after each successful roast)
 
+### `/api/og`
+- Serves OG images for social media previews
+- Checks Vercel Blob storage for pre-generated card image
+- Falls back to default "PM Roast" image if not found
+- Query param: `?c=<cardId>`
+
+### `/api/og-generate`
+- POST: Generates Pokemon-style card OG image and stores in Vercel Blob
+- Called automatically after card creation in `/api/roast` and `/api/roast-legend`
+- Accepts full card data: `cardId`, `score`, `archetypeName`, `element`, `emoji`, `description`, `moves`, `stage`, `weakness`, `userName`, `archetypeImage` (optional)
+- Card dimensions match `PokemonCard.tsx`: 400x560px
+- Allows overwriting existing images for regeneration
+
+### `/api/card-data`
+- GET: Fetches stored card data for OG image regeneration
+- Query param: `?id=<cardId>`
+- Returns abbreviated card data including archetype image
+
 ## Card System
 
 ### Rarity Tiers (based on career score)
@@ -175,6 +198,32 @@ Cards with 90+ score get additional effects:
 ### Elements (typing system)
 - `data`, `chaos`, `strategy`, `shipping`, `politics`, `vision`
 - Each has unique colors, backgrounds, and thematic props
+
+### OG Image System
+Pre-generated social preview images stored in Vercel Blob storage.
+
+**Flow:**
+1. Card created via `/api/roast` or `/api/roast-legend`
+2. OG image generated in background via `/api/og-generate` (fire-and-forget)
+3. Image stored at `og/<cardId>.png` in Vercel Blob
+4. When card URL shared, `/api/og?c=<cardId>` serves the pre-generated image
+5. Falls back to default image if blob not found
+
+**OG Image Design:**
+- Renders full Pokemon-style card matching `PokemonCard.tsx` dimensions (400x560px)
+- Includes: header (emoji, name, score), image frame, type badge, moves, description, footer
+- Element-based color scheme matching the card component
+- Centered in 1200x630px OG canvas
+
+**Regenerating OG for existing cards:**
+```bash
+# Fetch card data and call og-generate
+curl -s "https://www.pmroast.com/api/card-data?id=<cardId>" | \
+  jq '{cardId:"<cardId>",score:.s,archetypeName:.n,element:.el,emoji:.e,description:.d,moves:[.m[]|{name:.n,energyCost:.c,damage:.d,effect:.e}],stage:.st,weakness:.w,userName:.userName}' | \
+  curl -X POST "https://www.pmroast.com/api/og-generate" -H "Content-Type: application/json" -d @-
+```
+
+**Note:** Base64 archetype images may be too large (>1MB) for the request payload. OG images for existing cards may show emoji fallback instead of creature image.
 
 ## Mt. Roastmore (Famous Cards)
 
