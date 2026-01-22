@@ -32,26 +32,17 @@ function logUsage(type: UsageType, input?: string, success?: boolean) {
   });
 }
 
-// Shuffle array helper
-function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
+// Get a random legend name from Mt. Roastmore
+function getRandomLegendName(): string {
+  return FAMOUS_CARDS[Math.floor(Math.random() * FAMOUS_CARDS.length)].name;
 }
 
-// Get shuffled legend names from Mt. Roastmore
-const LEGEND_NAMES = shuffleArray(FAMOUS_CARDS.map(card => card.name));
-
-// Rotating placeholder examples - mix URLs with random legend names
+// Placeholder examples for rotation: linkedin -> website -> legend
 const PLACEHOLDER_EXAMPLES = [
-  { text: "linkedin.com/in/yourprofile", type: "linkedin" as const },
-  ...LEGEND_NAMES.slice(0, 8).map(name => ({ text: name, type: "legend" as const })),
-  { text: "yoursite.com/about", type: "website" as const },
-  ...LEGEND_NAMES.slice(8, 16).map(name => ({ text: name, type: "legend" as const })),
-];
+  { type: "linkedin", text: "linkedin.com/in/yourprofile" },
+  { type: "website", text: "yoursite.com/about" },
+  { type: "legend", text: "" }, // Will be filled with random legend name
+] as const;
 
 // Auto-detect input type from value
 function detectInputType(value: string): "linkedin" | "website" | "x" | "legend" | null {
@@ -104,6 +95,7 @@ export default function Home() {
   // Unified smart input state
   const [smartInput, setSmartInput] = useState("");
   const [placeholderIndex, setPlaceholderIndex] = useState(0);
+  const [currentLegendName, setCurrentLegendName] = useState(() => getRandomLegendName());
   const [detectedType, setDetectedType] = useState<"linkedin" | "website" | "x" | "legend" | null>(null);
   const [profileText, setProfileText] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -319,12 +311,19 @@ export default function Home() {
       .catch(() => {});
   }, []);
 
-  // Rotate placeholder text every 3 seconds
+  // Rotate placeholder text every 5 seconds
   useEffect(() => {
     if (smartInput) return; // Don't rotate when user is typing
     const interval = setInterval(() => {
-      setPlaceholderIndex((prev) => (prev + 1) % PLACEHOLDER_EXAMPLES.length);
-    }, 3000);
+      setPlaceholderIndex((prev) => {
+        const nextIndex = (prev + 1) % PLACEHOLDER_EXAMPLES.length;
+        // Pick a new random legend name when cycling to the legend step (index 2)
+        if (nextIndex === 2) {
+          setCurrentLegendName(getRandomLegendName());
+        }
+        return nextIndex;
+      });
+    }, 5000);
     return () => clearInterval(interval);
   }, [smartInput]);
 
@@ -1510,7 +1509,7 @@ export default function Home() {
                                   transition={{ duration: 0.3 }}
                                   className="text-white/40 text-base"
                                 >
-                                  {PLACEHOLDER_EXAMPLES[placeholderIndex].text}
+                                  {placeholderIndex === 2 ? currentLegendName : PLACEHOLDER_EXAMPLES[placeholderIndex].text}
                                 </motion.span>
                               </AnimatePresence>
                             </div>
