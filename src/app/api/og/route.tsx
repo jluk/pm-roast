@@ -1,7 +1,9 @@
 import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
+import { kv } from "@vercel/kv";
 
-export const runtime = "edge";
+// Use Node.js runtime to directly access KV (edge runtime can't self-reference)
+export const runtime = "nodejs";
 
 interface OGCardData {
   n: string;
@@ -17,34 +19,42 @@ interface OGCardData {
 
 async function getCardById(cardId: string): Promise<OGCardData | null> {
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com";
-    const fetchUrl = `${baseUrl}/api/card-data?id=${cardId}`;
-    console.log("Fetching card from:", fetchUrl);
+    // Direct KV access (Node.js runtime)
+    const storedCard = await kv.get<{
+      result: {
+        archetype: { name: string; description: string; emoji: string; element: string; stage?: string; weakness?: string };
+        moves: { name: string; energyCost: number; damage: number; effect?: string }[];
+        careerScore: number;
+        bangerQuote?: string;
+      };
+    }>(`card:${cardId}`);
 
-    const response = await fetch(fetchUrl, {
-      method: "GET",
-      headers: {
-        "Accept": "application/json",
-      },
-    });
-
-    console.log("Response status:", response.status);
-
-    if (!response.ok) {
-      console.error("Card fetch failed:", response.status);
+    if (!storedCard) {
+      console.log("Card not found in KV:", cardId);
       return null;
     }
 
-    const data = await response.json();
-    console.log("Card data received:", data ? "yes" : "no");
+    const { result } = storedCard;
 
-    if (data.error) {
-      console.error("Card data error:", data.error);
-      return null;
-    }
-    return data as OGCardData;
+    // Transform to OG format
+    return {
+      n: result.archetype.name,
+      d: result.archetype.description,
+      e: result.archetype.emoji,
+      s: result.careerScore,
+      el: result.archetype.element,
+      q: result.bangerQuote || result.archetype.description,
+      m: result.moves.map(m => ({
+        n: m.name,
+        c: m.energyCost,
+        d: m.damage,
+        e: m.effect,
+      })),
+      w: result.archetype.weakness || "Meetings",
+      st: result.archetype.stage || "Senior",
+    };
   } catch (err) {
-    console.error("Card fetch exception:", err);
+    console.error("KV fetch exception:", err);
     return null;
   }
 }
