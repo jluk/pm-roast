@@ -1,6 +1,7 @@
 import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
-import { kv } from "@vercel/kv";
+
+export const runtime = "edge";
 
 // Card data format for OG image rendering
 interface OGCardData {
@@ -15,41 +16,24 @@ interface OGCardData {
   st: string; // stage
 }
 
-// Fetch card from KV storage by ID
-async function getCardById(cardId: string): Promise<OGCardData | null> {
+// Fetch card from internal API endpoint (which runs in Node.js runtime with KV access)
+async function getCardById(cardId: string, baseUrl: string): Promise<OGCardData | null> {
   try {
-    const data = await kv.get<string>(`card:${cardId}`);
-    if (!data) {
-      console.log("No card found for ID:", cardId);
+    const response = await fetch(`${baseUrl}/api/card-data?id=${cardId}`);
+
+    if (!response.ok) {
+      console.error("Card data fetch failed:", response.status);
       return null;
     }
 
-    // Handle both string and object responses from KV
-    const stored = typeof data === 'string' ? JSON.parse(data) : data;
-    const result = stored.result;
+    const data = await response.json();
 
-    if (!result || !result.archetype) {
-      console.error("Invalid card data structure");
+    if (data.error) {
+      console.error("Card data error:", data.error);
       return null;
     }
 
-    // Transform RoastResult to OG card format
-    return {
-      n: result.archetype.name,
-      d: result.archetype.description,
-      e: result.archetype.emoji,
-      s: result.careerScore,
-      el: result.archetype.element,
-      q: result.bangerQuote,
-      m: (result.moves || []).map((move: { name: string; energyCost: number; damage: number; effect?: string }) => ({
-        n: move.name,
-        c: move.energyCost,
-        d: move.damage,
-        e: move.effect,
-      })),
-      w: result.archetype.weakness,
-      st: result.archetype.stage,
-    };
+    return data as OGCardData;
   } catch (error) {
     console.error("Failed to fetch card for OG:", error);
     return null;
@@ -148,15 +132,19 @@ function getFallbackImage() {
 
 export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const url = new URL(request.url);
+    const { searchParams } = url;
     const cardId = searchParams.get("id");
     const data = searchParams.get("data");
+
+    // Get base URL for internal API calls
+    const baseUrl = `${url.protocol}//${url.host}`;
 
     // Try to get card data from ID (for /card/[id] pages) or from data param (for legacy /share pages)
     let card: OGCardData | null = null;
 
     if (cardId) {
-      card = await getCardById(cardId);
+      card = await getCardById(cardId, baseUrl);
     } else if (data) {
       card = decodeCardData(data);
     }
