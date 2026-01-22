@@ -95,7 +95,7 @@ export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage 
   const [isDownloading, setIsDownloading] = useState(false);
   const [isRerolling, setIsRerolling] = useState(false);
   const [screenshotMode, setScreenshotMode] = useState(false);
-  const [rankInfo, setRankInfo] = useState<{ rank: number; totalCards: number; percentile: number } | null>(null);
+  const [rankInfo, setRankInfo] = useState<{ rank: number; totalCards: number; totalRoasts: number; percentile: number } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Fetch rank info when cardId is available
@@ -105,7 +105,7 @@ export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage 
     fetch(`/api/card-rank?cardId=${cardId}`)
       .then((res) => res.ok ? res.json() : null)
       .then((data) => {
-        if (data && data.rank && data.totalCards) {
+        if (data && data.rank && data.totalRoasts) {
           setRankInfo(data);
         }
       })
@@ -143,7 +143,7 @@ export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage 
   const shareToTwitter = () => {
     const archetype = stripMarkdown(result.archetype.name);
     const legendName = result.userName || "this legend";
-    const rankBrag = rankInfo ? `\n\n🏆 Ranked #${rankInfo.rank.toLocaleString()} of ${rankInfo.totalCards.toLocaleString()} PMs` : "";
+    const rankBrag = rankInfo ? `\n\n🏆 Ranked #${rankInfo.rank.toLocaleString()} of ${rankInfo.totalRoasts.toLocaleString()} PMs` : "";
     const text = isLegend
       ? `I roasted ${legendName} as a PM and they scored ${result.careerScore}/100 💀\n\nArchetype: "${archetype}"\n\nRoast your favorite celebrity:`
       : `I got roasted as a PM and I'm a "${archetype}" 💀${rankBrag}\n\nGet your PM roast card:`;
@@ -388,7 +388,7 @@ Get your PM card: ${shareUrl}
                             #{rankInfo.rank.toLocaleString()}
                           </span>
                           <span className="text-xs text-amber-400/60">
-                            / {rankInfo.totalCards.toLocaleString()}
+                            / {rankInfo.totalRoasts.toLocaleString()}
                           </span>
                         </div>
                       </div>
