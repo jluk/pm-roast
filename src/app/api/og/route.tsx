@@ -1,6 +1,5 @@
 import { ImageResponse } from "@vercel/og";
 import { NextRequest } from "next/server";
-import { kv } from "@vercel/kv";
 
 export const runtime = "edge";
 
@@ -17,15 +16,40 @@ interface OGCardData {
   st: string; // stage
 }
 
-// Fetch card from KV storage by ID
+// Fetch card from KV storage by ID using REST API (more reliable in edge runtime)
 async function getCardById(cardId: string): Promise<OGCardData | null> {
   try {
-    const data = await kv.get<string>(`card:${cardId}`);
-    if (!data) return null;
+    const kvUrl = process.env.KV_REST_API_URL;
+    const kvToken = process.env.KV_REST_API_TOKEN;
 
-    // Handle both string and object responses from KV
-    const stored = typeof data === 'string' ? JSON.parse(data) : data;
+    if (!kvUrl || !kvToken) {
+      console.error("KV environment variables not configured");
+      return null;
+    }
+
+    // Use Upstash REST API directly for edge compatibility
+    const response = await fetch(`${kvUrl}/get/card:${cardId}`, {
+      headers: {
+        Authorization: `Bearer ${kvToken}`,
+      },
+    });
+
+    if (!response.ok) {
+      console.error("KV fetch failed:", response.status);
+      return null;
+    }
+
+    const json = await response.json();
+    if (!json.result) return null;
+
+    // Parse the stored data
+    const stored = typeof json.result === 'string' ? JSON.parse(json.result) : json.result;
     const result = stored.result;
+
+    if (!result || !result.archetype) {
+      console.error("Invalid card data structure");
+      return null;
+    }
 
     // Transform RoastResult to OG card format
     return {
@@ -35,7 +59,7 @@ async function getCardById(cardId: string): Promise<OGCardData | null> {
       s: result.careerScore,
       el: result.archetype.element,
       q: result.bangerQuote,
-      m: result.moves.map((move: { name: string; energyCost: number; damage: number; effect?: string }) => ({
+      m: (result.moves || []).map((move: { name: string; energyCost: number; damage: number; effect?: string }) => ({
         n: move.name,
         c: move.energyCost,
         d: move.damage,
@@ -114,44 +138,50 @@ const PM_ELEMENTS: Record<string, { color: string; bg: string; textColor: string
   },
 };
 
-export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url);
-  const cardId = searchParams.get("id");
-  const data = searchParams.get("data");
-
-  // Try to get card data from ID (for /card/[id] pages) or from data param (for legacy /share pages)
-  let card: OGCardData | null = null;
-
-  if (cardId) {
-    card = await getCardById(cardId);
-  } else if (data) {
-    card = decodeCardData(data);
-  }
-
-  if (!card) {
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#0a0a0a",
-            color: "white",
-          }}
-        >
-          <div style={{ fontSize: 48, fontWeight: "bold" }}>PM Roast</div>
-          <div style={{ fontSize: 24, color: "#a3a3a3", marginTop: 16 }}>
-            Get brutally honest career feedback
-          </div>
+// Fallback image for errors or missing cards
+function getFallbackImage() {
+  return new ImageResponse(
+    (
+      <div
+        style={{
+          height: "100%",
+          width: "100%",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#0a0a0a",
+          color: "white",
+        }}
+      >
+        <div style={{ fontSize: 48, fontWeight: "bold" }}>PM Roast</div>
+        <div style={{ fontSize: 24, color: "#a3a3a3", marginTop: 16 }}>
+          Get brutally honest career feedback
         </div>
-      ),
-      { width: 1200, height: 630 }
-    );
-  }
+      </div>
+    ),
+    { width: 1200, height: 630 }
+  );
+}
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const cardId = searchParams.get("id");
+    const data = searchParams.get("data");
+
+    // Try to get card data from ID (for /card/[id] pages) or from data param (for legacy /share pages)
+    let card: OGCardData | null = null;
+
+    if (cardId) {
+      card = await getCardById(cardId);
+    } else if (data) {
+      card = decodeCardData(data);
+    }
+
+    if (!card) {
+      return getFallbackImage();
+    }
 
   if (!card) {
     return new ImageResponse(
@@ -580,4 +610,8 @@ export async function GET(request: NextRequest) {
       height: 630,
     }
   );
+  } catch (error) {
+    console.error("OG image generation failed:", error);
+    return getFallbackImage();
+  }
 }
