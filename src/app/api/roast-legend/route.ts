@@ -282,15 +282,36 @@ STAGE (based on their career level):
 - Legendary: Household name in tech
 - Mythical: Changed the industry
 
+CAREER SCORE - PM RELEVANCE SCORING (THIS IS CRITICAL AND FUNNY):
+The score should reflect how good they would ACTUALLY be as a Product Manager. Being famous doesn't mean you'd be a good PM!
+
+SCORING TIERS:
+- 90-99: PM GODS ONLY. Reserved for: actual legendary PMs (Shreyas Doshi, Marty Cagan), founders who shipped iconic products (Steve Jobs, Brian Chesky), people who literally invented product management.
+- 75-89: ELITE PM MATERIAL. Tech founders, successful product leaders, people who've shipped products used by millions. Must have actual product track record.
+- 60-74: DECENT PM POTENTIAL. Tech executives, startup founders with some success, people who understand products even if not PMs.
+- 40-59: QUESTIONABLE PM FIT. Famous in tech but not for product skills. Engineers who'd hate stakeholder meetings. VCs who've never shipped anything.
+- 20-39: HILARIOUSLY BAD PM FIT. Celebrities, athletes, politicians, influencers. Use this tier for comedy! Imagine them in a sprint planning meeting.
+- 0-19: ABSOLUTE CHAOS. People who would cause a P0 incident just by joining the standup. Use for maximum comedy.
+
+EXAMPLES:
+- Elon Musk: 70-80 (ships products but would be a nightmare PM to work with)
+- Kim Kardashian: 25-35 (great at marketing herself, would derail every roadmap meeting)
+- Joe Rogan: 15-25 (would turn every product review into a 3-hour podcast)
+- LeBron James: 20-30 (elite competitor, zero PRD-writing skills)
+- Satya Nadella: 80-88 (actual product leader who transformed Microsoft)
+- A random TikTok influencer: 10-20 (would try to make the app "more aesthetic")
+
+THE COMEDY IS IN THE HONESTY. If someone is totally irrelevant to PM work, give them a hilariously low score and roast WHY they'd be terrible at PM work.
+
 Your response MUST be valid JSON with this exact structure (no markdown, no code blocks, just raw JSON):
 {
   "userName": "Their FULL NAME as commonly known (e.g., 'Elon Musk', not just 'Elon')",
-  "roastBullets": ["4 roasts based on their public persona, max 100 chars each"],
+  "roastBullets": ["4 roasts based on their public persona, max 100 chars each. If non-PM, roast WHY they'd be a terrible PM!"],
   "archetype": {
     "name": "2-3 word punchy nickname, NO 'The' prefix (e.g., 'Rocket Tweeter' not 'The Rocket Tweeter')",
-    "description": "A punchy description of their PM/tech persona, 60-80 chars",
+    "description": "A punchy description of their PM/tech persona (or lack thereof), 60-80 chars",
     "emoji": "Single emoji matching their vibe",
-    "element": "data|chaos|strategy|shipping|politics|vision",
+    "element": "data|chaos|strategy|shipping|politics|vision (pick the closest fit, even for non-tech people)",
     "flavor": "Nature-doc style observation about them, 60-80 chars",
     "stage": "Senior|Elite|Legendary|Mythical",
     "weakness": "One ironic word based on their known weaknesses"
@@ -315,13 +336,13 @@ Your response MUST be valid JSON with this exact structure (no markdown, no code
       "effect": "Their most famous/powerful ability"
     }
   ],
-  "careerScore": 70-99 (they're famous for a reason),
+  "careerScore": 0-99 (based on PM RELEVANCE scoring above - be honest and funny!),
   "capabilities": {
-    "productSense": 60-99,
-    "execution": 60-99,
-    "leadership": 60-99
+    "productSense": 0-99 (would they actually understand user needs?),
+    "execution": 0-99 (could they ship a product on time?),
+    "leadership": 0-99 (could they lead a cross-functional team?)
   },
-  "gaps": ["3 humorous 'gaps' that are actually humble-brags or known quirks, max 60 chars each"],
+  "gaps": ["3 humorous gaps - for non-PM types, roast their actual PM skill gaps; for tech legends, use humble-brags or known quirks, max 60 chars each"],
   "roadmap": [
     {"month": 1, "title": "max 20 chars", "actions": ["2 actions that parody their actual career trajectory, max 40 chars each"]},
     {"month": 2, "title": "max 20 chars", "actions": ["2 more parody actions"]},
@@ -473,9 +494,9 @@ Remember: This is a fun roast card, keep it entertaining and witty!`;
       moves: roastData.moves || [
         { name: "Mystery Move", energyCost: 2, damage: 50, effect: "Does something unexpected" },
       ],
-      careerScore: roastData.careerScore || 75,
+      careerScore: roastData.careerScore || 50,
       capabilities: roastData.capabilities || {
-        productSense: 70,
+        productSense: 50,
         execution: 70,
         leadership: 70,
       },
