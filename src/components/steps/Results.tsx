@@ -110,9 +110,7 @@ export function Results({ result, dreamRole, onStartOver, isSharePage = false, c
 
   const shareToTwitter = () => {
     const archetype = stripMarkdown(result.archetype.name);
-    const rarity = getCardRarity(result.careerScore);
-    const rarityLabel = RARITY_INFO[rarity].label;
-    const text = `PM Roast said I'm a "${archetype}" (${rarityLabel} card)\n\n"${result.bangerQuote}"\n\nBrutal but fair. What's your PM archetype?`;
+    const text = `I got turned into a Pokémon card and I'm a "${archetype}" 💀\n\nGet your PM roast card:`;
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
       "_blank"
@@ -420,17 +418,13 @@ Get your PM card: ${shareUrl}
                 {/* Tweet preview tooltip - hovers above button */}
                 <div className="absolute bottom-full left-0 right-0 mb-3 opacity-0 group-hover/share:opacity-100 transition-all duration-200 pointer-events-none translate-y-2 group-hover/share:translate-y-0 z-50">
                   <div className="p-3 rounded-lg bg-black/95 border border-white/20 shadow-2xl backdrop-blur-sm">
-                    <div className="flex items-start gap-2 mb-2">
+                    <div className="flex items-start gap-2">
                       <svg className="w-4 h-4 text-white/60 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                       </svg>
                       <p className="text-xs text-white/90 leading-relaxed">
-                        PM Roast said I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; ({rarityInfo.label} card)<br /><br />&quot;{result.bangerQuote}&quot;
+                        I got turned into a Pokémon card and I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; 💀
                       </p>
-                    </div>
-                    <div className="flex items-center gap-2 text-[10px] text-white/50 border-t border-white/10 pt-2">
-                      <span className="px-1.5 py-0.5 rounded bg-white/10">Preview</span>
-                      <span>Click to post</span>
                     </div>
                   </div>
                   <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-3 bg-black/95 border-r border-b border-white/20 transform rotate-45" />
