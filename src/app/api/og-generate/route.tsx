@@ -2,8 +2,7 @@ import { ImageResponse } from "@vercel/og";
 import { put } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
 
-// Use Node.js runtime for blob storage
-export const runtime = "nodejs";
+export const runtime = "edge";
 
 export async function POST(request: NextRequest) {
   try {
