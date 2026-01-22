@@ -199,32 +199,16 @@ export async function GET(request: NextRequest) {
             position: "relative",
           }}
         >
-          {/* Holographic glow - more dramatic */}
+          {/* Holographic glow - simplified for Satori compatibility */}
           <div
             style={{
               position: "absolute",
-              top: -20,
-              left: -20,
-              right: -20,
-              bottom: -20,
+              top: -12,
+              left: -12,
+              right: -12,
+              bottom: -12,
               background: "linear-gradient(45deg, #ff0080, #ff8c00, #40e0d0, #7b68ee, #ff0080)",
-              borderRadius: 32,
-              filter: "blur(24px)",
-              opacity: 0.8,
-            }}
-          />
-
-          {/* Secondary inner glow */}
-          <div
-            style={{
-              position: "absolute",
-              top: -8,
-              left: -8,
-              right: -8,
-              bottom: -8,
-              background: `linear-gradient(135deg, ${element.color}66, transparent, ${element.color}66)`,
-              borderRadius: 24,
-              filter: "blur(8px)",
+              borderRadius: 28,
               opacity: 0.6,
             }}
           />
