@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = card.q;
 
   // Generate OG image URL
-  const ogImageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://pmroast.com"}/api/og?data=${data}`;
+  const ogImageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?data=${data}`;
 
   return {
     title,

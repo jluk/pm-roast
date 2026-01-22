@@ -217,7 +217,7 @@ function ExpandedCardView({
 
   const shareToTwitter = () => {
     const text = `${card.name} is "${card.archetypeName}" on Mt. Roastmore\n\n"${card.bangerQuote}"\n\nSee more legends get roasted:`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent("https://pmroast.com")}`, "_blank");
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent("https://www.pmroast.com")}`, "_blank");
   };
 
   return (

@@ -2627,7 +2627,13 @@ export default function Home() {
               exit={{ opacity: 0 }}
               className="w-full max-w-lg mx-auto py-12"
             >
-              <AnalyzingLoader hasProfilePic={inputSource === "linkedin" ? !!profilePicUrl && useProfilePic : undefined} />
+              <AnalyzingLoader hasProfilePic={
+                inputSource === "legend"
+                  ? undefined  // Don't show for legend submissions
+                  : inputSource === "linkedin"
+                    ? !!profilePicUrl && useProfilePic
+                    : !!userProfileImage && useProfilePic  // Manual/PDF: check user-uploaded image
+              } />
             </motion.div>
           )}
 

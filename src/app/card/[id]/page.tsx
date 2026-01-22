@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const description = result.bangerQuote;
 
   // Generate OG image URL
-  const ogImageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://pmroast.com"}/api/og?id=${id}`;
+  const ogImageUrl = `${process.env.NEXT_PUBLIC_BASE_URL || "https://www.pmroast.com"}/api/og?id=${id}`;
 
   return {
     title,

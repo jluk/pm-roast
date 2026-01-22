@@ -1,8 +1,16 @@
 import { kv } from "@vercel/kv";
 import { RoastResult, DreamRole } from "./types";
+import { FAMOUS_CARDS } from "./famous-cards";
+import { CELEBRITY_CARDS } from "./celebrity-cards";
 
 // Sorted set key for the global leaderboard
 const LEADERBOARD_KEY = "leaderboard:scores";
+
+// Pre-compute all legend scores (famous + celebrity cards)
+const ALL_LEGEND_SCORES = [
+  ...FAMOUS_CARDS.map(c => c.score),
+  ...CELEBRITY_CARDS.map(c => c.score),
+].sort((a, b) => b - a); // Sort descending (highest first)
 
 // Stored card data - full result with no truncation
 export interface StoredCard {
@@ -45,27 +53,50 @@ export async function storeCard(result: RoastResult, dreamRole: DreamRole): Prom
   return cardId;
 }
 
-// Get rank info for a specific card
+// Get rank info for a specific card (includes famous/celebrity cards in ranking)
 export async function getCardRank(cardId: string): Promise<RankInfo | null> {
   try {
-    // Get the card's rank (0-indexed, sorted by score descending)
-    // ZREVRANK gives rank where highest score = 0
-    const rank = await kv.zrevrank(LEADERBOARD_KEY, cardId);
+    // Get the card's score from the leaderboard
+    const score = await kv.zscore(LEADERBOARD_KEY, cardId);
 
-    if (rank === null) {
+    if (score === null) {
       return null;
     }
 
-    // Get total count of cards in leaderboard
-    const totalCards = await kv.zcard(LEADERBOARD_KEY);
+    // Get the card's rank among user cards (0-indexed, sorted by score descending)
+    const userRank = await kv.zrevrank(LEADERBOARD_KEY, cardId);
+
+    if (userRank === null) {
+      return null;
+    }
+
+    // Get total count of user cards in leaderboard
+    const userCards = await kv.zcard(LEADERBOARD_KEY);
+
+    // Count how many legend cards have higher scores than this card
+    // Legend scores are sorted descending, so count until we hit a score <= user's score
+    let legendsAbove = 0;
+    for (const legendScore of ALL_LEGEND_SCORES) {
+      if (legendScore > score) {
+        legendsAbove++;
+      } else {
+        break; // Sorted descending, no need to check further
+      }
+    }
+
+    // Total cards = user cards + all legend cards
+    const totalCards = userCards + ALL_LEGEND_SCORES.length;
+
+    // Adjusted rank = user rank among users + legends that beat them
+    const adjustedRank = userRank + legendsAbove;
 
     // Calculate percentile (higher is better)
     const percentile = totalCards > 1
-      ? Math.round(((totalCards - rank - 1) / (totalCards - 1)) * 100)
+      ? Math.round(((totalCards - adjustedRank - 1) / (totalCards - 1)) * 100)
       : 100;
 
     return {
-      rank: rank + 1, // Convert to 1-indexed for display
+      rank: adjustedRank + 1, // Convert to 1-indexed for display
       totalCards,
       percentile,
     };
@@ -75,13 +106,14 @@ export async function getCardRank(cardId: string): Promise<RankInfo | null> {
   }
 }
 
-// Get total number of cards in leaderboard
+// Get total number of cards in leaderboard (includes legend cards)
 export async function getTotalCards(): Promise<number> {
   try {
-    return await kv.zcard(LEADERBOARD_KEY);
+    const userCards = await kv.zcard(LEADERBOARD_KEY);
+    return userCards + ALL_LEGEND_SCORES.length;
   } catch (error) {
     console.error("Failed to get total cards:", error);
-    return 0;
+    return ALL_LEGEND_SCORES.length; // At minimum, return legend count
   }
 }
 
