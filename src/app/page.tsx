@@ -2129,9 +2129,7 @@ export default function Home() {
               </div>
 
               {/* Famous Cards Gallery */}
-              <div id="mt-roastmore" className="scroll-mt-20">
-                <FamousCardsGallery />
-              </div>
+              <FamousCardsGallery />
 
               {/* Example Gallery */}
               <div id="archetypes" className="scroll-mt-20">

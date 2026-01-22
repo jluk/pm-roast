@@ -852,7 +852,7 @@ export function FamousCardsGallery() {
   return (
     <div className="py-8 md:py-12">
       {/* Section Header */}
-      <div className="text-center mb-8 md:mb-10 px-4">
+      <div id="mt-roastmore" className="text-center mb-8 md:mb-10 px-4 scroll-mt-16">
         <h2 className="text-2xl md:text-3xl font-black text-white mb-2">
           Mt. Roastmore
         </h2>
