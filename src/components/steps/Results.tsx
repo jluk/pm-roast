@@ -377,7 +377,8 @@ Get your PM card: ${shareUrl}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.6 }}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-900/40 to-yellow-900/40 border border-amber-500/50 shadow-lg shadow-amber-500/10"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-900/40 to-yellow-900/40 border border-amber-500/50"
+                      style={{ boxShadow: '0 0 20px rgba(251, 191, 36, 0.15), 0 0 40px rgba(251, 191, 36, 0.08), inset 0 1px 0 rgba(251, 191, 36, 0.1)' }}
                     >
                       <span className="text-lg">🏆</span>
                       <div className="flex flex-col items-end">
@@ -435,7 +436,7 @@ Get your PM card: ${shareUrl}
             </div>
           </motion.div>
 
-          {/* Natural Rival - Separate glassmorphism tag */}
+          {/* Natural Rival - Danger/Conflict alert style */}
           {result.naturalRival && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
@@ -443,10 +444,13 @@ Get your PM card: ${shareUrl}
               transition={{ delay: 0.8 }}
               className="relative group shrink-0 z-10"
             >
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/15 via-orange-500/15 to-red-500/15 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-              <div className="relative px-4 py-3 rounded-xl bg-black/60 backdrop-blur-xl border border-red-500/20 shadow-xl">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-red-500/20 via-red-600/20 to-red-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              <div
+                className="relative px-4 py-3 rounded-xl bg-red-500/10 backdrop-blur-xl border border-red-500/40 shadow-xl"
+                style={{ boxShadow: '0 0 15px rgba(239, 68, 68, 0.1), inset 0 1px 0 rgba(239, 68, 68, 0.05)' }}
+              >
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-md bg-red-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-md bg-red-500/20 flex items-center justify-center shrink-0 mt-0.5 border border-red-500/30">
                     <svg className="w-3 h-3 text-red-400" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                     </svg>
