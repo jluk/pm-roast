@@ -158,30 +158,10 @@ export async function GET(request: NextRequest) {
       return getFallbackImage();
     }
 
-  if (!card) {
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            height: "100%",
-            width: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#0a0a0a",
-            color: "white",
-            fontSize: 32,
-          }}
-        >
-          Card not found
-        </div>
-      ),
-      { width: 1200, height: 630, headers: OG_CACHE_HEADERS }
-    );
-  }
-
-  const element = PM_ELEMENTS[card.el] || PM_ELEMENTS.chaos;
-  const moves = card.m || [];
+    const element = PM_ELEMENTS[card.el] || PM_ELEMENTS.chaos;
+    const moves = card.m || [];
+    const move1 = moves[0];
+    const move2 = moves[1];
 
   return new ImageResponse(
     (
@@ -369,53 +349,81 @@ export async function GET(request: NextRequest) {
                 border: `1px solid ${element.color}33`,
               }}
             >
-              {moves.slice(0, 2).map((move: { n: string; c: number; d: number; e?: string }, index: number) => (
+              {/* Move 1 */}
+              {move1 && (
                 <div
-                  key={index}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     padding: "6px 10px",
-                    borderBottom: index === 0 ? `1px solid ${element.color}33` : "none",
+                    borderBottom: `1px solid ${element.color}33`,
                   }}
                 >
-                  {/* Energy cost */}
                   <div style={{ display: "flex", gap: 2, width: 45 }}>
-                    {Array.from({ length: Math.min(move.c || 1, 3) }).map((_, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          width: 14,
-                          height: 14,
-                          borderRadius: 7,
-                          backgroundColor: element.color,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "white",
-                          fontSize: 7,
-                          fontWeight: 700,
-                        }}
-                      >
-                        {(card.el || "C").charAt(0).toUpperCase()}
-                      </div>
-                    ))}
+                    <div
+                      style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: 7,
+                        backgroundColor: element.color,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                        fontSize: 7,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {(card.el || "C").charAt(0).toUpperCase()}
+                    </div>
                   </div>
-                  {/* Move name + effect */}
                   <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
                     <span style={{ fontSize: 11, fontWeight: 700, color: "#1a1a1a" }}>
-                      {move.n}
+                      {move1.n}
                     </span>
-                    {move.e && (
-                      <span style={{ fontSize: 8, color: "#666" }}>{move.e}</span>
-                    )}
                   </div>
-                  {/* Damage */}
                   <span style={{ fontSize: 16, fontWeight: 900, color: "#1a1a1a" }}>
-                    {move.d}
+                    {move1.d}
                   </span>
                 </div>
-              ))}
+              )}
+              {/* Move 2 */}
+              {move2 && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "6px 10px",
+                  }}
+                >
+                  <div style={{ display: "flex", gap: 2, width: 45 }}>
+                    <div
+                      style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: 7,
+                        backgroundColor: element.color,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                        fontSize: 7,
+                        fontWeight: 700,
+                      }}
+                    >
+                      {(card.el || "C").charAt(0).toUpperCase()}
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "#1a1a1a" }}>
+                      {move2.n}
+                    </span>
+                  </div>
+                  <span style={{ fontSize: 16, fontWeight: 900, color: "#1a1a1a" }}>
+                    {move2.d}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Description / Flavor text */}
