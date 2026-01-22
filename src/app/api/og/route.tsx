@@ -62,36 +62,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { result } = storedCard;
-
-    // Safely extract values
-    const name = String(result.archetype?.name || "Unknown").replace(/\*+/g, "").trim();
-    const score = String(result.careerScore ?? 0);
-    // Skip emoji rendering - use element color indicator instead
-    const description = String(result.archetype?.description || "No description").slice(0, 80);
-    const element = String(result.archetype?.element || "chaos");
-    const weakness = String(result.archetype?.weakness || "Meetings");
-    const stage = String(result.archetype?.stage || "Senior");
-    const move1 = result.moves?.[0];
-    const move2 = result.moves?.[1];
-
-    const elementColors: Record<string, string> = {
-      data: "#3b82f6",
-      chaos: "#ef4444",
-      strategy: "#8b5cf6",
-      shipping: "#22c55e",
-      politics: "#f59e0b",
-      vision: "#ec4899",
-    };
-    const color = elementColors[element] || "#ef4444";
-
-    // Simplified test render
+    // Test: Return static image when card found (no data extraction)
     return new ImageResponse(
       (
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", backgroundColor: "#0a0a0a", color: "white" }}>
-          <div style={{ fontSize: 48, fontWeight: 700 }}>{name}</div>
-          <div style={{ fontSize: 64, fontWeight: 700, color: color, marginTop: 16 }}>{score}/100</div>
-          <div style={{ fontSize: 20, color: "#888", marginTop: 16 }}>{element} type</div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", height: "100%", backgroundColor: "#1a3a1a", color: "white" }}>
+          <div style={{ fontSize: 48, fontWeight: 700 }}>Card Found!</div>
+          <div style={{ fontSize: 24, color: "#888", marginTop: 16 }}>ID: {cardId}</div>
         </div>
       ),
       { width: 1200, height: 630 }
