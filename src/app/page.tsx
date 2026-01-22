@@ -120,6 +120,13 @@ export default function Home() {
     };
   }, [step]);
 
+  // Scroll to top when results are shown
+  useEffect(() => {
+    if (step === "results") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [step]);
+
   // LinkedIn preview state
   const [linkedinPreview, setLinkedinPreview] = useState<{
     loading: boolean;
