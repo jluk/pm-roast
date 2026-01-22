@@ -142,7 +142,7 @@ export function PokemonCard({
   // Display name: use userName if available, otherwise archetype name
   const displayName = userName || archetypeName;
 
-  // Dynamic text sizing based on content length
+  // Dynamic text sizing based on content length - responsive for mobile
   const getDescriptionTextSize = (text: string, isCompact: boolean) => {
     const len = text.length;
     if (isCompact) {
@@ -151,10 +151,11 @@ export function PokemonCard({
       if (len < 100) return "text-[9px]";
       return "text-[8px]";
     } else {
-      if (len < 40) return "text-sm";
-      if (len < 70) return "text-xs";
-      if (len < 100) return "text-[11px]";
-      return "text-[10px]";
+      // Non-compact: use smaller sizes on mobile, larger on desktop
+      if (len < 40) return "text-xs sm:text-sm";
+      if (len < 70) return "text-[11px] sm:text-xs";
+      if (len < 100) return "text-[10px] sm:text-[11px]";
+      return "text-[9px] sm:text-[10px]";
     }
   };
 
@@ -232,10 +233,10 @@ export function PokemonCard({
           </div>
         </div>
 
-        {/* Image Frame with elemental background */}
-        <div className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"}`}>
+        {/* Image Frame with elemental background - responsive height */}
+        <div className={`${compact ? "mx-3 mb-2" : "mx-3 sm:mx-4 mb-2 sm:mb-3"}`}>
           <div
-            className={`relative rounded-lg overflow-hidden border-4 ${compact ? "h-36" : "h-52"}`}
+            className={`relative rounded-lg overflow-hidden border-4 ${compact ? "h-36" : "h-44 sm:h-52"}`}
             style={{ borderColor: `${elementData.borderColor}66` }}
           >
             {/* Elemental gradient background */}
@@ -265,7 +266,7 @@ export function PokemonCard({
         </div>
 
         {/* Element Type Badge + Stage */}
-        <div className={`flex justify-between items-center ${compact ? "mx-3 mb-2" : "mx-4 mb-3"}`}>
+        <div className={`flex justify-between items-center ${compact ? "mx-3 mb-2" : "mx-3 sm:mx-4 mb-2"}`}>
           <div
             className={`px-3 py-1 rounded-full text-white font-bold shadow-md ${compact ? "text-xs" : "text-sm"}`}
             style={{ backgroundColor: elementData.color }}
@@ -282,13 +283,13 @@ export function PokemonCard({
 
         {/* Moves Section - Always 2 moves */}
         <div
-          className={`${compact ? "mx-3 mb-2" : "mx-4 mb-3"} bg-white/70 rounded-lg border`}
+          className={`${compact ? "mx-3 mb-2" : "mx-3 sm:mx-4 mb-2"} bg-white/70 rounded-lg border`}
           style={{ borderColor: elementData.innerBorderColor }}
         >
           {moves.slice(0, 2).map((move, index) => (
             <div
               key={index}
-              className={`flex items-start gap-2 last:border-b-0 ${compact ? "px-3 py-1.5" : "px-4 py-2"}`}
+              className={`flex items-start gap-2 last:border-b-0 ${compact ? "px-3 py-1.5" : "px-3 sm:px-4 py-1.5 sm:py-2"}`}
               style={{ borderBottomWidth: index === 0 ? 1 : 0, borderColor: elementData.innerBorderColor }}
             >
               {/* Energy Cost */}
@@ -330,8 +331,8 @@ export function PokemonCard({
         {/* Flavor Text / PM Descriptor */}
         {archetypeDescription && (
           <div
-            className={`${compact ? "mx-3 mb-2 px-2 py-2" : "mx-4 mb-3 px-3 py-2.5"} bg-white/50 rounded border overflow-hidden flex-1 flex items-center`}
-            style={{ borderColor: elementData.innerBorderColor, minHeight: compact ? "2.5rem" : "3rem" }}
+            className={`${compact ? "mx-3 mb-2 px-2 py-2" : "mx-3 sm:mx-4 mb-2 px-2 sm:px-3 py-2"} bg-white/50 rounded border overflow-hidden flex-1 flex items-center`}
+            style={{ borderColor: elementData.innerBorderColor, minHeight: compact ? "2.5rem" : "2.5rem" }}
           >
             <p
               className={`italic text-center leading-snug w-full ${getDescriptionTextSize(archetypeDescription, compact)}`}
@@ -344,7 +345,7 @@ export function PokemonCard({
 
         {/* Bottom: Weakness + Branding */}
         <div
-          className={`${compact ? "px-3 py-2" : "px-4 py-2"} flex items-center justify-between mt-auto`}
+          className={`${compact ? "px-3 py-2" : "px-3 sm:px-4 py-2"} flex items-center justify-between mt-auto shrink-0`}
           style={{ backgroundColor: `${elementData.borderColor}33` }}
         >
           <div className="flex items-center gap-2">

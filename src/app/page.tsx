@@ -19,6 +19,18 @@ const WEBSITE_URL_REGEX = /^(https?:\/\/)?(www\.)?[\w-]+(\.[\w-]+)+\/?.*$/i;
 // X handle validation regex (1-15 alphanumeric + underscore)
 const X_HANDLE_REGEX = /^@?[a-zA-Z0-9_]{1,15}$/;
 
+// Log usage for analytics (fire and forget)
+type UsageType = "legend" | "linkedin" | "portfolio" | "resume" | "manual";
+function logUsage(type: UsageType, input?: string, success?: boolean) {
+  fetch("/api/log-usage", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type, input, success }),
+  }).catch(() => {
+    // Silently fail - analytics shouldn't break the app
+  });
+}
+
 // Rotating placeholder examples
 const PLACEHOLDER_EXAMPLES = [
   { text: "linkedin.com/in/yourprofile", type: "linkedin" as const },
@@ -49,9 +61,11 @@ function detectInputType(value: string): "linkedin" | "website" | "x" | "legend"
     return "website";
   }
 
-  // Legend search: requires first and last name (two words minimum)
-  // This triggers when user types something like "Sam Altman" or "Elon Musk"
-  if (/^[A-Za-z]+\s+[A-Za-z]+/.test(trimmed)) {
+  // Legend search: two words (e.g., "Sam Altman") OR single word 5+ chars (e.g., "Grimes", "DaBaby")
+  // Single-word names must be 5+ chars to avoid false positives on short inputs
+  const isTwoOrMoreWords = /^[A-Za-z]+\s+[A-Za-z]+/.test(trimmed);
+  const isSingleWordName = /^[A-Za-z]{5,}$/.test(trimmed);
+  if (isTwoOrMoreWords || isSingleWordName) {
     return "legend";
   }
 
@@ -85,7 +99,7 @@ export default function Home() {
   const [cardId, setCardId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingLinkedin, setIsLoadingLinkedin] = useState(false);
-  const [inputSource, setInputSource] = useState<"linkedin" | "pdf" | "manual">("linkedin");
+  const [inputSource, setInputSource] = useState<"linkedin" | "pdf" | "manual" | "legend">("linkedin");
   const [profilePicUrl, setProfilePicUrl] = useState<string | null>(null);
   const [useProfilePic, setUseProfilePic] = useState(true);
   const [attemptedLinkedInFetch, setAttemptedLinkedInFetch] = useState(false);
@@ -129,6 +143,34 @@ export default function Home() {
       observerRef.current?.disconnect();
     };
   }, [step]);
+
+  // Fetch initial roast count on mount
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.totalRoasts) {
+          setRoastCount(data.totalRoasts);
+        }
+      })
+      .catch(() => {
+        // Keep default count on error
+      });
+  }, []);
+
+  // Helper to increment roast count (fire and forget)
+  const incrementRoastCount = useCallback(() => {
+    fetch("/api/stats", { method: "POST" })
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.totalRoasts) {
+          setRoastCount(data.totalRoasts);
+        }
+      })
+      .catch(() => {
+        // Silently fail
+      });
+  }, []);
 
   // Scroll to top when results are shown
   useEffect(() => {
@@ -186,6 +228,7 @@ export default function Home() {
     reason: string | null;
     imageUrl: string | null;
     wikipediaExtract: string | null;
+    wikipediaUrl: string | null;
     error: string | null;
   }>({
     loading: false,
@@ -195,6 +238,7 @@ export default function Home() {
     reason: null,
     imageUrl: null,
     wikipediaExtract: null,
+    wikipediaUrl: null,
     error: null,
   });
 
@@ -544,7 +588,10 @@ export default function Home() {
     }
 
     const name = smartInput.trim();
-    if (!name || !/^[A-Za-z]+\s+[A-Za-z]+/.test(name)) {
+    // Match detection logic: two+ words OR single word 5+ chars
+    const isTwoOrMoreWords = /^[A-Za-z]+\s+[A-Za-z]+/.test(name);
+    const isSingleWordName = /^[A-Za-z]{5,}$/.test(name);
+    if (!name || (!isTwoOrMoreWords && !isSingleWordName)) {
       setLegendPreview(prev => ({ ...prev, verified: false, loading: false, error: null }));
       return;
     }
@@ -569,6 +616,7 @@ export default function Home() {
           reason: data.reason || null,
           imageUrl: data.imageUrl || null,
           wikipediaExtract: data.wikipediaExtract || null,
+          wikipediaUrl: data.wikipediaUrl || null,
           error: data.isFamous ? null : "That's not a legend.",
         });
       } catch {
@@ -579,6 +627,7 @@ export default function Home() {
           isFamous: false,
           imageUrl: null,
           wikipediaExtract: null,
+          wikipediaUrl: null,
           error: "Failed to verify",
         }));
       }
@@ -736,6 +785,13 @@ export default function Home() {
 
   const handleMagicLinkSubmit = async () => {
     if (!currentUrl || !dreamRole) return;
+
+    // Log usage based on detected type
+    if (detectedType === "website") {
+      logUsage("portfolio", currentUrl);
+    } else if (detectedType === "linkedin") {
+      logUsage("linkedin", currentUrl);
+    }
 
     setIsLoadingLinkedin(true);
     setError(null);
@@ -912,6 +968,10 @@ export default function Home() {
   const handleLegendSearch = async (name: string) => {
     if (!dreamRole || !name.trim()) return;
 
+    // Log usage
+    logUsage("legend", name.trim());
+
+    setInputSource("legend");
     setIsLoadingLinkedin(true);
     setStep("analyzing");
     setError(null);
@@ -940,11 +1000,84 @@ export default function Home() {
       setResult(data.card);
       setCardId(data.cardId || null);
       setStep("results");
+      incrementRoastCount();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       setStep("upload");
     } finally {
       setIsLoadingLinkedin(false);
+    }
+  };
+
+  // Handle re-roll to generate a new roast
+  const handleReroll = async (): Promise<void> => {
+    if (!dreamRole) return;
+
+    setStep("analyzing");
+    setError(null);
+
+    try {
+      if (inputSource === "legend") {
+        // Re-roll celebrity roast
+        const response = await fetch("/api/roast-legend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: legendPreview.name || smartInput.trim(),
+            dreamRole,
+            imageUrl: legendPreview.imageUrl,
+            wikipediaExtract: legendPreview.wikipediaExtract,
+            reroll: true, // Flag to bypass cache
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          setError(data.error || "Failed to generate new roast");
+          setStep("results"); // Stay on results page on error
+          return;
+        }
+
+        setResult(data.card);
+        setCardId(data.cardId || null);
+        setStep("results");
+        incrementRoastCount();
+      } else {
+        // Re-roll regular profile roast
+        const formData = new FormData();
+        formData.append("profileText", profileText);
+
+        if (userProfileImage && useProfilePic) {
+          formData.append("userImage", userProfileImage);
+        } else if (profilePicUrl && useProfilePic) {
+          formData.append("profilePicUrl", profilePicUrl);
+        }
+
+        formData.append("dreamRole", dreamRole);
+        formData.append("reroll", "true"); // Flag to bypass cache
+
+        const response = await fetch("/api/roast", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          setError(data.error || "Failed to generate new roast");
+          setStep("results"); // Stay on results page on error
+          return;
+        }
+
+        setResult(data);
+        setCardId(data.cardId || null);
+        setStep("results");
+        incrementRoastCount();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+      setStep("results"); // Stay on results page on error
     }
   };
 
@@ -983,6 +1116,7 @@ export default function Home() {
       setResult(roastResult);
       setCardId(newCardId || null);
       setStep("results");
+      incrementRoastCount();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       setStep("upload");
@@ -992,6 +1126,9 @@ export default function Home() {
 
   const handleManualSubmit = async () => {
     if (!dreamRole) return;
+
+    // Log usage
+    logUsage("manual");
 
     if (profileText.trim().length >= 50) {
       setInputSource("manual");
@@ -1023,6 +1160,7 @@ export default function Home() {
         setResult(roastResult);
         setCardId(newCardId || null);
         setStep("results");
+        incrementRoastCount();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
         setStep("upload");
@@ -1034,6 +1172,9 @@ export default function Home() {
   // Handle resume upload directly from main form
   const handleResumeSubmit = async () => {
     if (!dreamRole || !file) return;
+
+    // Log usage
+    logUsage("resume", file.name);
 
     setInputSource("pdf");
     setIsLoadingLinkedin(true);
@@ -1060,6 +1201,7 @@ export default function Home() {
       setResult(roastResult);
       setCardId(newCardId || null);
       setStep("results");
+      incrementRoastCount();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
       setStep("upload");
@@ -1121,6 +1263,7 @@ export default function Home() {
       reason: null,
       imageUrl: null,
       wikipediaExtract: null,
+      wikipediaUrl: null,
       error: null,
     });
     setDreamRole("founder");
@@ -1910,6 +2053,23 @@ export default function Home() {
                                       Verified
                                     </div>
                                   </div>
+                                  {/* Wikipedia source link */}
+                                  {legendPreview.wikipediaUrl && (
+                                    <a
+                                      href={legendPreview.wikipediaUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="flex items-center gap-1.5 ml-12 text-[10px] text-white/40 hover:text-white/70 transition-colors"
+                                    >
+                                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12.09 13.119c-.936 1.932-2.217 4.548-2.853 5.728-.616 1.074-1.127.931-1.532.029-1.406-3.321-4.293-9.144-5.651-12.409-.251-.601-.441-.987-.619-1.139-.181-.15-.554-.24-1.122-.271C.103 5.033 0 4.982 0 4.898v-.455l.052-.045c.924-.005 5.401 0 5.401 0l.051.045v.434c0 .119-.075.176-.225.176l-.564.031c-.485.029-.727.164-.727.436 0 .135.053.33.166.601 1.082 2.646 4.818 10.521 4.818 10.521l2.681-5.476-2.607-5.36c-.166-.32-.323-.493-.475-.518-.151-.025-.423-.038-.812-.038l-.126-.048v-.478l.052-.045h5.355l.052.045v.478l-.126.048c-.617.014-.926.049-.926.105 0 .068.035.16.127.273.091.112 1.832 3.79 1.832 3.79l1.919-3.79c.069-.135.103-.257.103-.366 0-.135-.181-.21-.543-.225-.075 0-.225-.015-.449-.015l-.127-.048v-.478l.052-.045h4.319l.052.045v.478l-.127.048c-.51.003-.911.048-1.214.135-.304.087-.576.321-.828.685-.251.364-1.787 3.574-1.787 3.574l2.682 5.373c.069.15.138.225.211.225.069 0 .138-.075.211-.225.584-1.14 2.679-5.459 3.405-7.104.584-1.336.919-2.298.919-2.734 0-.375-.259-.576-.78-.614l-.463-.031c-.09-.003-.164-.093-.164-.195v-.434l.052-.045h4.319l.052.045v.434c0 .096-.064.179-.146.195l-.455.031c-.391.023-.716.136-.976.343-.26.207-.628.75-.98 1.521-.352.77-3.165 6.665-4.203 8.79z"/>
+                                      </svg>
+                                      View on Wikipedia
+                                      <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                      </svg>
+                                    </a>
+                                  )}
                                 </div>
                               ) : null}
                             </div>
@@ -2409,7 +2569,7 @@ export default function Home() {
               {/* Mobile: Show card preview below form */}
               <div className="lg:hidden mt-6">
                 <p className="text-center text-xs text-muted-foreground mb-3">Your personalized card</p>
-                <div className="relative max-w-[280px] mx-auto">
+                <div className="relative flex justify-center">
                   <div className="absolute -inset-2 bg-gradient-to-r from-pink-500/15 via-purple-500/15 to-blue-500/15 rounded-2xl blur-xl pointer-events-none" />
                   <div className="relative">
                     <HeroCard />
@@ -2445,6 +2605,8 @@ export default function Home() {
               result={result}
               dreamRole={dreamRole}
               onStartOver={handleStartOver}
+              onReroll={handleReroll}
+              isLegend={inputSource === "legend"}
               cardId={cardId || undefined}
             />
           )}

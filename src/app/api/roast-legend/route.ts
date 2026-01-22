@@ -50,39 +50,49 @@ async function generateCelebrityImage(
     if (profileImage) {
       console.log("=== GENERATING PERSONALIZED CELEBRITY IMAGE ===");
 
-      const personalizedPrompt = `Create a FUNNY illustrated trading card portrait of THIS EXACT PERSON as "${archetypeName}".
+      const personalizedPrompt = `Create a HILARIOUS MEME-STYLE trading card illustration of THIS EXACT PERSON as "${archetypeName}".
 
-CRITICAL - NO TEXT IN IMAGE:
-- NEVER generate ANY text, words, letters, numbers, labels, signs, or writing of any kind
-- AI-generated text always looks wrong - avoid it completely
+THE ROAST CONCEPT - THIS IS THE JOKE:
+"${archetypeDescription}"
 
-CRITICAL - PRESERVE THE PERSON'S LIKENESS:
-- This is THE MOST IMPORTANT requirement - the output MUST look like this specific person: ${name}
-- Copy their EXACT face: same eyes, nose, mouth, face shape, skin tone, hair color, hairstyle
-- The person in the output should be IMMEDIATELY RECOGNIZABLE as ${name}
-- Study every facial detail in the input and replicate it faithfully
-- If they have glasses, facial hair, distinctive features - KEEP THEM
+SHOW THEM IN ACTION - NOT JUST A HEADSHOT:
+- Depict ${name} DOING something funny that matches their roast archetype
+- Show them in a comedic scene or situation that illustrates the joke
+- Include props, items, or background elements that tell the story of their roast
+- Think "internet meme meets Pokemon card" - visually funny, shareable humor
+- Examples: if they're "The Feature Factory" show them surrounded by half-built products; if they're "The Pivot Master" show them spinning on a pivot point
+- The scene should make someone laugh when they see it
+
+CRITICAL - FACIAL LIKENESS (MUST BE RECOGNIZABLE):
+- ${name} MUST be IMMEDIATELY RECOGNIZABLE - this is essential!
+- Copy their EXACT face from the reference: eye shape, nose, lips, face shape, jawline, skin tone
+- Keep their distinctive features: glasses, facial hair, hairstyle, expressions they're known for
+- The face should be the clear focal point even in a scene
+- Do NOT beautify or idealize - their real features are funnier!
+
+CARD-FRIENDLY COMPOSITION:
+- PORTRAIT aspect ratio (taller than wide) - this will be cropped to fit a trading card
+- Face should be prominent and fill at least 35-45% of the frame
+- Upper body and scene context visible
+- Leave some margin at edges for card border cropping
+- Subject centered or slightly off-center for dynamic composition
 
 STYLE:
-- Pokemon trading card illustration style - vibrant, colorful, fun
-- Hand-painted watercolor look with magical energy effects
-- Premium collectible quality
-- They should look powerful and legendary
+- Bold, vibrant, saturated colors - eye-catching and fun
+- Stylized cartoon/illustration style (NOT photorealistic, NOT anime)
+- Comic book energy with dynamic poses and expressions
+- ${element} element theme in colors and effects (fire, ice, lightning, etc)
+- Trading card collectible quality - premium and polished
 
-CHARACTER DESCRIPTION:
-${archetypeDescription}
-
-COMPOSITION:
-- Upper body portrait, face prominently featured and LARGE
-- Front-facing or 3/4 view
-- LANDSCAPE 16:9 aspect ratio
-- Dynamic pose showing confidence and power
+ABSOLUTELY NO TEXT:
+- NEVER generate ANY text, words, letters, numbers, or writing anywhere
 
 DO NOT:
-- Generate any text, words, or writing
-- Make the person unrecognizable
-- Create photorealistic renders
-- Make the face small or obscured`;
+- Make it a boring headshot or passport photo
+- Make the face too small or unrecognizable
+- Use landscape/wide framing
+- Make it photorealistic or uncanny valley
+- Be mean-spirited (affectionate roasting, not cruel)`;
 
       try {
         const response = await genAINew.models.generateContent({
@@ -124,34 +134,44 @@ DO NOT:
     // Fallback: Generate illustration without reference photo
     console.log("=== GENERATING CELEBRITY ILLUSTRATION (NO PHOTO) ===");
 
-    const illustrationPrompt = `Create a FUNNY illustrated Pokemon trading card style portrait for a legendary figure named "${name}" with the archetype "${archetypeName}".
+    const illustrationPrompt = `Create a HILARIOUS MEME-STYLE trading card illustration of "${name}" as "${archetypeName}".
 
-CRITICAL - NO TEXT IN IMAGE:
-- NEVER generate ANY text, words, letters, numbers, labels, signs, or writing of any kind
+THE ROAST CONCEPT - THIS IS THE JOKE:
+"${archetypeDescription}"
+
+SHOW THEM IN ACTION - NOT JUST A HEADSHOT:
+- Depict ${name} DOING something funny that matches their roast archetype
+- Show them in a comedic scene or situation that illustrates the joke
+- Include props, items, or background elements that tell the story of their roast
+- Think "internet meme meets Pokemon card" - visually funny, shareable humor
+- The scene should make someone laugh when they see it
+
+MAKE THEM RECOGNIZABLE:
+- If ${name} is a known figure, capture their recognizable features
+- Exaggerate their distinctive traits for caricature effect
+- The face should be the clear focal point even in a scene
+
+CARD-FRIENDLY COMPOSITION:
+- PORTRAIT aspect ratio (taller than wide) - this will be cropped to fit a trading card
+- Face should be prominent and fill at least 35-45% of the frame
+- Upper body and scene context visible
+- Subject centered with some margin at edges for cropping
 
 STYLE:
-- Pokemon/trading card game illustration style
-- Vibrant, colorful, hand-painted watercolor look
-- Magical energy effects and dynamic lighting
-- Premium collectible quality
-- Should look LEGENDARY and POWERFUL
+- Bold, vibrant, saturated colors - eye-catching and fun
+- Stylized cartoon/caricature style (NOT photorealistic)
+- Comic book energy with dynamic poses and expressions
+- ${element} element theme in colors and effects
+- Trading card collectible quality
 
-CHARACTER:
-- ${archetypeDescription}
-- Show them in a powerful, confident pose
-- Include subtle visual hints about their industry/achievements
-- Make them look like a final boss or legendary Pokemon card
-
-COMPOSITION:
-- Upper body portrait
-- LANDSCAPE 16:9 aspect ratio
-- Dynamic and engaging composition
-- Face should be expressive and memorable
+ABSOLUTELY NO TEXT:
+- NEVER generate ANY text, words, letters, numbers, or writing anywhere
 
 DO NOT:
-- Generate any text or writing
+- Make it a boring headshot
+- Use landscape/wide framing
 - Make it photorealistic
-- Make it boring or generic`;
+- Be mean-spirited (affectionate roasting, not cruel)`;
 
     const response = await genAINew.models.generateContent({
       model: "gemini-2.0-flash-exp-image-generation",
@@ -214,7 +234,7 @@ function famousCardToRoastResult(card: FamousCard, dreamRole: DreamRole): RoastR
       { month: 4, title: "World Domination", actions: ["Complete ascension", "Transcend mortality"] },
     ],
     podcastEpisodes: [
-      { title: "How I Built This", guest: card.name, reason: "Learn from the legend directly" },
+      { title: "Browse Lenny's Podcast", guest: "Various PM Leaders", reason: "Explore episodes on product and leadership" },
     ],
     bangerQuote: card.bangerQuote,
     dreamRoleReaction: `Already surpassed ${DREAM_ROLES[dreamRole].label}. They're playing a different game.`,
@@ -295,8 +315,9 @@ Your response MUST be valid JSON with this exact structure (no markdown, no code
     {"month": 4, "title": "max 20 chars", "actions": ["2 more parody actions"]}
   ],
   "podcastEpisodes": [
-    {"title": "A real or plausible podcast", "guest": "Guest name", "reason": "Why funny/relevant, max 50 chars"}
+    {"title": "REAL episode from Lenny's Podcast YouTube channel", "guest": "Actual guest from that episode", "reason": "Why relevant, max 50 chars"}
   ],
+  IMPORTANT FOR podcastEpisodes: ONLY use episodes that ACTUALLY EXIST on Lenny's Podcast YouTube channel (@LennysPodcast). If this celebrity was a guest on Lenny's Podcast, use that episode. Otherwise use a thematically relevant episode with a real guest like Shreyas Doshi, Marty Cagan, Julie Zhuo, etc. If unsure, use {"title": "Browse Lenny's Podcast", "guest": "Various PM Leaders", "reason": "Explore episodes on product and leadership"}.
   "bangerQuote": "A quotable roast line about them that captures their essence. Max 140 chars.",
   "dreamRoleReaction": "Sarcastic verdict comparing them to the dream role they were aiming for. Max 80 chars.",
   "naturalRival": "Their known competitor or ironic nemesis. Max 60 chars."
@@ -305,7 +326,7 @@ Your response MUST be valid JSON with this exact structure (no markdown, no code
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, dreamRole, imageUrl, wikipediaExtract } = body;
+    const { name, dreamRole, imageUrl, wikipediaExtract, reroll } = body;
 
     if (!name || typeof name !== "string" || name.trim().length < 2) {
       return NextResponse.json({ error: "Invalid name provided" }, { status: 400 });
@@ -319,32 +340,12 @@ export async function POST(request: NextRequest) {
     const profileImageUrl = imageUrl || null;
     const wikiContext = wikipediaExtract || null;
 
-    // First, check for exact match in pre-generated famous cards
-    const exactMatch = getFamousCardByName(normalizedName);
-    if (exactMatch) {
-      const result = famousCardToRoastResult(exactMatch, dreamRole as DreamRole);
-      const cardId = await storeCard(result, dreamRole as DreamRole);
-
-      return NextResponse.json({
-        success: true,
-        source: "pre-generated",
-        cached: false,
-        card: result,
-        cardId,
-      });
-    }
-
-    // Check for fuzzy match (might be close to a famous person)
-    const fuzzyMatches = searchFamousCards(normalizedName);
-    if (fuzzyMatches.length > 0) {
-      // If the query is very close to a famous card name, use that
-      const bestMatch = fuzzyMatches[0];
-      const queryLower = normalizedName.toLowerCase();
-      const matchLower = bestMatch.name.toLowerCase();
-
-      // If it's a clear match (starts with same chars or is very similar)
-      if (matchLower.startsWith(queryLower) || queryLower.startsWith(matchLower.split(" ")[0])) {
-        const result = famousCardToRoastResult(bestMatch, dreamRole as DreamRole);
+    // Skip pre-generated cards if re-rolling - generate fresh AI roast instead
+    if (!reroll) {
+      // First, check for exact match in pre-generated famous cards
+      const exactMatch = getFamousCardByName(normalizedName);
+      if (exactMatch) {
+        const result = famousCardToRoastResult(exactMatch, dreamRole as DreamRole);
         const cardId = await storeCard(result, dreamRole as DreamRole);
 
         return NextResponse.json({
@@ -355,23 +356,49 @@ export async function POST(request: NextRequest) {
           cardId,
         });
       }
+
+      // Check for fuzzy match (might be close to a famous person)
+      const fuzzyMatches = searchFamousCards(normalizedName);
+      if (fuzzyMatches.length > 0) {
+        // If the query is very close to a famous card name, use that
+        const bestMatch = fuzzyMatches[0];
+        const queryLower = normalizedName.toLowerCase();
+        const matchLower = bestMatch.name.toLowerCase();
+
+        // If it's a clear match (starts with same chars or is very similar)
+        if (matchLower.startsWith(queryLower) || queryLower.startsWith(matchLower.split(" ")[0])) {
+          const result = famousCardToRoastResult(bestMatch, dreamRole as DreamRole);
+          const cardId = await storeCard(result, dreamRole as DreamRole);
+
+          return NextResponse.json({
+            success: true,
+            source: "pre-generated",
+            cached: false,
+            card: result,
+            cardId,
+          });
+        }
+      }
     }
 
-    // Check Redis cache for previously generated celebrity roasts
+    // Check Redis cache for previously generated celebrity roasts (skip if reroll)
     const cacheKey = `legend:${normalizedName.toLowerCase().replace(/\s+/g, "-")}`;
-    const cached = await kv.get<string>(cacheKey);
 
-    if (cached) {
-      const cachedResult = typeof cached === "string" ? JSON.parse(cached) : cached;
-      const cardId = await storeCard(cachedResult as RoastResult, dreamRole as DreamRole);
+    if (!reroll) {
+      const cached = await kv.get<string>(cacheKey);
 
-      return NextResponse.json({
-        success: true,
-        source: "ai-generated",
-        cached: true,
-        card: cachedResult,
-        cardId,
-      });
+      if (cached) {
+        const cachedResult = typeof cached === "string" ? JSON.parse(cached) : cached;
+        const cardId = await storeCard(cachedResult as RoastResult, dreamRole as DreamRole);
+
+        return NextResponse.json({
+          success: true,
+          source: "ai-generated",
+          cached: true,
+          card: cachedResult,
+          cardId,
+        });
+      }
     }
 
     // Generate roast using Gemini (verification already done via /api/verify-legend)

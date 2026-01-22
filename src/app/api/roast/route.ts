@@ -563,8 +563,9 @@ Your responses MUST be valid JSON with this exact structure (no markdown, no cod
     {"month": 4, "title": "max 20 chars", "actions": ["2 actions specifically to close gap to DREAM ROLE, max 40 chars each"]}
   ],
   "podcastEpisodes": [
-    {"title": "REAL Lenny's Podcast episode", "guest": "Guest name", "reason": "Why relevant to THEIR path to DREAM ROLE, max 50 chars"}
+    {"title": "REAL episode title from Lenny's Podcast YouTube channel", "guest": "Actual guest name from that episode", "reason": "Why relevant to THEIR path to DREAM ROLE, max 50 chars"}
   ],
+  IMPORTANT FOR podcastEpisodes: ONLY recommend episodes that ACTUALLY EXIST on Lenny's Podcast YouTube channel (@LennysPodcast). Use real episode titles and real guest names. Popular guests include: Shreyas Doshi, Shishir Mehrotra, Marty Cagan, Gibson Biddle, Julie Zhuo, Lenny Rachitsky interviews, etc. If you cannot think of a real relevant episode, use {"title": "Browse Lenny's Podcast", "guest": "Various PM Leaders", "reason": "Explore episodes on product, growth, and career advice"}.
   "bangerQuote": "Screenshot-worthy roast, ideally referencing gap between current state and dream role. Max 140 chars.",
   "dreamRoleReaction": "Brutally honest verdict on their dream role chances given the gap. Reference what's missing. Max 80 chars.",
   "naturalRival": "Their arch-nemesis - funny person/concept they fear. Max 60 chars."

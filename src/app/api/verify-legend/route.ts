@@ -2,6 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
 import { getFamousCardByName, searchFamousCards } from "@/lib/famous-cards";
 
+// Check if the Wikipedia result title is relevant to the search query
+function isRelevantWikipediaResult(searchQuery: string, resultTitle: string): boolean {
+  const queryWords = searchQuery.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+  const titleWords = resultTitle.toLowerCase().split(/\s+/).filter(w => w.length > 2);
+
+  // Must have at least one meaningful word overlap
+  const hasOverlap = queryWords.some(qWord =>
+    titleWords.some(tWord =>
+      tWord.includes(qWord) || qWord.includes(tWord)
+    )
+  );
+
+  return hasOverlap;
+}
+
 // Fetch Wikipedia page info and image for a person
 async function getWikipediaInfo(name: string): Promise<{
   exists: boolean;
@@ -21,6 +36,12 @@ async function getWikipediaInfo(name: string): Promise<{
 
     // Get the first result's page title
     const pageTitle = searchData.query.search[0].title;
+
+    // Validate that the Wikipedia result is actually relevant to the search query
+    // This prevents unrelated results (e.g., "big boobs" returning "Joan Rivers")
+    if (!isRelevantWikipediaResult(name, pageTitle)) {
+      return { exists: false };
+    }
 
     // Fetch page extract and image
     const pageUrl = `https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(pageTitle)}&prop=extracts|pageimages&exintro=1&explaintext=1&piprop=original&format=json&origin=*`;
@@ -129,12 +150,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Generate Wikipedia URL from the page title
+    const wikipediaUrl = wikiInfo.title
+      ? `https://en.wikipedia.org/wiki/${encodeURIComponent(wikiInfo.title.replace(/ /g, "_"))}`
+      : null;
+
     const result = {
       isFamous: true,
       name: wikiInfo.title || normalizedName,
       reason,
       imageUrl: wikiInfo.imageUrl || null,
       wikipediaExtract: wikiInfo.extract || null,
+      wikipediaUrl,
       source: "wikipedia",
     };
 

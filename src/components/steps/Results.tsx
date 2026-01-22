@@ -65,14 +65,17 @@ interface ResultsProps {
   result: RoastResult;
   dreamRole: DreamRole;
   onStartOver: () => void;
+  onReroll?: () => Promise<void>;
   isSharePage?: boolean;
+  isLegend?: boolean;
   cardId?: string;
 }
 
-// Generate YouTube search URL for a podcast episode
-function getYouTubeSearchUrl(title: string, guest: string): string {
-  const query = `Lenny's Podcast ${guest} ${title}`;
-  return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+// Generate YouTube search URL within Lenny's Podcast channel only
+function getLennysPodcastSearchUrl(title: string, guest: string): string {
+  // Search within Lenny's channel to avoid NSFW/unrelated results
+  const query = `${guest} ${title}`;
+  return `https://www.youtube.com/@LennysPodcast/search?query=${encodeURIComponent(query)}`;
 }
 
 // Strip markdown formatting from text
@@ -86,12 +89,24 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-export function Results({ result, dreamRole, onStartOver, isSharePage = false, cardId }: ResultsProps) {
+export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage = false, isLegend = false, cardId }: ResultsProps) {
   const [copied, setCopied] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isRerolling, setIsRerolling] = useState(false);
   const [screenshotMode, setScreenshotMode] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Handle re-roll with loading state
+  const handleReroll = async () => {
+    if (!onReroll || isRerolling) return;
+    setIsRerolling(true);
+    try {
+      await onReroll();
+    } finally {
+      setIsRerolling(false);
+    }
+  };
 
   // Generate the shareable URL - prefer cardId if available (permanent storage)
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
@@ -110,7 +125,10 @@ export function Results({ result, dreamRole, onStartOver, isSharePage = false, c
 
   const shareToTwitter = () => {
     const archetype = stripMarkdown(result.archetype.name);
-    const text = `I got turned into a Pokémon card and I'm a "${archetype}" 💀\n\nGet your PM roast card:`;
+    const legendName = result.userName || "a legend";
+    const text = isLegend
+      ? `I PM roasted ${legendName} and they're a "${archetype}" 💀\n\nRoast your favorite celebrity:`
+      : `I got turned into a Pokémon card and I'm a "${archetype}" 💀\n\nGet your PM roast card:`;
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`,
       "_blank"
@@ -228,14 +246,21 @@ Get your PM card: ${shareUrl}
           transition={{ delay: 0.1, type: "spring" }}
           className="flex flex-col items-center w-full lg:w-[420px] shrink-0 overflow-visible"
         >
-          {/* Flippable Card Container - overflow-visible prevents hover clipping */}
-          <div
-            className="cursor-pointer isolate overflow-visible"
-            onClick={() => setIsFlipped(!isFlipped)}
+          {/* Flippable Card Container - responsive sizing for mobile */}
+          <motion.div
+            className="cursor-pointer isolate overflow-visible w-[360px] h-[504px] sm:w-[400px] sm:h-[560px]"
+            onClick={() => !isRerolling && setIsFlipped(!isFlipped)}
+            animate={isRerolling ? {
+              rotate: [0, -2, 2, -2, 2, -1, 1, 0],
+              scale: [1, 0.98, 1.02, 0.98, 1.02, 0.99, 1.01, 1],
+            } : {}}
+            transition={isRerolling ? {
+              duration: 0.6,
+              repeat: Infinity,
+              ease: "easeInOut",
+            } : {}}
             style={{
               perspective: "1000px",
-              width: 400,
-              height: 560,
             }}
           >
             <motion.div
@@ -296,9 +321,9 @@ Get your PM card: ${shareUrl}
                 />
               </div>
             </motion.div>
-          </div>
+          </motion.div>
           <p className="text-xs text-muted-foreground mt-3">
-            Click card to flip
+            {isRerolling ? "Regenerating..." : "Click card to flip"}
           </p>
         </motion.div>
 
@@ -423,7 +448,10 @@ Get your PM card: ${shareUrl}
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                       </svg>
                       <p className="text-xs text-white/90 leading-relaxed">
-                        I got turned into a Pokémon card and I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; 💀
+                        {isLegend
+                          ? <>I PM roasted {result.userName || "a legend"} and they&apos;re a &quot;{stripMarkdown(result.archetype.name)}&quot; 💀</>
+                          : <>I got turned into a Pokémon card and I&apos;m a &quot;{stripMarkdown(result.archetype.name)}&quot; 💀</>
+                        }
                       </p>
                     </div>
                   </div>
@@ -435,7 +463,7 @@ Get your PM card: ${shareUrl}
               <div className="flex gap-2">
                 <button
                   onClick={downloadCard}
-                  disabled={isDownloading}
+                  disabled={isDownloading || isRerolling}
                   className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors disabled:opacity-50"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -445,7 +473,8 @@ Get your PM card: ${shareUrl}
                 </button>
                 <button
                   onClick={copyLink}
-                  className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors"
+                  disabled={isRerolling}
+                  className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors disabled:opacity-50"
                 >
                   {copied ? (
                     <>
@@ -463,9 +492,33 @@ Get your PM card: ${shareUrl}
                     </>
                   )}
                 </button>
+                {/* Re-roll button - only show if onReroll is provided and not on share page */}
+                {onReroll && !isSharePage && (
+                  <button
+                    onClick={handleReroll}
+                    disabled={isRerolling}
+                    className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors disabled:opacity-50"
+                  >
+                    {isRerolling ? (
+                      <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Rolling...
+                      </>
+                    ) : (
+                      <>
+                        <span className="text-base">🎲</span>
+                        Re-roll
+                      </>
+                    )}
+                  </button>
+                )}
                 <button
                   onClick={onStartOver}
-                  className={`flex-1 h-10 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+                  disabled={isRerolling}
+                  className={`flex-1 h-10 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 ${
                     isSharePage
                       ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#5558e3] hover:to-[#7c4fe0]"
                       : "bg-white/[0.05] border border-white/10 text-white/70 hover:bg-white/[0.08]"
@@ -607,34 +660,75 @@ Get your PM card: ${shareUrl}
 
             {/* Episodes - no nested boxes */}
             <div className="space-y-6">
-              {result.podcastEpisodes.map((episode, index) => (
-                <a
-                  key={index}
-                  href={getYouTubeSearchUrl(episode.title, episode.guest)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex gap-4 group"
-                >
-                  {/* YouTube icon */}
-                  <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0 group-hover:bg-red-500/20 transition-colors">
-                    <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                    </svg>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-white text-[15px] group-hover:text-pink-400 transition-colors mb-0.5">
-                      {stripMarkdown(episode.title)}
-                    </p>
-                    <p className="text-sm text-white/50">with {stripMarkdown(episode.guest)}</p>
-                    <p className="text-sm text-white/60 mt-1">{stripMarkdown(episode.reason)}</p>
-                  </div>
-                  <div className="flex items-center text-white/30 group-hover:text-pink-400 transition-colors shrink-0">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                    </svg>
-                  </div>
-                </a>
-              ))}
+              {result.podcastEpisodes.map((episode, index) => {
+                // Check if this is a generic fallback (no specific recommendation)
+                const isGenericFallback =
+                  episode.title.toLowerCase().includes("browse") ||
+                  episode.guest.toLowerCase().includes("various");
+
+                if (isGenericFallback) {
+                  return (
+                    <div key={index} className="space-y-4">
+                      <p className="text-sm text-white/60 ml-14">
+                        No specific episode recommendation for your profile, but Lenny&apos;s Podcast has 200+ episodes on product management, growth, and career development.
+                      </p>
+                      <a
+                        href="https://www.youtube.com/@LennysPodcast/videos"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex gap-4 group"
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0 group-hover:bg-red-500/20 transition-colors">
+                          <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium text-white text-[15px] group-hover:text-pink-400 transition-colors mb-0.5">
+                            Browse All Episodes
+                          </p>
+                          <p className="text-sm text-white/50">Lenny&apos;s Podcast</p>
+                          <p className="text-sm text-white/60 mt-1">Find episodes on product, growth, and leadership</p>
+                        </div>
+                        <div className="flex items-center text-white/30 group-hover:text-pink-400 transition-colors shrink-0">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </div>
+                      </a>
+                    </div>
+                  );
+                }
+
+                return (
+                  <a
+                    key={index}
+                    href={getLennysPodcastSearchUrl(episode.title, episode.guest)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex gap-4 group"
+                  >
+                    {/* YouTube icon */}
+                    <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center shrink-0 group-hover:bg-red-500/20 transition-colors">
+                      <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-white text-[15px] group-hover:text-pink-400 transition-colors mb-0.5">
+                        {stripMarkdown(episode.title)}
+                      </p>
+                      <p className="text-sm text-white/50">with {stripMarkdown(episode.guest)}</p>
+                      <p className="text-sm text-white/60 mt-1">{stripMarkdown(episode.reason)}</p>
+                    </div>
+                    <div className="flex items-center text-white/30 group-hover:text-pink-400 transition-colors shrink-0">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </div>
+                  </a>
+                );
+              })}
             </div>
           </div>
         </div>

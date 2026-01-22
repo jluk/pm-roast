@@ -114,7 +114,7 @@ export function SharePageClient({ card, encodedData }: SharePageClientProps) {
       </nav>
 
       {/* Main Content - reuse Results component */}
-      <section className="flex-1 flex flex-col items-center px-6 pt-24 pb-12">
+      <section className="flex-1 flex flex-col items-center justify-center px-6 pt-20 pb-8">
         <Results
           result={result}
           dreamRole={dreamRole}

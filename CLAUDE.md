@@ -96,10 +96,24 @@ public/
 - Falls back to Pokemon creature image if no photo
 - Stores result in Vercel KV, returns `cardId` for permanent URL
 
+### `/api/roast-legend`
+- Generates roasts for famous people (celebrities, tech leaders, etc.)
+- Accepts `{ name, dreamRole, reroll? }`
+- First checks `famous-cards.ts` for pre-generated Mt. Roastmore cards
+- If not found or `reroll=true`: generates via Gemini with Wikipedia image
+- Caches AI-generated legend cards in Redis (30-day TTL)
+- Uses scene-based image prompts for funny, meme-style illustrations
+
+### `/api/verify-legend`
+- Validates celebrity names via Wikipedia API
+- Returns `{ isValid, name, description, imageUrl, wikipediaUrl }`
+- Used for the legend verification UI before generating
+
 ### `/api/card-image`
 - Standalone endpoint for generating card artwork
 - Accepts `{ archetypeName, archetypeDescription, element }`
 - Returns base64 image data
+- Used for regenerating images on shared cards
 
 ### `/api/linkedin`
 - Accepts `POST` with `{ url: "linkedin.com/in/..." }`
@@ -110,6 +124,16 @@ public/
 - Accepts `POST` with `{ url: "example.com" }`
 - Scrapes HTML, extracts text and meta
 - Checks for PM-related keywords
+
+### `/api/log-usage`
+- Analytics tracking for user input types
+- Categories: `legend`, `linkedin`, `portfolio`, `resume`, `manual`
+- Sanitizes inputs (redacts LinkedIn usernames, extracts domains only)
+- Stores daily counts in Vercel KV
+
+### `/api/stats`
+- GET: Returns total roast count
+- POST: Increments roast counter (called after each successful roast)
 
 ## Card System
 
@@ -138,23 +162,62 @@ Pre-generated cards for 50+ famous tech/PM personalities displayed in a carousel
 
 ### Adding New Famous Cards
 1. Add profile photo to `public/famous/`
-2. Add card definition to `scripts/generate-famous-cards.ts` with creative scene description
-3. Run: `npx tsx scripts/generate-famous-cards.ts [card-id]`
-4. Update `src/lib/famous-cards.ts` with the new card data
+2. Add card definition to `src/lib/famous-cards.ts`
+3. Optionally add to `scripts/regenerate-famous-card.ts` for image regeneration
+
+### Regenerating Famous Card Images
+Use `scripts/regenerate-famous-card.ts` to regenerate card images with updated prompts:
+
+```bash
+npx tsx scripts/regenerate-famous-card.ts <card-id>
+# Example: npx tsx scripts/regenerate-famous-card.ts dario-amodei
+```
+
+The script:
+- Loads GEMINI_API_KEY from `.env.local`
+- Fetches Wikipedia image (falls back to local `public/famous/*.jpg`)
+- Generates scene-based illustration using archetype + moves data
+- Saves to `public/famous/generated/<card-id>-card.png`
+
+### Card Data Structure
+Each famous card in `src/lib/famous-cards.ts` includes:
+- `id`, `name`, `title`, `company`
+- `archetypeName`, `archetypeDescription`, `archetypeEmoji`
+- `element` (data/chaos/strategy/shipping/politics/vision)
+- `moves[]` with name, energyCost, damage, effect
+- `score`, `stage`, `weakness`, `flavor`
+- `roastBullets[]`, `bangerQuote`, `naturalRival`
 
 ## Image Generation Guidelines
 
 **CRITICAL: Never generate text in images**
 - AI-generated text always looks wrong
 - All image generation prompts include explicit instructions to avoid text
-- This applies to: `/api/roast`, `/api/card-image`, and `scripts/generate-famous-cards.ts`
 
-### Prompt Requirements
-- Preserve person's likeness (for personalized cards)
-- Pokemon TCG art style (90s/2000s watercolor aesthetic)
-- Landscape 16:9 aspect ratio
-- Vibrant, saturated colors matching element type
-- NO text, labels, words, signs, or writing of any kind
+### Legend Images (Famous People)
+Located in: `/api/roast-legend/route.ts`
+- **With reference photo**: Meme-style scene showing person DOING something funny
+- **Aspect ratio**: Portrait (for card format)
+- **Face size**: 35-45% of frame, must be recognizable
+- **Style**: Stylized cartoon with real facial likeness preserved
+- **Scene-based**: Depicts the person in a comedic situation matching their roast archetype
+- **Fallback (no photo)**: Caricature-style illustration
+
+### Non-Legend Images (Regular Users)
+Located in: `/api/roast/route.ts`
+- **With profile photo**: Person in funny office scenario from `FUNNY_SCENARIOS` array
+- **Aspect ratio**: Landscape 16:9
+- **Style**: Illustrated/painted trading card style
+- **Fallback (no photo)**: Pokemon-style CREATURE (not a person) representing archetype
+
+### Key Differences
+| Aspect | Legends | Non-Legends |
+|--------|---------|-------------|
+| Aspect ratio | Portrait | Landscape 16:9 |
+| No-photo fallback | Caricature of person | Pokemon creature |
+| Scene source | Custom per archetype | Random from array |
+
+**TODO**: Consider unifying these to use same aspect ratio and scene approach.
 
 ## Homepage Sections
 
@@ -171,8 +234,32 @@ The homepage has anchor-linked navigation to three main sections:
 4. **Results**: Bento Grid layout with flippable card (front/back), stats, roast, roadmap
 5. **Share**: Permanent `/card/[id]` URL stored in Vercel KV
 
+## Testing
+
+```bash
+npm test                    # Run all tests
+npm test -- --watch        # Watch mode
+npm test -- path/to/test   # Run specific test file
+```
+
+### Test Files
+Located in `__tests__/unit/`:
+- `input-detection.test.ts` - Input type detection (LinkedIn, website, X, legend)
+- `famous-cards.test.ts` - Famous cards search and data integrity
+- `log-usage-sanitization.test.ts` - Privacy sanitization for analytics
+
 ## Adding Shadcn Components
 
 ```bash
 npx shadcn@latest add [component-name]
 ```
+
+## Input Detection Logic
+
+The homepage detects input type to show appropriate UI:
+- **LinkedIn**: Contains `linkedin.com`
+- **X/Twitter**: Starts with `@` or contains `twitter.com`/`x.com`
+- **Website**: Contains `.` or starts with `http`
+- **Legend**: Two+ words OR single word with 5+ chars (e.g., "Grimes", "Madonna")
+
+Detection order matters - URL patterns take priority over legend detection.

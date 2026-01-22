@@ -1,24 +1,36 @@
 import { NextResponse } from "next/server";
+import { kv } from "@vercel/kv";
 
-// In production, this would use Vercel KV or a database
-// For now, we use a starting count that can be updated manually
-const BASE_COUNT = 1847;
-
-// Simple in-memory counter (resets on server restart)
-// In production, replace with: import { kv } from "@vercel/kv";
-let sessionCount = 0;
+const ROAST_COUNT_KEY = "stats:roast_count";
+const BASE_COUNT = 1847; // Starting count before we started tracking
 
 // Get current stats
 export async function GET() {
-  return NextResponse.json({
-    totalRoasts: BASE_COUNT + sessionCount
-  });
+  try {
+    const count = await kv.get<number>(ROAST_COUNT_KEY);
+    return NextResponse.json({
+      totalRoasts: BASE_COUNT + (count || 0)
+    });
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    // Fallback to base count if KV fails
+    return NextResponse.json({
+      totalRoasts: BASE_COUNT
+    });
+  }
 }
 
 // Increment roast count
 export async function POST() {
-  sessionCount++;
-  return NextResponse.json({
-    totalRoasts: BASE_COUNT + sessionCount
-  });
+  try {
+    const newCount = await kv.incr(ROAST_COUNT_KEY);
+    return NextResponse.json({
+      totalRoasts: BASE_COUNT + newCount
+    });
+  } catch (error) {
+    console.error("Error incrementing stats:", error);
+    return NextResponse.json({
+      totalRoasts: BASE_COUNT
+    });
+  }
 }

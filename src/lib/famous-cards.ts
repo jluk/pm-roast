@@ -222,7 +222,7 @@ export const FAMOUS_CARDS: FamousCard[] = [
       { name: "Scaling Laws Lecture", energyCost: 4, damage: 130, effect: "Bores opponent into submission with math" },
     ],
     stage: "Legendary",
-    weakness: "Moving fast",
+    weakness: "Saying yes",
     flavor: "The 'responsible AI' guy who keeps making AI more powerful. The cognitive dissonance is a feature, not a bug.",
     bangerQuote: "We're building the most powerful AI in history, but don't worry, we wrote a constitution for it.",
     naturalRival: "OpenAI's marketing budget and anyone who ships without a safety review",
