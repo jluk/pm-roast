@@ -930,6 +930,11 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
           archetypeImage: roastResult.archetypeImage,
           element: roastResult.archetype.element,
           userName: roastResult.userName,
+          emoji: roastResult.archetype.emoji,
+          description: roastResult.archetype.description,
+          moves: roastResult.moves,
+          stage: roastResult.archetype.stage,
+          weakness: roastResult.archetype.weakness,
         }),
       }).catch((err) => console.error("OG generation failed:", err));
     }

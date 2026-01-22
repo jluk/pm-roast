@@ -420,6 +420,11 @@ export async function POST(request: NextRequest) {
             archetypeImage: result.archetypeImage,
             element: result.archetype.element,
             userName: result.userName,
+            emoji: result.archetype.emoji,
+            description: result.archetype.description,
+            moves: result.moves,
+            stage: result.archetype.stage,
+            weakness: result.archetype.weakness,
           }),
         }).catch(() => {});
 
@@ -456,6 +461,11 @@ export async function POST(request: NextRequest) {
               archetypeImage: result.archetypeImage,
               element: result.archetype.element,
               userName: result.userName,
+              emoji: result.archetype.emoji,
+              description: result.archetype.description,
+              moves: result.moves,
+              stage: result.archetype.stage,
+              weakness: result.archetype.weakness,
             }),
           }).catch(() => {});
 
@@ -492,6 +502,11 @@ export async function POST(request: NextRequest) {
             archetypeImage: cached_result.archetypeImage,
             element: cached_result.archetype.element,
             userName: cached_result.userName,
+            emoji: cached_result.archetype.emoji,
+            description: cached_result.archetype.description,
+            moves: cached_result.moves,
+            stage: cached_result.archetype.stage,
+            weakness: cached_result.archetype.weakness,
           }),
         }).catch(() => {});
 
@@ -610,6 +625,11 @@ Remember: This is a fun roast card, keep it entertaining and witty!`;
         archetypeImage: validatedResult.archetypeImage,
         element: validatedResult.archetype.element,
         userName: validatedResult.userName,
+        emoji: validatedResult.archetype.emoji,
+        description: validatedResult.archetype.description,
+        moves: validatedResult.moves,
+        stage: validatedResult.archetype.stage,
+        weakness: validatedResult.archetype.weakness,
       }),
     }).catch(() => {});
 
