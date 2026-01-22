@@ -96,6 +96,13 @@ COMPOSITION:
 - Front-facing or 3/4 view (never profile or from behind)
 - Room for comedic props and scene elements
 
+CRITICAL - THIS IS AN ILLUSTRATION, NOT A CARD:
+- Generate ONLY the artwork/illustration - NOT a complete trading card
+- Do NOT add any card borders, frames, rounded corners, or card-like elements
+- Do NOT make it look like a Pokemon card, trading card, or any card format
+- The output should be a clean illustration that will be placed INSIDE an existing card template
+- Fill the entire frame with the scene - no decorative borders or card UI
+
 ABSOLUTELY DO NOT:
 - Create abstract art, surreal nightmare imagery, or body horror
 - Distort the face beyond recognition or make it monstrous
@@ -104,7 +111,8 @@ ABSOLUTELY DO NOT:
 - Generate ANY text, words, letters, numbers, signs, labels, speech bubbles, or writing (AI text always looks wrong)
 - Create photorealistic renders
 - Make the person unidentifiable
-- Use portrait/vertical orientation - MUST be landscape/horizontal`;
+- Use portrait/vertical orientation - MUST be landscape/horizontal
+- Add card borders, frames, or make it look like a trading card`;
 
       try {
         const response = await genAINew.models.generateContent({
@@ -183,13 +191,21 @@ COMPOSITION:
 - Front-facing or 3/4 view (never profile or from behind)
 - Room for comedic props and scene elements
 
+CRITICAL - THIS IS AN ILLUSTRATION, NOT A CARD:
+- Generate ONLY the artwork/illustration - NOT a complete trading card
+- Do NOT add any card borders, frames, rounded corners, or card-like elements
+- Do NOT make it look like a Pokemon card, trading card, or any card format
+- The output should be a clean illustration that will be placed INSIDE an existing card template
+- Fill the entire frame with the scene - no decorative borders or card UI
+
 ABSOLUTELY DO NOT:
 - Crop or cut off ANY part of the face
 - Place the face at the edge of the frame
 - Generate ANY text, words, letters, numbers, signs, labels, or writing (AI text always looks wrong)
 - Use portrait/vertical orientation - MUST be landscape/horizontal
 - Make it photorealistic
-- Be mean-spirited (affectionate roasting, not cruel)`;
+- Be mean-spirited (affectionate roasting, not cruel)
+- Add card borders, frames, or make it look like a trading card`;
 
     const response = await genAINew.models.generateContent({
       model: "gemini-2.0-flash-exp-image-generation",

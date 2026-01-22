@@ -207,6 +207,13 @@ COMPOSITION:
 - ${elementSettings.props}
 - LANDSCAPE 16:9 aspect ratio
 
+CRITICAL - THIS IS AN ILLUSTRATION, NOT A CARD:
+- Generate ONLY the artwork/illustration - NOT a complete trading card
+- Do NOT add any card borders, frames, rounded corners, or card-like elements
+- Do NOT make it look like a Pokemon card, trading card, or any card format
+- The output should be a clean illustration that fills the entire frame
+- No decorative borders or card UI elements
+
 ABSOLUTELY DO NOT:
 - Create abstract art, surreal imagery, or unrecognizable outputs
 - Change the person's fundamental appearance or make them generic
@@ -214,7 +221,8 @@ ABSOLUTELY DO NOT:
 - Make the face small or distant in the frame
 - Generate ANY text, words, letters, numbers, signs, labels, or writing (AI text always looks wrong)
 - Create photorealistic renders
-- Make the person unidentifiable`;
+- Make the person unidentifiable
+- Add card borders, frames, or make it look like a trading card`;
 
       try {
         // Use new SDK for image generation with profile photo
@@ -300,12 +308,19 @@ CRITICAL - NO TEXT:
 - NEVER generate ANY text, words, letters, numbers, labels, signs, or writing
 - AI-generated text always looks wrong - avoid it completely
 
+CRITICAL - THIS IS AN ILLUSTRATION, NOT A CARD:
+- Generate ONLY the artwork/illustration - NOT a complete trading card
+- Do NOT add any card borders, frames, rounded corners, or card-like elements
+- Do NOT make it look like a Pokemon card format with borders
+- Fill the entire frame with the scene - no decorative card UI
+
 DO NOT:
 - Make it boring, generic, or just standing there
 - Cut off the creature or comedic elements
 - Make it photorealistic or 3D rendered
 - Generate any text, words, labels, or writing of any kind
-- Make it portrait orientation`;
+- Make it portrait orientation
+- Add card borders, frames, or trading card elements`;
 
     // Use new SDK with responseModalities for image generation
     const response = await genAINew.models.generateContent({
