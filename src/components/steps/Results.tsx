@@ -542,12 +542,12 @@ Get your PM card: ${shareUrl}
                     </>
                   )}
                 </button>
-                {/* Re-roll button - only show if onReroll is provided and not on share page */}
+                {/* Re-roll button - only show if onReroll is provided and not on share page, hidden on mobile */}
                 {onReroll && !isSharePage && (
                   <button
                     onClick={handleReroll}
                     disabled={isRerolling}
-                    className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors disabled:opacity-50"
+                    className="flex-1 h-10 px-4 rounded-xl bg-white/[0.05] border border-white/10 text-white/70 text-sm font-medium hidden md:flex items-center justify-center gap-2 hover:bg-white/[0.08] transition-colors disabled:opacity-50"
                   >
                     {isRerolling ? (
                       <>
