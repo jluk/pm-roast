@@ -8,6 +8,7 @@ import { generateShareUrl } from "@/lib/share";
 import { PokemonCard, PMElement } from "@/components/PokemonCard";
 import { CardBack } from "@/components/CardBack";
 import { getCardRarity, CardRarity } from "@/components/HoloCard";
+import { getLennyEpisodeUrl, getLennyEpisode, getLennySearchUrl, hasLennyEpisode } from "@/lib/lenny-episodes";
 
 // Rarity display info
 const RARITY_INFO: Record<CardRarity, {
@@ -71,11 +72,16 @@ interface ResultsProps {
   cardId?: string;
 }
 
-// Generate YouTube search URL for Lenny's Podcast episodes
-function getLennysPodcastSearchUrl(title: string, guest: string): string {
-  // Use YouTube main search with "Lenny's Podcast" to find specific episodes
-  const query = `Lenny's Podcast ${guest} ${title}`.trim();
-  return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+// Generate YouTube URL for Lenny's Podcast episodes - uses direct link if known, otherwise search
+function getLennysPodcastUrl(title: string, guest: string): { url: string; isDirectLink: boolean } {
+  // First check if we have a direct link for this guest
+  const directUrl = getLennyEpisodeUrl(guest);
+  if (directUrl) {
+    return { url: directUrl, isDirectLink: true };
+  }
+
+  // Fallback to search
+  return { url: getLennySearchUrl(title, guest), isDirectLink: false };
 }
 
 // Strip markdown formatting from text
@@ -467,6 +473,45 @@ Get your PM card: ${shareUrl}
             </motion.div>
           )}
 
+          {/* Featured on Lenny's Podcast - only show for legends who have been interviewed */}
+          {isLegend && result.userName && hasLennyEpisode(result.userName) && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.9 }}
+              className="relative group shrink-0 z-10"
+            >
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-pink-500/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              <a
+                href={getLennyEpisodeUrl(result.userName) || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative block px-4 py-3 rounded-xl bg-pink-500/10 backdrop-blur-xl border border-pink-500/40 shadow-xl hover:bg-pink-500/15 transition-colors"
+                style={{ boxShadow: '0 0 15px rgba(236, 72, 153, 0.1), inset 0 1px 0 rgba(236, 72, 153, 0.05)' }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center shrink-0 border border-pink-500/30">
+                    <svg className="w-4 h-4 text-pink-400" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 1c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7c0-4.97-4.03-9-9-9z"/>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-pink-400">Featured on Lenny&apos;s Podcast</span>
+                      <span className="px-1.5 py-0.5 text-[10px] font-bold bg-pink-500/20 text-pink-300 rounded uppercase tracking-wider">Interview</span>
+                    </div>
+                    <p className="text-xs text-white/60 mt-0.5">Watch the full episode on YouTube</p>
+                  </div>
+                  <div className="text-pink-400/60 group-hover:text-pink-400 transition-colors">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </div>
+                </div>
+              </a>
+            </motion.div>
+          )}
+
           {/* CTA Buttons - with hover preview */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -760,10 +805,13 @@ Get your PM card: ${shareUrl}
                   );
                 }
 
+                const { url: episodeUrl, isDirectLink } = getLennysPodcastUrl(episode.title, episode.guest);
+                const knownEpisode = getLennyEpisode(episode.guest);
+
                 return (
                   <a
                     key={index}
-                    href={getLennysPodcastSearchUrl(episode.title, episode.guest)}
+                    href={episodeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex gap-4 group"
@@ -775,10 +823,17 @@ Get your PM card: ${shareUrl}
                       </svg>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-white text-[15px] group-hover:text-pink-400 transition-colors mb-0.5">
-                        {stripMarkdown(episode.title)}
-                      </p>
-                      <p className="text-sm text-white/50">with {stripMarkdown(episode.guest)}</p>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <p className="font-medium text-white text-[15px] group-hover:text-pink-400 transition-colors">
+                          {isDirectLink && knownEpisode ? knownEpisode.title : stripMarkdown(episode.title)}
+                        </p>
+                        {isDirectLink && (
+                          <span className="px-1.5 py-0.5 text-[10px] font-medium bg-pink-500/20 text-pink-400 rounded">
+                            VERIFIED
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-white/50">with {isDirectLink && knownEpisode ? knownEpisode.guest : stripMarkdown(episode.guest)}</p>
                       <p className="text-sm text-white/60 mt-1">{stripMarkdown(episode.reason)}</p>
                     </div>
                     <div className="flex items-center text-white/30 group-hover:text-pink-400 transition-colors shrink-0">
