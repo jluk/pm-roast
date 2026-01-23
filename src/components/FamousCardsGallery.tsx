@@ -51,49 +51,36 @@ function GridCard({
   onClick: () => void;
 }) {
   const [isFlipped, setIsFlipped] = useState(false);
-  // Initialize as null to avoid hydration mismatch flicker
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
+  const [mounted, setMounted] = useState(false);
   const rarity = getCardRarity(card.score);
   const rarityInfo = RARITY_INFO[rarity];
 
+  // Determine mobile after mount to avoid hydration mismatch
+  const isMobile = mounted && typeof window !== "undefined" && window.innerWidth < 768;
+
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    setMounted(true);
   }, []);
 
   const handleClick = () => {
-    // Wait for mount to determine device type
-    if (isMobile === null) {
+    if (!mounted || !isMobile) {
+      // Desktop or not yet mounted - open modal directly
       onClick();
-      return;
-    }
-    if (isMobile) {
-      // On mobile, tap toggles flip, second tap opens modal
+    } else {
+      // Mobile - tap to flip, second tap opens modal
       if (isFlipped) {
         onClick();
       } else {
         setIsFlipped(true);
       }
-    } else {
-      onClick();
     }
-  };
-
-  // Don't apply hover handlers until we know the device type
-  const handleMouseEnter = () => {
-    if (isMobile === false) setIsFlipped(true);
-  };
-  const handleMouseLeave = () => {
-    if (isMobile === false) setIsFlipped(false);
   };
 
   return (
     <div
       className="group cursor-pointer"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => mounted && !isMobile && setIsFlipped(true)}
+      onMouseLeave={() => mounted && !isMobile && setIsFlipped(false)}
       onClick={handleClick}
     >
       {/* Container with fixed dimensions matching the 300px x 420px card (aspect 5:7) */}
@@ -131,8 +118,8 @@ function GridCard({
               compact
               userName={card.name}
             />
-            {/* Mobile tap hint */}
-            {isMobile === true && (
+            {/* Mobile tap hint - only show after mount on mobile */}
+            {mounted && isMobile && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full">
                 <span className="text-white/70 text-xs">Tap to flip</span>
               </div>
@@ -268,7 +255,7 @@ function ExpandedCardView({
         >
           {/* Hero Section - Card + Bento boxes */}
           <div>
-          <div className="flex flex-col lg:flex-row gap-5 lg:gap-10 lg:items-start">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-10 lg:items-start">
             {/* Left: Flippable Card - Fixed width on desktop with overflow visible for hover effects */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -278,7 +265,7 @@ function ExpandedCardView({
             >
               {/* Flippable Card Container - overflow-visible prevents hover clipping */}
               <div
-                className="cursor-pointer isolate overflow-visible w-full max-w-[320px] sm:max-w-[400px] mx-auto aspect-[5/7]"
+                className="cursor-pointer isolate overflow-visible w-full max-w-[360px] sm:max-w-[400px] mx-auto aspect-[5/7]"
                 onClick={() => setIsFlipped(!isFlipped)}
                 style={{
                   perspective: "1000px",
