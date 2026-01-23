@@ -51,7 +51,8 @@ function GridCard({
   onClick: () => void;
 }) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  // Initialize as null to avoid hydration mismatch flicker
+  const [isMobile, setIsMobile] = useState<boolean | null>(null);
   const rarity = getCardRarity(card.score);
   const rarityInfo = RARITY_INFO[rarity];
 
@@ -63,6 +64,11 @@ function GridCard({
   }, []);
 
   const handleClick = () => {
+    // Wait for mount to determine device type
+    if (isMobile === null) {
+      onClick();
+      return;
+    }
     if (isMobile) {
       // On mobile, tap toggles flip, second tap opens modal
       if (isFlipped) {
@@ -75,11 +81,19 @@ function GridCard({
     }
   };
 
+  // Don't apply hover handlers until we know the device type
+  const handleMouseEnter = () => {
+    if (isMobile === false) setIsFlipped(true);
+  };
+  const handleMouseLeave = () => {
+    if (isMobile === false) setIsFlipped(false);
+  };
+
   return (
     <div
       className="group cursor-pointer"
-      onMouseEnter={() => !isMobile && setIsFlipped(true)}
-      onMouseLeave={() => !isMobile && setIsFlipped(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       onClick={handleClick}
     >
       {/* Container with fixed dimensions matching the 300px x 420px card (aspect 5:7) */}
@@ -118,7 +132,7 @@ function GridCard({
               userName={card.name}
             />
             {/* Mobile tap hint */}
-            {isMobile && (
+            {isMobile === true && (
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full">
                 <span className="text-white/70 text-xs">Tap to flip</span>
               </div>
@@ -254,7 +268,7 @@ function ExpandedCardView({
         >
           {/* Hero Section - Card + Bento boxes */}
           <div>
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
+          <div className="flex flex-col lg:flex-row gap-5 lg:gap-10 lg:items-start">
             {/* Left: Flippable Card - Fixed width on desktop with overflow visible for hover effects */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
@@ -264,7 +278,7 @@ function ExpandedCardView({
             >
               {/* Flippable Card Container - overflow-visible prevents hover clipping */}
               <div
-                className="cursor-pointer isolate overflow-visible w-full max-w-[320px] sm:max-w-[400px] aspect-[5/7]"
+                className="cursor-pointer isolate overflow-visible w-full max-w-[320px] sm:max-w-[400px] mx-auto aspect-[5/7]"
                 onClick={() => setIsFlipped(!isFlipped)}
                 style={{
                   perspective: "1000px",
@@ -327,7 +341,7 @@ function ExpandedCardView({
                   </div>
                 </motion.div>
               </div>
-              <p className="text-xs text-muted-foreground mt-3">
+              <p className="text-xs text-muted-foreground mt-2">
                 Click card to flip
               </p>
             </motion.div>
