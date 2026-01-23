@@ -1100,16 +1100,17 @@ export default function Home() {
           body: formData,
         });
 
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          setError(data.error || "Failed to generate new roast");
+        if (!response.ok) {
+          const errorData = await response.json();
+          setError(errorData.error || "Failed to generate new roast");
           setStep("results"); // Stay on results page on error
           return;
         }
 
-        setResult(data);
-        setCardId(data.cardId || null);
+        const data = await response.json();
+        const { cardId: newCardId, ...roastResult } = data;
+        setResult(roastResult);
+        setCardId(newCardId || null);
         setStep("results");
         incrementRoastCount();
       }

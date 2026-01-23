@@ -217,8 +217,10 @@ function ExpandedCardView({
   };
 
   const shareToTwitter = () => {
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "https://www.pmroast.com";
+    const shareUrl = `${baseUrl}/legend/${card.id}`;
     const text = `${card.name} is "${card.archetypeName}" on Mt. Roastmore\n\n"${card.bangerQuote}"\n\nSee more legends get roasted:`;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent("https://www.pmroast.com")}`, "_blank");
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(shareUrl)}`, "_blank");
   };
 
   return (
