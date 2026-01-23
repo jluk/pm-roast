@@ -1481,6 +1481,34 @@ export const FAMOUS_CARDS: FamousCard[] = [
       "The 'release it and see what happens' philosophy personified",
     ],
   },
+  {
+    id: "claire-vo",
+    name: "Claire Vo",
+    title: "CPO",
+    company: "LaunchDarkly",
+    imageUrl: "/famous/sv/claire.png",
+    score: 91,
+    archetypeName: "The Universe Bender",
+    archetypeEmoji: "🌌",
+    archetypeDescription: "Turns feature flags into career trajectories and optimizes everything except her calendar",
+    element: "strategy",
+    moves: [
+      { name: "Feature Flag Flip", energyCost: 2, damage: 55, effect: "Gradually rolls out devastation to 10% of opponents" },
+      { name: "Optimizely A/B Crush", energyCost: 3, damage: 75, effect: "Tests two ways to defeat you, picks the statistically significant one" },
+      { name: "Universe Bend", energyCost: 4, damage: 110, effect: "Reality warps to match her product vision" },
+    ],
+    stage: "Legendary",
+    weakness: "100% rollouts",
+    flavor: "Went from Color to LaunchDarkly because even her career moves need a gradual rollout strategy.",
+    bangerQuote: "She doesn't ship features, she strategically releases them to a percentage of the universe that earned it.",
+    naturalRival: "Engineers who deploy straight to prod",
+    roastBullets: [
+      "Has worked at so many companies that her LinkedIn looks like a greatest hits album of Silicon Valley",
+      "The only CPO who treats every product decision like it needs a feature flag and a 47-slide deck",
+      "Went from optimizing websites at Optimizely to optimizing feature releases—addiction to A/B testing is real",
+      "Literally wrote the playbook on 'bending the universe' and somehow made it sound like a product framework",
+    ],
+  },
 ];
 
 // Get a random card for showcase

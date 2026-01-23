@@ -5,6 +5,7 @@ import { kv } from "@vercel/kv";
 import { RoastResult, DreamRole, DREAM_ROLES, PMElement } from "@/lib/types";
 import { FamousCard, getFamousCardByName, searchFamousCards } from "@/lib/famous-cards";
 import { storeCard } from "@/lib/card-storage";
+import { hasLennyEpisode, getLennyEpisode } from "@/lib/lenny-episodes";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const genAINew = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
@@ -567,15 +568,25 @@ export async function POST(request: NextRequest) {
       ? `\n\nHere's some background on this person from Wikipedia:\n${wikiContext}`
       : "";
 
+    // Include Lenny's Podcast context if they've been a guest
+    let lennyContextPrompt = "";
+    if (hasLennyEpisode(normalizedName)) {
+      const lennyEp = getLennyEpisode(normalizedName);
+      if (lennyEp) {
+        lennyContextPrompt = `\n\nThis person was featured on Lenny's Podcast in an episode titled: "${lennyEp.title}". Use this as context for their PM philosophy and approach.`;
+      }
+    }
+
     const prompt = `Create a PM Roast trading card for: "${normalizedName}"
 
 This person wants to be a: ${DREAM_ROLES[dreamRole as DreamRole].label} (${DREAM_ROLES[dreamRole as DreamRole].description})
-${wikiContextPrompt}
+${wikiContextPrompt}${lennyContextPrompt}
 
 Use their PUBLIC persona, achievements, and known characteristics:
 - Reference their actual companies, products, famous quotes, or public controversies
 - Make it feel like a roast by people who know their work
 - Be specific to THIS person's actual career and public image
+${lennyContextPrompt ? "- Reference their Lenny's Podcast appearance and any insights they shared" : ""}
 
 Remember: This is a fun roast card, keep it entertaining and witty!`;
 
