@@ -236,35 +236,36 @@ Get your PM card: ${shareUrl}
   // Works for anyone who's been on Lenny's Podcast, not just pre-cached legends
   const hasLennyBanner = result.userName && hasLennyEpisode(result.userName);
 
-  // Calculate dynamic font sizes for roast section based on content length and available space
+  // Calculate dynamic font sizes for roast section based on content length
+  // Includes banger quote + 3 bullets, sized to fill available space
   const roastFontSizes = useMemo(() => {
-    // Only count the 3 bullets we display
+    const quoteLength = result.bangerQuote?.length || 0;
     const bulletsLength = result.roastBullets.slice(0, 3).reduce((acc, b) => acc + b.length, 0);
+    const totalLength = quoteLength + bulletsLength;
 
     // When Lenny banner is showing, use more compact sizing
     if (hasLennyBanner) {
-      if (bulletsLength < 200) {
-        return { bullet: "text-base", spacing: "space-y-3", padding: "p-2" };
-      } else if (bulletsLength < 350) {
-        return { bullet: "text-sm", spacing: "space-y-2", padding: "p-1.5" };
+      if (totalLength < 300) {
+        return { quote: "text-base", bullet: "text-sm", spacing: "space-y-3", padding: "p-2", heatBar: "w-2.5 h-1.5" };
+      } else if (totalLength < 450) {
+        return { quote: "text-sm", bullet: "text-[13px]", spacing: "space-y-2", padding: "p-1.5", heatBar: "w-2 h-1" };
       } else {
-        return { bullet: "text-xs", spacing: "space-y-1.5", padding: "p-1.5" };
+        return { quote: "text-xs", bullet: "text-xs", spacing: "space-y-1.5", padding: "p-1.5", heatBar: "w-2 h-1" };
       }
     }
 
-    // Normal sizing when no Lenny banner
-    // Determine font size tier based on total content length
+    // Normal sizing - fill the space based on content length
     // Shorter content = larger fonts, longer content = smaller fonts
-    if (bulletsLength < 200) {
-      return { bullet: "text-lg", spacing: "space-y-5", padding: "p-3" };
-    } else if (bulletsLength < 350) {
-      return { bullet: "text-base", spacing: "space-y-4", padding: "p-2.5" };
-    } else if (bulletsLength < 500) {
-      return { bullet: "text-[15px]", spacing: "space-y-3", padding: "p-2" };
+    if (totalLength < 300) {
+      return { quote: "text-lg", bullet: "text-base", spacing: "space-y-4", padding: "p-3", heatBar: "w-3 h-1.5" };
+    } else if (totalLength < 450) {
+      return { quote: "text-base", bullet: "text-[15px]", spacing: "space-y-3", padding: "p-2.5", heatBar: "w-2.5 h-1.5" };
+    } else if (totalLength < 600) {
+      return { quote: "text-[15px]", bullet: "text-sm", spacing: "space-y-2.5", padding: "p-2", heatBar: "w-2.5 h-1.5" };
     } else {
-      return { bullet: "text-sm", spacing: "space-y-2.5", padding: "p-2" };
+      return { quote: "text-sm", bullet: "text-[13px]", spacing: "space-y-2", padding: "p-2", heatBar: "w-2 h-1" };
     }
-  }, [result.roastBullets, hasLennyBanner]);
+  }, [result.roastBullets, result.bangerQuote, hasLennyBanner]);
 
   // Go straight to full results - no multi-step reveal
   return (
@@ -377,16 +378,16 @@ Get your PM card: ${shareUrl}
               {/* Singed gradient accent line */}
               <div className="h-[2px] bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 shrink-0" />
 
-              <div className="p-4 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div className="p-5 flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Header with Global Rank badge */}
-                <div className="flex items-center justify-between mb-3 shrink-0">
+                <div className="flex items-center justify-between mb-4 shrink-0">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
-                      <svg className="w-3.5 h-3.5 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                    <div className="w-7 h-7 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
+                      <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.5 1.5-4.5 3-6.5s3-4.5 3-7.5c0 0 1 2 2 4 .5-1 1-2 1-3 2.5 3.5 5 6.5 5 13 0 3.866-3.134 7-7 7zm0-2c2.761 0 5-2.239 5-5 0-2.5-1.5-5-3-7-.5 1-1 2-2 3-.5-1-1-2-1.5-3-1 1.5-2.5 3.5-2.5 7 0 2.761 2.239 5 5 5z"/>
                       </svg>
                     </div>
-                    <h3 className="text-sm font-semibold text-white">The Roast</h3>
+                    <h3 className="text-base font-semibold text-white">The Roast</h3>
                   </div>
 
                   {/* Global Rank Badge */}
@@ -398,14 +399,14 @@ Get your PM card: ${shareUrl}
                       className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-900/40 to-yellow-900/40 border border-amber-500/50"
                       style={{ boxShadow: '0 0 20px rgba(251, 191, 36, 0.15), 0 0 40px rgba(251, 191, 36, 0.08), inset 0 1px 0 rgba(251, 191, 36, 0.1)' }}
                     >
-                      <span className="text-base">🏆</span>
+                      <span className="text-lg">🏆</span>
                       <div className="flex flex-col items-end">
                         <span className="text-[9px] uppercase tracking-wider text-amber-400/70 font-medium leading-none">Rank</span>
                         <div className="flex items-baseline gap-0.5">
-                          <span className="text-base font-bold text-amber-300 leading-none">
+                          <span className="text-lg font-bold text-amber-300 leading-none">
                             #{rankInfo.rank.toLocaleString()}
                           </span>
-                          <span className="text-[10px] text-amber-400/60">
+                          <span className="text-xs text-amber-400/60">
                             /{rankInfo.totalRoasts.toLocaleString()}
                           </span>
                         </div>
@@ -415,17 +416,17 @@ Get your PM card: ${shareUrl}
                 </div>
 
                 {/* Banger Quote - prominently displayed under header */}
-                <div className="flex items-start gap-3 mb-4 pb-3 border-b border-white/10 shrink-0">
-                  <svg className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-start gap-3 mb-4 pb-4 border-b border-white/10 shrink-0">
+                  <svg className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
                   </svg>
-                  <p className="text-sm text-white/90 font-medium leading-snug">
+                  <p className={`${roastFontSizes.quote} text-white/90 font-medium leading-snug`}>
                     {stripMarkdown(result.bangerQuote)}
                   </p>
                 </div>
 
                 {/* Roast bullets - limit to 3 */}
-                <div className="space-y-2 flex-1 overflow-hidden">
+                <div className={`${roastFontSizes.spacing} flex-1 overflow-hidden`}>
                   {result.roastBullets.slice(0, 3).map((bullet, index) => {
                     const heatLevel = index === 0 ? 3 : index === 1 ? 2 : 1;
                     return (
@@ -434,14 +435,14 @@ Get your PM card: ${shareUrl}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 + index * 0.1 }}
-                        className="flex gap-2.5 items-start p-1.5 rounded-lg hover:bg-white/[0.02] transition-all duration-300"
+                        className={`flex gap-3 items-start ${roastFontSizes.padding} rounded-lg hover:bg-white/[0.02] transition-all duration-300`}
                       >
                         {/* Heat Meter */}
-                        <div className="flex flex-col gap-0.5 shrink-0 mt-1">
+                        <div className="flex flex-col gap-0.5 shrink-0 mt-1.5">
                           {[3, 2, 1].map((level) => (
                             <div
                               key={level}
-                              className={`w-2 h-1 rounded-sm transition-all ${
+                              className={`${roastFontSizes.heatBar} rounded-sm transition-all ${
                                 level <= heatLevel
                                   ? level === 3
                                     ? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.6)]"
@@ -453,7 +454,7 @@ Get your PM card: ${shareUrl}
                             />
                           ))}
                         </div>
-                        <p className="text-[13px] text-zinc-300/90 leading-snug line-clamp-2">
+                        <p className={`${roastFontSizes.bullet} text-zinc-300/90 leading-relaxed`}>
                           {stripMarkdown(bullet)}
                         </p>
                       </motion.div>

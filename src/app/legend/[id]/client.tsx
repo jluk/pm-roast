@@ -160,27 +160,7 @@ export function LegendPageClient({ card }: LegendPageClientProps) {
 
             {/* Right: Bento Glass Tiles */}
             <div className="flex flex-col gap-4 w-full lg:flex-1">
-              {/* Tile 1: Banger Quote - The funniest line, prominently displayed */}
-              <motion.div
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
-                className="relative group"
-              >
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/20 via-red-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-                <div className="relative p-6 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl">
-                  <div className="flex items-start gap-4">
-                    <svg className="w-6 h-6 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
-                    </svg>
-                    <p className="text-lg md:text-xl text-white/90 font-medium leading-relaxed">
-                      {card.bangerQuote}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Tile 2: Legend Info */}
+              {/* Tile 1: Legend Info */}
               <motion.div
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -308,7 +288,7 @@ export function LegendPageClient({ card }: LegendPageClientProps) {
 
               <div className="px-8 py-8">
                 {/* Header with flame icon */}
-                <div className="flex items-center gap-3 mb-8">
+                <div className="flex items-center gap-3 mb-6">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
                     <svg className="w-5 h-5 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.5 1.5-4.5 3-6.5s3-4.5 3-7.5c0 0 1 2 2 4 .5-1 1-2 1-3 2.5 3.5 5 6.5 5 13 0 3.866-3.134 7-7 7zm0-2c2.761 0 5-2.239 5-5 0-2.5-1.5-5-3-7-.5 1-1 2-2 3-.5-1-1-2-1.5-3-1 1.5-2.5 3.5-2.5 7 0 2.761 2.239 5 5 5z"/>
@@ -316,6 +296,16 @@ export function LegendPageClient({ card }: LegendPageClientProps) {
                   </div>
                   <h3 className="text-xl font-semibold text-white">The Roast</h3>
                   <span className="text-xs text-orange-400/60 uppercase tracking-wider ml-auto">Brutal Truths</span>
+                </div>
+
+                {/* Banger Quote - prominently displayed under header */}
+                <div className="flex items-start gap-4 mb-6 pb-6 border-b border-white/10">
+                  <svg className="w-6 h-6 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+                  </svg>
+                  <p className="text-lg text-white/90 font-medium leading-relaxed">
+                    {card.bangerQuote}
+                  </p>
                 </div>
 
                 {/* Roast bullets with Heat Meter */}
