@@ -233,7 +233,8 @@ Get your PM card: ${shareUrl}
   const rarityInfo = RARITY_INFO[rarity];
 
   // Check if Lenny banner will be shown (takes extra space)
-  const hasLennyBanner = isLegend && result.userName && hasLennyEpisode(result.userName);
+  // Works for anyone who's been on Lenny's Podcast, not just pre-cached legends
+  const hasLennyBanner = result.userName && hasLennyEpisode(result.userName);
 
   // Calculate dynamic font sizes for roast section based on content length and available space
   const roastFontSizes = useMemo(() => {
@@ -481,8 +482,8 @@ Get your PM card: ${shareUrl}
             </motion.div>
           )}
 
-          {/* Featured on Lenny's Podcast - only show for legends who have been interviewed */}
-          {isLegend && result.userName && hasLennyEpisode(result.userName) && (() => {
+          {/* Featured on Lenny's Podcast - show for anyone who has been interviewed */}
+          {result.userName && hasLennyEpisode(result.userName) && (() => {
             const legendEpisode = getLennyEpisode(result.userName);
             const legendUrl = legendEpisode ? `https://www.youtube.com/watch?v=${legendEpisode.videoId}` : null;
             if (!legendUrl) return null;
@@ -788,8 +789,8 @@ Get your PM card: ${shareUrl}
                   })
                   .filter((ep): ep is NonNullable<typeof ep> => ep !== null);
 
-                // If this is a legend who has been on Lenny's Podcast, add their episode at the top
-                if (isLegend && result.userName && hasLennyEpisode(result.userName)) {
+                // If this person has been on Lenny's Podcast, add their episode at the top
+                if (result.userName && hasLennyEpisode(result.userName)) {
                   const legendEpisode = getLennyEpisode(result.userName);
                   if (legendEpisode) {
                     const legendUrl = `https://www.youtube.com/watch?v=${legendEpisode.videoId}`;
