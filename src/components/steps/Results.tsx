@@ -232,11 +232,26 @@ Get your PM card: ${shareUrl}
   const rarity = getCardRarity(result.careerScore);
   const rarityInfo = RARITY_INFO[rarity];
 
-  // Calculate dynamic font sizes for roast section based on content length
+  // Check if Lenny banner will be shown (takes extra space)
+  const hasLennyBanner = isLegend && result.userName && hasLennyEpisode(result.userName);
+
+  // Calculate dynamic font sizes for roast section based on content length and available space
   const roastFontSizes = useMemo(() => {
     // Only count the 3 bullets we display
     const bulletsLength = result.roastBullets.slice(0, 3).reduce((acc, b) => acc + b.length, 0);
 
+    // When Lenny banner is showing, use more compact sizing
+    if (hasLennyBanner) {
+      if (bulletsLength < 200) {
+        return { bullet: "text-base", spacing: "space-y-3", padding: "p-2" };
+      } else if (bulletsLength < 350) {
+        return { bullet: "text-sm", spacing: "space-y-2", padding: "p-1.5" };
+      } else {
+        return { bullet: "text-xs", spacing: "space-y-1.5", padding: "p-1.5" };
+      }
+    }
+
+    // Normal sizing when no Lenny banner
     // Determine font size tier based on total content length
     // Shorter content = larger fonts, longer content = smaller fonts
     if (bulletsLength < 200) {
@@ -248,7 +263,7 @@ Get your PM card: ${shareUrl}
     } else {
       return { bullet: "text-sm", spacing: "space-y-2.5", padding: "p-2" };
     }
-  }, [result.roastBullets]);
+  }, [result.roastBullets, hasLennyBanner]);
 
   // Go straight to full results - no multi-step reveal
   return (
@@ -361,9 +376,9 @@ Get your PM card: ${shareUrl}
               {/* Singed gradient accent line */}
               <div className="h-[2px] bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 shrink-0" />
 
-              <div className="p-5 flex-1 flex flex-col justify-center">
+              <div className={`${hasLennyBanner ? 'p-4' : 'p-5'} flex-1 flex flex-col justify-center min-h-0 overflow-hidden`}>
                 {/* Header with Global Rank badge */}
-                <div className="flex items-center justify-between mb-5">
+                <div className={`flex items-center justify-between ${hasLennyBanner ? 'mb-3' : 'mb-5'}`}>
                   <div className="flex items-center gap-2">
                     <div className="w-7 h-7 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
                       <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
@@ -427,7 +442,7 @@ Get your PM card: ${shareUrl}
                             />
                           ))}
                         </div>
-                        <p className={`${roastFontSizes.bullet} text-zinc-300/90 leading-relaxed`}>
+                        <p className={`${roastFontSizes.bullet} text-zinc-300/90 leading-relaxed ${hasLennyBanner ? 'line-clamp-2' : ''}`}>
                           {stripMarkdown(bullet)}
                         </p>
                       </motion.div>
