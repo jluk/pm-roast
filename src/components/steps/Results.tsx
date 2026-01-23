@@ -237,7 +237,7 @@ Get your PM card: ${shareUrl}
   const hasLennyBanner = result.userName && hasLennyEpisode(result.userName);
 
   // Calculate dynamic font sizes for roast section based on content length
-  // Includes banger quote + 3 bullets, sized to fill available space
+  // Includes banger quote + 3 bullets, sized to fit within the fixed container
   const roastFontSizes = useMemo(() => {
     const quoteLength = result.bangerQuote?.length || 0;
     const bulletsLength = result.roastBullets.slice(0, 3).reduce((acc, b) => acc + b.length, 0);
@@ -245,25 +245,22 @@ Get your PM card: ${shareUrl}
 
     // When Lenny banner is showing, use more compact sizing
     if (hasLennyBanner) {
-      if (totalLength < 300) {
-        return { quote: "text-base", bullet: "text-sm", spacing: "space-y-3", padding: "p-2", heatBar: "w-2.5 h-1.5" };
-      } else if (totalLength < 450) {
-        return { quote: "text-sm", bullet: "text-[13px]", spacing: "space-y-2", padding: "p-1.5", heatBar: "w-2 h-1" };
+      if (totalLength < 250) {
+        return { quote: "text-sm line-clamp-3", bullet: "text-xs line-clamp-2", spacing: "space-y-2", padding: "p-1.5", heatBar: "w-2 h-1" };
       } else {
-        return { quote: "text-xs", bullet: "text-xs", spacing: "space-y-1.5", padding: "p-1.5", heatBar: "w-2 h-1" };
+        return { quote: "text-xs line-clamp-2", bullet: "text-xs line-clamp-2", spacing: "space-y-1.5", padding: "p-1", heatBar: "w-2 h-1" };
       }
     }
 
-    // Normal sizing - fill the space based on content length
-    // Shorter content = larger fonts, longer content = smaller fonts
-    if (totalLength < 300) {
-      return { quote: "text-lg", bullet: "text-base", spacing: "space-y-4", padding: "p-3", heatBar: "w-3 h-1.5" };
-    } else if (totalLength < 450) {
-      return { quote: "text-base", bullet: "text-[15px]", spacing: "space-y-3", padding: "p-2.5", heatBar: "w-2.5 h-1.5" };
-    } else if (totalLength < 600) {
-      return { quote: "text-[15px]", bullet: "text-sm", spacing: "space-y-2.5", padding: "p-2", heatBar: "w-2.5 h-1.5" };
+    // Normal sizing - fit within container, use line-clamp to prevent overflow
+    if (totalLength < 250) {
+      return { quote: "text-base line-clamp-3", bullet: "text-sm line-clamp-3", spacing: "space-y-3", padding: "p-2", heatBar: "w-2.5 h-1.5" };
+    } else if (totalLength < 400) {
+      return { quote: "text-sm line-clamp-3", bullet: "text-[13px] line-clamp-2", spacing: "space-y-2", padding: "p-1.5", heatBar: "w-2.5 h-1.5" };
+    } else if (totalLength < 550) {
+      return { quote: "text-sm line-clamp-2", bullet: "text-xs line-clamp-2", spacing: "space-y-2", padding: "p-1.5", heatBar: "w-2 h-1" };
     } else {
-      return { quote: "text-sm", bullet: "text-[13px]", spacing: "space-y-2", padding: "p-2", heatBar: "w-2 h-1" };
+      return { quote: "text-xs line-clamp-2", bullet: "text-xs line-clamp-2", spacing: "space-y-1.5", padding: "p-1", heatBar: "w-2 h-1" };
     }
   }, [result.roastBullets, result.bangerQuote, hasLennyBanner]);
 
@@ -416,8 +413,8 @@ Get your PM card: ${shareUrl}
                 </div>
 
                 {/* Banger Quote - prominently displayed under header */}
-                <div className="flex items-start gap-3 mb-4 pb-4 border-b border-white/10 shrink-0">
-                  <svg className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-start gap-3 mb-3 pb-3 border-b border-white/10 shrink-0 overflow-hidden">
+                  <svg className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
                   </svg>
                   <p className={`${roastFontSizes.quote} text-white/90 font-medium leading-snug`}>
@@ -426,7 +423,7 @@ Get your PM card: ${shareUrl}
                 </div>
 
                 {/* Roast bullets - limit to 3 */}
-                <div className={`${roastFontSizes.spacing} flex-1 overflow-hidden`}>
+                <div className={`${roastFontSizes.spacing} flex-1 min-h-0 overflow-hidden`}>
                   {result.roastBullets.slice(0, 3).map((bullet, index) => {
                     const heatLevel = index === 0 ? 3 : index === 1 ? 2 : 1;
                     return (
@@ -435,10 +432,10 @@ Get your PM card: ${shareUrl}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 + index * 0.1 }}
-                        className={`flex gap-3 items-start ${roastFontSizes.padding} rounded-lg hover:bg-white/[0.02] transition-all duration-300`}
+                        className={`flex gap-2 items-start ${roastFontSizes.padding} rounded-lg hover:bg-white/[0.02] transition-all duration-300 overflow-hidden`}
                       >
                         {/* Heat Meter */}
-                        <div className="flex flex-col gap-0.5 shrink-0 mt-1.5">
+                        <div className="flex flex-col gap-0.5 shrink-0 mt-1">
                           {[3, 2, 1].map((level) => (
                             <div
                               key={level}
@@ -454,7 +451,7 @@ Get your PM card: ${shareUrl}
                             />
                           ))}
                         </div>
-                        <p className={`${roastFontSizes.bullet} text-zinc-300/90 leading-relaxed`}>
+                        <p className={`${roastFontSizes.bullet} text-zinc-300/90 leading-snug flex-1 min-w-0`}>
                           {stripMarkdown(bullet)}
                         </p>
                       </motion.div>
