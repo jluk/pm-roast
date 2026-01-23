@@ -71,15 +71,20 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      // Fetch user profile data
+      // Fetch user profile data with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       const userResponse = await fetch(
         `${TWITTER_API_BASE}/users/by/username/${cleanHandle}?user.fields=description,profile_image_url,public_metrics,verified,verified_type,created_at,location,url,pinned_tweet_id`,
         {
           headers: {
             Authorization: `Bearer ${bearerToken}`,
           },
+          signal: controller.signal,
         }
       );
+      clearTimeout(timeoutId);
 
       if (!userResponse.ok) {
         if (userResponse.status === 404) {
@@ -115,17 +120,21 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Fetch recent tweets for more context
+      // Fetch recent tweets for more context (with separate timeout)
       let recentTweets: TwitterTweet[] = [];
       try {
+        const tweetController = new AbortController();
+        const tweetTimeoutId = setTimeout(() => tweetController.abort(), 5000); // 5 second timeout
         const tweetsResponse = await fetch(
           `${TWITTER_API_BASE}/users/${user.id}/tweets?max_results=10&tweet.fields=created_at,public_metrics`,
           {
             headers: {
               Authorization: `Bearer ${bearerToken}`,
             },
+            signal: tweetController.signal,
           }
         );
+        clearTimeout(tweetTimeoutId);
 
         if (tweetsResponse.ok) {
           const tweetsData = await tweetsResponse.json();

@@ -51,8 +51,24 @@ export async function storeCard(result: RoastResult, dreamRole: DreamRole, isLeg
 
   // Add to leaderboard sorted set (score as the sorting value, cardId as member)
   // Higher scores = better rank, so we use the score directly
-  // Note: Leaderboard entries persist but card data expires - this is acceptable
   await kv.zadd(LEADERBOARD_KEY, { score: result.careerScore, member: cardId });
+
+  // Periodically prune leaderboard to prevent unbounded growth
+  // Keep only the top 50,000 entries (approx 1MB of storage)
+  // Only run 1% of the time to avoid overhead
+  if (Math.random() < 0.01) {
+    try {
+      const size = await kv.zcard(LEADERBOARD_KEY);
+      if (size > 50000) {
+        // Remove lowest-ranked entries beyond 50k
+        await kv.zremrangebyrank(LEADERBOARD_KEY, 0, size - 50001);
+        console.log(`Pruned leaderboard from ${size} to 50000 entries`);
+      }
+    } catch (pruneError) {
+      console.error("Leaderboard prune failed:", pruneError);
+      // Non-critical, continue
+    }
+  }
 
   return cardId;
 }

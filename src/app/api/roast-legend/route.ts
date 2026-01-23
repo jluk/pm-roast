@@ -407,10 +407,16 @@ export async function POST(request: NextRequest) {
       const exactMatch = getFamousCardByName(normalizedName);
       if (exactMatch) {
         const result = famousCardToRoastResult(exactMatch, dreamRole as DreamRole);
-        const cardId = await storeCard(result, dreamRole as DreamRole, true);
+        let cardId: string | null = null;
+        try {
+          cardId = await storeCard(result, dreamRole as DreamRole, true);
+        } catch (storageError) {
+          console.error("Storage failed for legend card:", storageError);
+          // Continue without cardId - still return the card
+        }
 
         // Generate OG image in background
-        fetch(new URL("/api/og-generate", request.url).toString(), {
+        if (cardId) fetch(new URL("/api/og-generate", request.url).toString(), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -448,10 +454,15 @@ export async function POST(request: NextRequest) {
         // If it's a clear match (starts with same chars or is very similar)
         if (matchLower.startsWith(queryLower) || queryLower.startsWith(matchLower.split(" ")[0])) {
           const result = famousCardToRoastResult(bestMatch, dreamRole as DreamRole);
-          const cardId = await storeCard(result, dreamRole as DreamRole, true);
+          let cardId: string | null = null;
+          try {
+            cardId = await storeCard(result, dreamRole as DreamRole, true);
+          } catch (storageError) {
+            console.error("Storage failed for legend card:", storageError);
+          }
 
           // Generate OG image in background
-          fetch(new URL("/api/og-generate", request.url).toString(), {
+          if (cardId) fetch(new URL("/api/og-generate", request.url).toString(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -484,14 +495,26 @@ export async function POST(request: NextRequest) {
     const cacheKey = `legend:${normalizedName.toLowerCase().replace(/\s+/g, "-")}`;
 
     if (!reroll) {
-      const cached = await kv.get<string>(cacheKey);
+      let cached = null;
+      try {
+        cached = await kv.get<string>(cacheKey);
+      } catch (cacheError) {
+        console.error("Cache read failed:", cacheError);
+        // Continue to generate fresh
+      }
 
       if (cached) {
         const cachedResult = typeof cached === "string" ? JSON.parse(cached) : cached;
-        const cardId = await storeCard(cachedResult as RoastResult, dreamRole as DreamRole, true);
+        let cardId: string | null = null;
+        try {
+          cardId = await storeCard(cachedResult as RoastResult, dreamRole as DreamRole, true);
+        } catch (storageError) {
+          console.error("Storage failed for cached legend:", storageError);
+        }
 
         // Generate OG image in background
         const cached_result = cachedResult as RoastResult;
+        if (cardId)
         fetch(new URL("/api/og-generate", request.url).toString(), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -608,14 +631,24 @@ Remember: This is a fun roast card, keep it entertaining and witty!`;
       validatedResult.archetypeImage = archetypeImage;
     }
 
-    // Cache the result in Redis for 30 days
-    await kv.set(cacheKey, JSON.stringify(validatedResult), { ex: 30 * 24 * 60 * 60 });
+    // Cache the result in Redis for 7 days (reduced from 30 to manage storage)
+    try {
+      await kv.set(cacheKey, JSON.stringify(validatedResult), { ex: 7 * 24 * 60 * 60 });
+    } catch (cacheError) {
+      console.error("Cache write failed:", cacheError);
+      // Continue - caching is optional
+    }
 
     // Store in KV for sharing
-    const cardId = await storeCard(validatedResult, dreamRole as DreamRole, true);
+    let cardId: string | null = null;
+    try {
+      cardId = await storeCard(validatedResult, dreamRole as DreamRole, true);
+    } catch (storageError) {
+      console.error("Storage failed for new legend:", storageError);
+    }
 
     // Generate OG image in background
-    fetch(new URL("/api/og-generate", request.url).toString(), {
+    if (cardId) fetch(new URL("/api/og-generate", request.url).toString(), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

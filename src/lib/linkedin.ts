@@ -438,6 +438,7 @@ export async function fetchLinkedInData(linkedinUrl: string): Promise<FetchLinke
       params: {
         username: username,
       },
+      timeout: 15000, // 15 second timeout to prevent hung requests
     });
 
     console.log("=== LINKDAPI RESPONSE STATUS ===");

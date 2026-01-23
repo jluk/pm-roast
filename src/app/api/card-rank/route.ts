@@ -12,7 +12,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "cardId is required" }, { status: 400 });
   }
 
-  const rankInfo = await getCardRank(cardId);
+  let rankInfo;
+  try {
+    rankInfo = await getCardRank(cardId);
+  } catch (error) {
+    console.error("Failed to get card rank:", error);
+    // Return graceful fallback - rank feature is non-critical
+    return NextResponse.json({ error: "Ranking temporarily unavailable" }, { status: 503 });
+  }
 
   if (!rankInfo) {
     return NextResponse.json({ error: "Card not found in leaderboard" }, { status: 404 });
