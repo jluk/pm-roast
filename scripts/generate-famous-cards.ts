@@ -502,6 +502,15 @@ const FAMOUS_CARDS = [
     element: "chaos",
     creativeScene: `This person releasing Stable Diffusion into the world like opening Pandora's box - AI-generated images explode everywhere. "Open source AI" banner waves chaotically. They're democratizing AI while also creating chaos. Board drama swirls in the background. Their expression is chaotic neutral energy - the face of someone who changed everything and then... things got complicated.`,
   },
+  {
+    id: "claire-vo",
+    name: "Claire Vo",
+    sourceImage: "claire.png",
+    outputImage: "claire-card.png",
+    archetypeName: "The Universe Bender",
+    element: "strategy",
+    creativeScene: `This person as a cosmic product strategist floating in space, surrounded by feature flags that control reality itself - each flag toggles different versions of the universe. They're gradually rolling out existence to 10% of users at a time. LaunchDarkly, Optimizely, and Color logos orbit like planets they've conquered. A/B test results scroll through the cosmos showing which universe performed better. They're holding a master control panel that says "rollout: 100%" but their finger hovers hesitantly. Their expression is strategic confidence mixed with "I've seen what happens when you ship without a feature flag" wisdom. The entire scene feels like someone who optimized their way through multiple companies and somehow made feature flags feel like a superpower.`,
+  },
 ];
 
 // Element-specific color palettes

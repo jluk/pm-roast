@@ -1486,7 +1486,7 @@ export const FAMOUS_CARDS: FamousCard[] = [
     name: "Claire Vo",
     title: "CPO",
     company: "LaunchDarkly",
-    imageUrl: "/famous/sv/claire.png",
+    imageUrl: "/famous/sv/generated/claire-card.png",
     score: 91,
     archetypeName: "The Universe Bender",
     archetypeEmoji: "🌌",
