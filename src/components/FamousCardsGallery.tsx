@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FAMOUS_CARDS, FamousCard } from "@/lib/famous-cards";
 import { CELEBRITY_CARDS, CelebrityCard } from "@/lib/celebrity-cards";
@@ -51,19 +51,21 @@ function GridCard({
   onClick: () => void;
 }) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const mountedRef = useRef(false);
   const rarity = getCardRarity(card.score);
   const rarityInfo = RARITY_INFO[rarity];
 
-  // Determine mobile after mount to avoid hydration mismatch
-  const isMobile = mounted && typeof window !== "undefined" && window.innerWidth < 768;
-
+  // Set mounted ref on first render (no re-render triggered)
   useEffect(() => {
-    setMounted(true);
+    mountedRef.current = true;
   }, []);
 
+  // Check mobile at interaction time, not render time
+  const checkMobile = () => mountedRef.current && typeof window !== "undefined" && window.innerWidth < 768;
+
   const handleClick = () => {
-    if (!mounted || !isMobile) {
+    const isMobile = checkMobile();
+    if (!isMobile) {
       // Desktop or not yet mounted - open modal directly
       onClick();
     } else {
@@ -79,8 +81,8 @@ function GridCard({
   return (
     <div
       className="group cursor-pointer"
-      onMouseEnter={() => mounted && !isMobile && setIsFlipped(true)}
-      onMouseLeave={() => mounted && !isMobile && setIsFlipped(false)}
+      onMouseEnter={() => !checkMobile() && setIsFlipped(true)}
+      onMouseLeave={() => !checkMobile() && setIsFlipped(false)}
       onClick={handleClick}
     >
       {/* Container with fixed dimensions matching the 300px x 420px card (aspect 5:7) */}
@@ -118,12 +120,10 @@ function GridCard({
               compact
               userName={card.name}
             />
-            {/* Mobile tap hint - only show after mount on mobile */}
-            {mounted && isMobile && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full">
-                <span className="text-white/70 text-xs">Tap to flip</span>
-              </div>
-            )}
+            {/* Mobile tap hint - use CSS to hide on desktop, avoids JS flicker */}
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/60 backdrop-blur-sm rounded-full md:hidden">
+              <span className="text-white/70 text-xs">Tap to flip</span>
+            </div>
           </div>
 
           {/* Back - Roast Preview */}
