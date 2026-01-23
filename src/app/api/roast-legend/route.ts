@@ -631,9 +631,9 @@ Remember: This is a fun roast card, keep it entertaining and witty!`;
       validatedResult.archetypeImage = archetypeImage;
     }
 
-    // Cache the result in Redis for 7 days (reduced from 30 to manage storage)
+    // Cache the result in Redis for 2 days to manage storage during traffic spikes
     try {
-      await kv.set(cacheKey, JSON.stringify(validatedResult), { ex: 7 * 24 * 60 * 60 });
+      await kv.set(cacheKey, JSON.stringify(validatedResult), { ex: 2 * 24 * 60 * 60 });
     } catch (cacheError) {
       console.error("Cache write failed:", cacheError);
       // Continue - caching is optional

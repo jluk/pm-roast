@@ -45,9 +45,9 @@ export async function storeCard(result: RoastResult, dreamRole: DreamRole, isLeg
     isLegend,
   };
 
-  // Store in KV with 7 day expiration (in seconds) to manage storage limits during traffic spikes
+  // Store in KV with 2 day expiration (in seconds) to manage storage limits during traffic spikes
   // Cards can be re-generated if needed, prioritize availability over retention
-  await kv.set(`card:${cardId}`, JSON.stringify(storedCard), { ex: 7 * 24 * 60 * 60 });
+  await kv.set(`card:${cardId}`, JSON.stringify(storedCard), { ex: 2 * 24 * 60 * 60 });
 
   // Add to leaderboard sorted set (score as the sorting value, cardId as member)
   // Higher scores = better rank, so we use the score directly
