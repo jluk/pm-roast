@@ -71,11 +71,11 @@ interface ResultsProps {
   cardId?: string;
 }
 
-// Generate YouTube search URL within Lenny's Podcast channel only
+// Generate YouTube search URL for Lenny's Podcast episodes
 function getLennysPodcastSearchUrl(title: string, guest: string): string {
-  // Search within Lenny's channel to avoid NSFW/unrelated results
-  const query = `${guest} ${title}`;
-  return `https://www.youtube.com/@LennysPodcast/search?query=${encodeURIComponent(query)}`;
+  // Use YouTube main search with "Lenny's Podcast" to find specific episodes
+  const query = `Lenny's Podcast ${guest} ${title}`.trim();
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
 }
 
 // Strip markdown formatting from text
