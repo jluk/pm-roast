@@ -914,8 +914,12 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
       cardId = await storeCard(roastResult, dreamRole);
       console.log("=== CARD STORED WITH ID:", cardId, "===");
     } catch (error) {
-      console.error("Failed to store card:", error);
+      // Log detailed error for monitoring - storage full or quota exceeded
+      console.error("=== STORAGE FAILED ===");
+      console.error("Error:", error instanceof Error ? error.message : error);
+      console.error("This may indicate Upstash storage is full. Falling back to encoded URL sharing.");
       // Continue without cardId - fallback to encoded URL sharing
+      // The roast still works, user just gets a longer URL
     }
 
     // Generate OG image in background (fire and forget - don't block response)
