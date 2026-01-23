@@ -363,8 +363,28 @@ Get your PM card: ${shareUrl}
           </p>
         </motion.div>
 
-        {/* Right: Bento Glass Tiles - justify-between for flush alignment with card */}
-        <div className="flex flex-col gap-3 w-full lg:flex-1 lg:h-[560px] lg:justify-between">
+        {/* Right: Bento Glass Tiles */}
+        <div className="flex flex-col gap-3 w-full lg:flex-1">
+          {/* Banger Quote - The funniest line, prominently displayed */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
+            className="relative group shrink-0"
+          >
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/20 via-red-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            <div className="relative p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl">
+              <div className="flex items-start gap-4">
+                <svg className="w-6 h-6 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+                </svg>
+                <p className="text-lg md:text-xl text-white/90 font-medium leading-relaxed">
+                  {stripMarkdown(result.bangerQuote)}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+
           {/* The Roast - 3 high-impact bullet points only */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
