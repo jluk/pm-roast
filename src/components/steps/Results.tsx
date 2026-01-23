@@ -570,7 +570,7 @@ Get your PM card: ${shareUrl}
                   disabled={isRerolling}
                   className={`flex-1 h-10 px-4 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-50 ${
                     isSharePage
-                      ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:from-[#5558e3] hover:to-[#7c4fe0]"
+                      ? "bg-white/[0.05] border border-white/10 text-white/70 hover:bg-white/[0.08] md:border-0 md:bg-gradient-to-r md:from-[#6366f1] md:to-[#8b5cf6] md:text-white md:hover:from-[#5558e3] md:hover:to-[#7c4fe0]"
                       : "bg-white/[0.05] border border-white/10 text-white/70 hover:bg-white/[0.08]"
                   }`}
                 >
