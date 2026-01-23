@@ -8,6 +8,14 @@ import { ELEMENT_SETTINGS } from "@/lib/image-generation";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const genAINew = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
+// Timeout wrapper for API calls
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> {
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error(errorMessage)), timeoutMs);
+  });
+  return Promise.race([promise, timeoutPromise]);
+}
+
 // Dynamic import for pdf-parse (CommonJS module)
 async function parsePdf(buffer: Buffer): Promise<{ text: string }> {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -225,27 +233,31 @@ ABSOLUTELY DO NOT:
 - Add card borders, frames, or make it look like a trading card`;
 
       try {
-        // Use new SDK for image generation with profile photo
-        const response = await genAINew.models.generateContent({
-          model: "gemini-2.0-flash-exp-image-generation",
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  inlineData: {
-                    mimeType: profileImage.mimeType,
-                    data: profileImage.data,
+        // Use new SDK for image generation with profile photo (90s timeout)
+        const response = await withTimeout(
+          genAINew.models.generateContent({
+            model: "gemini-2.0-flash-exp-image-generation",
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: profileImage.mimeType,
+                      data: profileImage.data,
+                    },
                   },
-                },
-                { text: personalizedPrompt },
-              ],
+                  { text: personalizedPrompt },
+                ],
+              },
+            ],
+            config: {
+              responseModalities: ["Text", "Image"],
             },
-          ],
-          config: {
-            responseModalities: ["Text", "Image"],
-          },
-        });
+          }),
+          90000, // 90 second timeout for image generation
+          "Image generation timeout"
+        );
 
         // Check for image in response
         if (response.candidates && response.candidates[0]?.content?.parts) {
@@ -322,14 +334,18 @@ DO NOT:
 - Make it portrait orientation
 - Add card borders, frames, or trading card elements`;
 
-    // Use new SDK with responseModalities for image generation
-    const response = await genAINew.models.generateContent({
-      model: "gemini-2.0-flash-exp-image-generation",
-      contents: imagePrompt,
-      config: {
-        responseModalities: ["Text", "Image"],
-      },
-    });
+    // Use new SDK with responseModalities for image generation (90s timeout)
+    const response = await withTimeout(
+      genAINew.models.generateContent({
+        model: "gemini-2.0-flash-exp-image-generation",
+        contents: imagePrompt,
+        config: {
+          responseModalities: ["Text", "Image"],
+        },
+      }),
+      90000, // 90 second timeout for image generation
+      "Image generation timeout"
+    );
 
     console.log("Generic response received");
 
@@ -763,7 +779,11 @@ Remember: Respond with valid JSON only. No markdown formatting, no code blocks, 
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
         console.log(`=== GEMINI ATTEMPT ${attempt} ===`);
-        const result = await model.generateContent(prompt);
+        const result = await withTimeout(
+          model.generateContent(prompt),
+          60000, // 60 second timeout for text generation
+          "Gemini API timeout - request took too long"
+        );
         const response = result.response;
 
         // Log finish reason to debug truncation

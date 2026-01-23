@@ -9,6 +9,14 @@ import { storeCard } from "@/lib/card-storage";
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const genAINew = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
+// Timeout wrapper for API calls
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> {
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error(errorMessage)), timeoutMs);
+  });
+  return Promise.race([promise, timeoutPromise]);
+}
+
 // Fetch image as base64 from URL
 async function fetchImageAsBase64(imageUrl: string): Promise<{ data: string; mimeType: string } | null> {
   try {
@@ -115,26 +123,30 @@ ABSOLUTELY DO NOT:
 - Add card borders, frames, or make it look like a trading card`;
 
       try {
-        const response = await genAINew.models.generateContent({
-          model: "gemini-2.0-flash-exp-image-generation",
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  inlineData: {
-                    mimeType: profileImage.mimeType,
-                    data: profileImage.data,
+        const response = await withTimeout(
+          genAINew.models.generateContent({
+            model: "gemini-2.0-flash-exp-image-generation",
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  {
+                    inlineData: {
+                      mimeType: profileImage.mimeType,
+                      data: profileImage.data,
+                    },
                   },
-                },
-                { text: personalizedPrompt },
-              ],
+                  { text: personalizedPrompt },
+                ],
+              },
+            ],
+            config: {
+              responseModalities: ["Text", "Image"],
             },
-          ],
-          config: {
-            responseModalities: ["Text", "Image"],
-          },
-        });
+          }),
+          90000,
+          "Image generation timeout"
+        );
 
         if (response.candidates && response.candidates[0]?.content?.parts) {
           for (const part of response.candidates[0].content.parts) {
@@ -207,13 +219,17 @@ ABSOLUTELY DO NOT:
 - Be mean-spirited (affectionate roasting, not cruel)
 - Add card borders, frames, or make it look like a trading card`;
 
-    const response = await genAINew.models.generateContent({
-      model: "gemini-2.0-flash-exp-image-generation",
-      contents: illustrationPrompt,
-      config: {
-        responseModalities: ["Text", "Image"],
-      },
-    });
+    const response = await withTimeout(
+      genAINew.models.generateContent({
+        model: "gemini-2.0-flash-exp-image-generation",
+        contents: illustrationPrompt,
+        config: {
+          responseModalities: ["Text", "Image"],
+        },
+      }),
+      90000,
+      "Image generation timeout"
+    );
 
     if (response.candidates && response.candidates[0]?.content?.parts) {
       for (const part of response.candidates[0].content.parts) {
@@ -563,10 +579,14 @@ Use their PUBLIC persona, achievements, and known characteristics:
 
 Remember: This is a fun roast card, keep it entertaining and witty!`;
 
-    const chatResponse = await model.generateContent([
-      { text: CELEBRITY_ROAST_PROMPT },
-      { text: prompt },
-    ]);
+    const chatResponse = await withTimeout(
+      model.generateContent([
+        { text: CELEBRITY_ROAST_PROMPT },
+        { text: prompt },
+      ]),
+      60000, // 60 second timeout for text generation
+      "Gemini API timeout"
+    );
 
     const responseText = chatResponse.response.text();
 
