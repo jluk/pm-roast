@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { domToPng } from "modern-screenshot";
 import { RoastResult, DreamRole, DREAM_ROLES } from "@/lib/types";
@@ -236,33 +236,59 @@ Get your PM card: ${shareUrl}
   // Works for anyone who's been on Lenny's Podcast, not just pre-cached legends
   const hasLennyBanner = result.userName && hasLennyEpisode(result.userName);
 
-  // Calculate dynamic font sizes for roast section based on content length
-  // Includes banger quote + 3 bullets, sized to fit within the fixed container
-  const roastFontSizes = useMemo(() => {
-    const quoteLength = result.bangerQuote?.length || 0;
-    const bulletsLength = result.roastBullets.slice(0, 3).reduce((acc, b) => acc + b.length, 0);
-    const totalLength = quoteLength + bulletsLength;
+  // Dynamic auto-fit font sizing for roast section
+  const roastContainerRef = useRef<HTMLDivElement>(null);
+  const [quoteFontSize, setQuoteFontSize] = useState(16);
+  const [bulletFontSize, setBulletFontSize] = useState(14);
 
-    // When Lenny banner is showing, use more compact sizing
-    if (hasLennyBanner) {
-      if (totalLength < 250) {
-        return { quote: "text-sm line-clamp-3", bullet: "text-xs line-clamp-2", spacing: "space-y-2", padding: "p-1.5", heatBar: "w-2 h-1" };
-      } else {
-        return { quote: "text-xs line-clamp-2", bullet: "text-xs line-clamp-2", spacing: "space-y-1.5", padding: "p-1", heatBar: "w-2 h-1" };
-      }
-    }
+  useEffect(() => {
+    const calculateFontSizes = () => {
+      if (!roastContainerRef.current) return;
 
-    // Normal sizing - fit within container, use line-clamp to prevent overflow
-    if (totalLength < 250) {
-      return { quote: "text-base line-clamp-3", bullet: "text-sm line-clamp-3", spacing: "space-y-3", padding: "p-2", heatBar: "w-2.5 h-1.5" };
-    } else if (totalLength < 400) {
-      return { quote: "text-sm line-clamp-3", bullet: "text-[13px] line-clamp-2", spacing: "space-y-2", padding: "p-1.5", heatBar: "w-2.5 h-1.5" };
-    } else if (totalLength < 550) {
-      return { quote: "text-sm line-clamp-2", bullet: "text-xs line-clamp-2", spacing: "space-y-2", padding: "p-1.5", heatBar: "w-2 h-1" };
-    } else {
-      return { quote: "text-xs line-clamp-2", bullet: "text-xs line-clamp-2", spacing: "space-y-1.5", padding: "p-1", heatBar: "w-2 h-1" };
-    }
-  }, [result.roastBullets, result.bangerQuote, hasLennyBanner]);
+      const containerHeight = roastContainerRef.current.clientHeight;
+      const containerWidth = roastContainerRef.current.clientWidth - 40; // padding
+
+      // Estimate chars per line at base font size (~7px per char average)
+      const charsPerLineAt14px = Math.floor(containerWidth / 7);
+
+      // Calculate lines needed for content
+      const quoteText = result.bangerQuote || '';
+      const bullets = result.roastBullets.slice(0, 3);
+
+      // Header takes ~60px, quote border section takes ~20px extra
+      const headerHeight = rankInfo ? 70 : 50; // Rank badge adds height
+      const quotePadding = 32; // border-b spacing
+      const bulletPadding = bullets.length * 16; // spacing between bullets
+      const availableHeight = containerHeight - headerHeight - quotePadding - bulletPadding - 20;
+
+      // Calculate lines needed at base font
+      const quoteLines = Math.ceil(quoteText.length / charsPerLineAt14px);
+      const bulletLines = bullets.reduce((acc, b) => acc + Math.ceil(b.length / charsPerLineAt14px), 0);
+      const totalLines = quoteLines + bulletLines;
+
+      if (totalLines === 0) return;
+
+      // Calculate font size to fit (lineHeight ~1.5)
+      const lineHeightMultiplier = 1.5;
+      const idealFontSize = availableHeight / (totalLines * lineHeightMultiplier);
+
+      // Clamp font sizes with min/max
+      // Quote: 11-18px, Bullets: 11-15px
+      const maxQuote = hasLennyBanner ? 14 : 18;
+      const maxBullet = hasLennyBanner ? 12 : 15;
+
+      const newQuoteFontSize = Math.max(11, Math.min(maxQuote, idealFontSize));
+      const newBulletFontSize = Math.max(11, Math.min(maxBullet, idealFontSize * 0.9));
+
+      setQuoteFontSize(newQuoteFontSize);
+      setBulletFontSize(newBulletFontSize);
+    };
+
+    calculateFontSizes();
+    // Recalculate on window resize
+    window.addEventListener('resize', calculateFontSizes);
+    return () => window.removeEventListener('resize', calculateFontSizes);
+  }, [result.bangerQuote, result.roastBullets, hasLennyBanner, rankInfo]);
 
   // Go straight to full results - no multi-step reveal
   return (
@@ -375,7 +401,7 @@ Get your PM card: ${shareUrl}
               {/* Singed gradient accent line */}
               <div className="h-[2px] bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 shrink-0" />
 
-              <div className="p-5 flex-1 flex flex-col min-h-0 overflow-hidden">
+              <div ref={roastContainerRef} className="p-5 flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Header with Global Rank badge */}
                 <div className="flex items-center justify-between mb-4 shrink-0">
                   <div className="flex items-center gap-2">
@@ -413,17 +439,20 @@ Get your PM card: ${shareUrl}
                 </div>
 
                 {/* Banger Quote - prominently displayed under header */}
-                <div className="flex items-start gap-3 mb-3 pb-3 border-b border-white/10 shrink-0 overflow-hidden">
+                <div className="flex items-start gap-3 mb-3 pb-3 border-b border-white/10 overflow-hidden">
                   <svg className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
                   </svg>
-                  <p className={`${roastFontSizes.quote} text-white/90 font-medium leading-snug`}>
+                  <p
+                    className="text-white/90 font-medium leading-snug"
+                    style={{ fontSize: `${quoteFontSize}px` }}
+                  >
                     {stripMarkdown(result.bangerQuote)}
                   </p>
                 </div>
 
                 {/* Roast bullets - limit to 3 */}
-                <div className={`${roastFontSizes.spacing} flex-1 min-h-0 overflow-hidden`}>
+                <div className="space-y-2 flex-1 min-h-0 overflow-hidden">
                   {result.roastBullets.slice(0, 3).map((bullet, index) => {
                     const heatLevel = index === 0 ? 3 : index === 1 ? 2 : 1;
                     return (
@@ -432,14 +461,14 @@ Get your PM card: ${shareUrl}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 + index * 0.1 }}
-                        className={`flex gap-2 items-start ${roastFontSizes.padding} rounded-lg hover:bg-white/[0.02] transition-all duration-300 overflow-hidden`}
+                        className="flex gap-2 items-start p-1.5 rounded-lg hover:bg-white/[0.02] transition-all duration-300 overflow-hidden"
                       >
                         {/* Heat Meter */}
                         <div className="flex flex-col gap-0.5 shrink-0 mt-1">
                           {[3, 2, 1].map((level) => (
                             <div
                               key={level}
-                              className={`${roastFontSizes.heatBar} rounded-sm transition-all ${
+                              className={`w-2 h-1 rounded-sm transition-all ${
                                 level <= heatLevel
                                   ? level === 3
                                     ? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.6)]"
@@ -451,7 +480,10 @@ Get your PM card: ${shareUrl}
                             />
                           ))}
                         </div>
-                        <p className={`${roastFontSizes.bullet} text-zinc-300/90 leading-snug flex-1 min-w-0`}>
+                        <p
+                          className="text-zinc-300/90 leading-snug flex-1 min-w-0"
+                          style={{ fontSize: `${bulletFontSize}px` }}
+                        >
                           {stripMarkdown(bullet)}
                         </p>
                       </motion.div>
