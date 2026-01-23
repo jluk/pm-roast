@@ -389,7 +389,27 @@ function ExpandedCardView({
                 </div>
               </motion.div>
 
-              {/* Tile 2: CTA Buttons */}
+              {/* Tile 2: Banger Quote */}
+              <motion.div
+                initial={{ opacity: 0, x: 30 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.5, type: "spring", stiffness: 100 }}
+                className="relative group"
+              >
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+                <div className="relative p-5 rounded-2xl bg-black/40 backdrop-blur-xl border border-orange-500/20 shadow-xl">
+                  <div className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+                    </svg>
+                    <p className="text-[15px] text-white/90 font-medium leading-relaxed italic">
+                      &ldquo;{card.bangerQuote}&rdquo;
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Tile 3: CTA Buttons */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
