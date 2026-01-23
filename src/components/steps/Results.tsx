@@ -788,6 +788,25 @@ Get your PM card: ${shareUrl}
                   })
                   .filter((ep): ep is NonNullable<typeof ep> => ep !== null);
 
+                // If this is a legend who has been on Lenny's Podcast, add their episode at the top
+                if (isLegend && result.userName && hasLennyEpisode(result.userName)) {
+                  const legendEpisode = getLennyEpisode(result.userName);
+                  if (legendEpisode) {
+                    const legendUrl = `https://www.youtube.com/watch?v=${legendEpisode.videoId}`;
+                    // Check if it's not already in the list
+                    const alreadyIncluded = verifiedEpisodes.some(ep => ep.verifiedUrl === legendUrl);
+                    if (!alreadyIncluded) {
+                      verifiedEpisodes.unshift({
+                        title: legendEpisode.title,
+                        guest: legendEpisode.guest,
+                        reason: "Hear directly from them on their PM journey",
+                        verifiedUrl: legendUrl,
+                        knownEpisode: legendEpisode,
+                      });
+                    }
+                  }
+                }
+
                 if (verifiedEpisodes.length === 0) {
                   return (
                     <p className="text-sm text-white/60 ml-14">
