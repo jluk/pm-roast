@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { kv } from "@vercel/kv";
 import { getFamousCardByName, searchFamousCards } from "@/lib/famous-cards";
+import { hasLennyEpisode, getLennyEpisode } from "@/lib/lenny-episodes";
 
 // Check if the Wikipedia result title is relevant to the search query
 function isRelevantWikipediaResult(searchQuery: string, resultTitle: string): boolean {
@@ -110,6 +111,19 @@ export async function POST(request: NextRequest) {
           reason: `${bestMatch.title} at ${bestMatch.company}`,
           imageUrl: bestMatch.imageUrl,
           source: "pre-generated",
+        });
+      }
+    }
+
+    // Check if they've been on Lenny's Podcast - that's automatic verification
+    if (hasLennyEpisode(normalizedName)) {
+      const lennyEpisode = getLennyEpisode(normalizedName);
+      if (lennyEpisode) {
+        return NextResponse.json({
+          isFamous: true,
+          name: lennyEpisode.guest, // Use the properly formatted name from Lenny's
+          reason: `Featured on Lenny's Podcast: "${lennyEpisode.title}"`,
+          source: "lenny-podcast",
         });
       }
     }
