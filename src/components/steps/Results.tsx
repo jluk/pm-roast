@@ -363,29 +363,9 @@ Get your PM card: ${shareUrl}
           </p>
         </motion.div>
 
-        {/* Right: Bento Glass Tiles */}
-        <div className="flex flex-col gap-3 w-full lg:flex-1">
-          {/* Banger Quote - The funniest line, prominently displayed */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.5, ease: "easeOut" }}
-            className="relative group shrink-0"
-          >
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-orange-500/20 via-red-500/20 to-pink-500/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            <div className="relative p-5 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-xl">
-              <div className="flex items-start gap-4">
-                <svg className="w-6 h-6 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
-                </svg>
-                <p className="text-lg md:text-xl text-white/90 font-medium leading-relaxed">
-                  {stripMarkdown(result.bangerQuote)}
-                </p>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* The Roast - 3 high-impact bullet points only */}
+        {/* Right: Bento Glass Tiles - fixed height to match card */}
+        <div className="flex flex-col gap-3 w-full lg:flex-1 lg:h-[560px]">
+          {/* The Roast - Banger quote + 3 high-impact bullet points */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -397,16 +377,16 @@ Get your PM card: ${shareUrl}
               {/* Singed gradient accent line */}
               <div className="h-[2px] bg-gradient-to-r from-orange-600 via-red-500 to-orange-600 shrink-0" />
 
-              <div className={`${hasLennyBanner ? 'p-4' : 'p-5'} flex-1 flex flex-col justify-center min-h-0 overflow-hidden`}>
+              <div className="p-4 flex-1 flex flex-col min-h-0 overflow-hidden">
                 {/* Header with Global Rank badge */}
-                <div className={`flex items-center justify-between ${hasLennyBanner ? 'mb-3' : 'mb-5'}`}>
+                <div className="flex items-center justify-between mb-3 shrink-0">
                   <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
-                      <svg className="w-4 h-4 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
+                    <div className="w-6 h-6 rounded-md bg-gradient-to-br from-orange-500/30 to-red-600/30 flex items-center justify-center border border-orange-500/30">
+                      <svg className="w-3.5 h-3.5 text-orange-400" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M12 23c-3.866 0-7-3.134-7-7 0-2.5 1.5-4.5 3-6.5s3-4.5 3-7.5c0 0 1 2 2 4 .5-1 1-2 1-3 2.5 3.5 5 6.5 5 13 0 3.866-3.134 7-7 7zm0-2c2.761 0 5-2.239 5-5 0-2.5-1.5-5-3-7-.5 1-1 2-2 3-.5-1-1-2-1.5-3-1 1.5-2.5 3.5-2.5 7 0 2.761 2.239 5 5 5z"/>
                       </svg>
                     </div>
-                    <h3 className="text-base font-semibold text-white">The Roast</h3>
+                    <h3 className="text-sm font-semibold text-white">The Roast</h3>
                   </div>
 
                   {/* Global Rank Badge */}
@@ -415,18 +395,18 @@ Get your PM card: ${shareUrl}
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ delay: 0.6 }}
-                      className="flex items-center gap-3 px-4 py-2 rounded-lg bg-gradient-to-r from-amber-900/40 to-yellow-900/40 border border-amber-500/50"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-900/40 to-yellow-900/40 border border-amber-500/50"
                       style={{ boxShadow: '0 0 20px rgba(251, 191, 36, 0.15), 0 0 40px rgba(251, 191, 36, 0.08), inset 0 1px 0 rgba(251, 191, 36, 0.1)' }}
                     >
-                      <span className="text-xl">🏆</span>
+                      <span className="text-base">🏆</span>
                       <div className="flex flex-col items-end">
-                        <span className="text-[10px] uppercase tracking-wider text-amber-400/70 font-medium leading-none">Global Rank</span>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-xl font-bold text-amber-300 leading-none">
+                        <span className="text-[9px] uppercase tracking-wider text-amber-400/70 font-medium leading-none">Rank</span>
+                        <div className="flex items-baseline gap-0.5">
+                          <span className="text-base font-bold text-amber-300 leading-none">
                             #{rankInfo.rank.toLocaleString()}
                           </span>
-                          <span className="text-xs text-amber-400/60">
-                            / {rankInfo.totalRoasts.toLocaleString()}
+                          <span className="text-[10px] text-amber-400/60">
+                            /{rankInfo.totalRoasts.toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -434,8 +414,18 @@ Get your PM card: ${shareUrl}
                   )}
                 </div>
 
+                {/* Banger Quote - prominently displayed under header */}
+                <div className="flex items-start gap-3 mb-4 pb-3 border-b border-white/10 shrink-0">
+                  <svg className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/>
+                  </svg>
+                  <p className="text-sm text-white/90 font-medium leading-snug">
+                    {stripMarkdown(result.bangerQuote)}
+                  </p>
+                </div>
+
                 {/* Roast bullets - limit to 3 */}
-                <div className={`${roastFontSizes.spacing}`}>
+                <div className="space-y-2 flex-1 overflow-hidden">
                   {result.roastBullets.slice(0, 3).map((bullet, index) => {
                     const heatLevel = index === 0 ? 3 : index === 1 ? 2 : 1;
                     return (
@@ -444,14 +434,14 @@ Get your PM card: ${shareUrl}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.6 + index * 0.1 }}
-                        className={`flex gap-3 items-start ${roastFontSizes.padding} rounded-lg hover:bg-white/[0.02] transition-all duration-300`}
+                        className="flex gap-2.5 items-start p-1.5 rounded-lg hover:bg-white/[0.02] transition-all duration-300"
                       >
                         {/* Heat Meter */}
-                        <div className="flex flex-col gap-0.5 shrink-0 mt-1.5">
+                        <div className="flex flex-col gap-0.5 shrink-0 mt-1">
                           {[3, 2, 1].map((level) => (
                             <div
                               key={level}
-                              className={`w-2.5 h-1.5 rounded-sm transition-all ${
+                              className={`w-2 h-1 rounded-sm transition-all ${
                                 level <= heatLevel
                                   ? level === 3
                                     ? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.6)]"
@@ -463,7 +453,7 @@ Get your PM card: ${shareUrl}
                             />
                           ))}
                         </div>
-                        <p className={`${roastFontSizes.bullet} text-zinc-300/90 leading-relaxed ${hasLennyBanner ? 'line-clamp-2' : ''}`}>
+                        <p className="text-[13px] text-zinc-300/90 leading-snug line-clamp-2">
                           {stripMarkdown(bullet)}
                         </p>
                       </motion.div>
