@@ -1515,7 +1515,7 @@ export function getLennyEpisodeUrl(guestName: string): string | null {
   const normalizedName = guestName.toLowerCase().trim();
   const episode = LENNY_EPISODES[normalizedName];
   if (episode) {
-    return `https://www.youtube.com/watch?v=\${episode.videoId}`;
+    return `https://www.youtube.com/watch?v=${episode.videoId}`;
   }
   return null;
 }
@@ -1546,7 +1546,7 @@ export function getVerifiedEpisodeUrl(guestName: string, episodeTitle: string): 
   // First try exact guest match
   const exactMatch = getLennyEpisodeUrl(guestName);
   if (exactMatch) return exactMatch;
-  
+
   // Try searching by title keywords
   const titleWords = episodeTitle.toLowerCase().split(/\s+/);
   for (const [key, episode] of Object.entries(LENNY_EPISODES)) {
@@ -1554,9 +1554,9 @@ export function getVerifiedEpisodeUrl(guestName: string, episodeTitle: string): 
     // If multiple title words match, it's likely the right episode
     const matches = titleWords.filter(word => word.length > 3 && episodeTitleLower.includes(word));
     if (matches.length >= 2) {
-      return `https://www.youtube.com/watch?v=\${episode.videoId}`;
+      return `https://www.youtube.com/watch?v=${episode.videoId}`;
     }
   }
-  
+
   return null;
 }
