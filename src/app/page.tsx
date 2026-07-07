@@ -105,6 +105,8 @@ export default function Home() {
   const [dreamRole, setDreamRole] = useState<DreamRole | null>("founder");
   const [result, setResult] = useState<RoastResult | null>(null);
   const [cardId, setCardId] = useState<string | null>(null);
+  // Client-measured wall-clock time of the last generation (for the "Under the Hood" panel)
+  const [generationMs, setGenerationMs] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingLinkedin, setIsLoadingLinkedin] = useState(false);
   const [inputSource, setInputSource] = useState<"linkedin" | "pdf" | "manual" | "legend">("linkedin");
@@ -1014,6 +1016,7 @@ export default function Home() {
     setStep("analyzing");
     setError(null);
     setIsLoadingLinkedin(true);
+    const genStart = performance.now();
 
     try {
       const response = await fetch("/api/roast-legend", {
@@ -1037,6 +1040,7 @@ export default function Home() {
 
       setResult(data.card);
       setCardId(data.cardId || null);
+      setGenerationMs(performance.now() - genStart);
       setStep("results");
       incrementRoastCount();
     } catch (err) {
@@ -1126,6 +1130,7 @@ export default function Home() {
 
     setStep("analyzing");
     setError(null);
+    const genStart = performance.now();
 
     try {
       const formData = new FormData();
@@ -1154,6 +1159,7 @@ export default function Home() {
       const { cardId: newCardId, ...roastResult } = data;
       setResult(roastResult);
       setCardId(newCardId || null);
+      setGenerationMs(performance.now() - genStart);
       setStep("results");
       incrementRoastCount();
     } catch (err) {
@@ -2647,6 +2653,8 @@ export default function Home() {
               onReroll={handleReroll}
               isLegend={inputSource === "legend"}
               cardId={cardId || undefined}
+              inputImage={userProfileImagePreview}
+              generationMs={generationMs}
             />
           )}
 

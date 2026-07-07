@@ -9,6 +9,7 @@ import { PokemonCard, PMElement } from "@/components/PokemonCard";
 import { CardBack } from "@/components/CardBack";
 import { getCardRarity, CardRarity } from "@/components/HoloCard";
 import { getLennyEpisode, hasLennyEpisode, getVerifiedEpisodeUrl } from "@/lib/lenny-episodes";
+import { GenMediaPanel } from "@/components/GenMediaPanel";
 
 // Rarity display info
 const RARITY_INFO: Record<CardRarity, {
@@ -70,6 +71,11 @@ interface ResultsProps {
   isSharePage?: boolean;
   isLegend?: boolean;
   cardId?: string;
+  // Source photo the user supplied (base64 data URL), present in-session only —
+  // powers the input→output likeness comparison in the "Under the Hood" panel.
+  inputImage?: string | null;
+  // Client-measured wall-clock time for the generation that produced `result`.
+  generationMs?: number | null;
 }
 
 // Get verified YouTube URL for Lenny's Podcast episodes - returns null if not verified
@@ -88,7 +94,7 @@ function stripMarkdown(text: string): string {
     .trim();
 }
 
-export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage = false, isLegend = false, cardId }: ResultsProps) {
+export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage = false, isLegend = false, cardId, inputImage = null, generationMs = null }: ResultsProps) {
   const [copied, setCopied] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -900,6 +906,17 @@ Get your PM card: ${shareUrl}
           </div>
         </div>
       </motion.div>
+
+      {/* Under the Hood — GenMedia pipeline, likeness demo, metrics & safety */}
+      <GenMediaPanel
+        result={result}
+        rankInfo={rankInfo}
+        inputImage={inputImage}
+        generationMs={generationMs}
+        isLegend={isLegend}
+        onRegenerate={onReroll && !isSharePage ? handleReroll : undefined}
+        isRegenerating={isRerolling}
+      />
 
     </motion.div>
   );
