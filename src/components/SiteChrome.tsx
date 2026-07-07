@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 
-type NavSection = "roast-me" | "mt-roastmore" | "archetypes";
+type NavSection = "roast-me" | "mt-roastmore" | "fusion" | "archetypes";
 
 const NAV_ITEMS: { id: NavSection; label: string; href: string }[] = [
   { id: "roast-me", label: "Roast Me", href: "/#roast-me" },
   { id: "mt-roastmore", label: "Mt. Roastmore", href: "/#mt-roastmore" },
+  { id: "fusion", label: "Fusion", href: "/#fusion" },
   { id: "archetypes", label: "Archetypes", href: "/#archetypes" },
 ];
 

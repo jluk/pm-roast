@@ -14,6 +14,7 @@ import { HeroCard } from "@/components/InteractiveCard";
 import { FAMOUS_CARDS } from "@/lib/famous-cards";
 import { CELEBRITY_CARDS } from "@/lib/celebrity-cards";
 import { SiteNav, SiteFooter } from "@/components/SiteChrome";
+import { FusionLab } from "@/components/FusionLab";
 
 // LinkedIn URL validation regex
 const LINKEDIN_URL_REGEX = /^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[\w-]+\/?$/i;
@@ -126,7 +127,7 @@ export default function Home() {
   // Set up Intersection Observer for nav section tracking
   // Re-run when step changes since mt-roastmore is inside conditionally rendered FamousCardsGallery
   useEffect(() => {
-    const sections = ["roast-me", "mt-roastmore", "archetypes"];
+    const sections = ["roast-me", "mt-roastmore", "fusion", "archetypes"];
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -161,7 +162,7 @@ export default function Home() {
     if (hash) {
       const sectionId = hash.slice(1);
       // Immediately set the active section to match the hash
-      if (["roast-me", "mt-roastmore", "archetypes"].includes(sectionId)) {
+      if (["roast-me", "mt-roastmore", "fusion", "archetypes"].includes(sectionId)) {
         setActiveSection(sectionId);
       }
       // Wait for DOM to be ready, then scroll to the element
@@ -2562,6 +2563,9 @@ export default function Home() {
 
               {/* Famous Cards Gallery */}
               <FamousCardsGallery />
+
+              {/* Fusion Lab */}
+              <FusionLab />
 
               {/* Example Gallery */}
               <div id="archetypes" className="scroll-mt-20">

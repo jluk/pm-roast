@@ -127,6 +127,11 @@ export interface RoastResult {
 
   // Natural rival - their arch-nemesis (person or concept they fear)
   naturalRival: string;
+
+  // Present only on fusion ("polymerized") cards — the two parent cards
+  fusion?: {
+    parents: { id: string; name: string; emoji: string }[];
+  };
 }
 
 export type Step = "upload" | "analyzing" | "results";
