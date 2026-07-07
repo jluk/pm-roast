@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { PMElement, PMMove } from "./PokemonCard";
 import { InteractiveCard } from "./InteractiveCard";
 import { getCardRarity } from "./HoloCard";
+import { SectionHeader } from "./SectionHeader";
 
 // Example card data showcasing different PM archetypes - 9 cards for 3x3 grid
 // Internet humor meets tech culture - unhinged but relatable PM energy
@@ -296,20 +297,14 @@ function GalleryCard({ card, index }: { card: typeof EXAMPLE_CARDS[0]; index: nu
 
 export function ExampleGallery() {
   return (
-    <section className="w-full max-w-7xl mx-auto mt-24 px-4">
-      <motion.div
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-        className="text-center mb-12"
-      >
-        <h2 className="text-3xl font-bold text-white mb-3">
-          What PM archetype are you?
-        </h2>
-        <p className="text-muted-foreground text-base">
-          Join thousands of PMs who&apos;ve discovered their true career identity
-        </p>
-      </motion.div>
+    <section className="w-full max-w-7xl mx-auto mt-12 md:mt-16 px-4">
+      <div className="mb-12">
+        <SectionHeader
+          eyebrow="Find Your Type"
+          title="What PM archetype are you?"
+          subtitle="Join thousands of PMs who've discovered their true career identity."
+        />
+      </div>
 
       {/* 3x3 Card Gallery Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 justify-items-center">

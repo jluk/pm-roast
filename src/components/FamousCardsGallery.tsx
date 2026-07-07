@@ -10,6 +10,7 @@ type AnyCard = FamousCard | CelebrityCard;
 import { PokemonCard } from "./PokemonCard";
 import { CardBack } from "./CardBack";
 import { getCardRarity, CardRarity } from "./HoloCard";
+import { SectionHeader } from "./SectionHeader";
 
 // Rarity display info (matching Results.tsx)
 const RARITY_INFO: Record<CardRarity, {
@@ -909,11 +910,14 @@ function PackSelection({ onSelectPack, isOpening }: { onSelectPack: (color: Pack
         animate={{ opacity: 1, y: 0 }}
         className="mb-6 sm:mb-8"
       >
-        <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">
-          🎁 Free Booster Pack
+        <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-indigo-300/70">
+          Keep Pulling
+        </span>
+        <h3 className="mt-3 text-2xl sm:text-3xl font-semibold tracking-tight text-white">
+          Free Booster Pack
         </h3>
-        <p className="text-muted-foreground text-sm">
-          Choose a pack to reveal more legends
+        <p className="mt-2 text-[15px] text-white/50">
+          Choose a pack to reveal more legends.
         </p>
       </motion.div>
 
@@ -1086,16 +1090,13 @@ export function FamousCardsGallery() {
   return (
     <div className={`pt-8 md:pt-12 ${packOpened ? "pb-8 md:pb-12" : "pb-0"}`}>
       {/* Section Header */}
-      <div id="mt-roastmore" className="text-center mb-8 md:mb-10 px-4 scroll-mt-16">
-        <h2 className="text-2xl md:text-3xl font-black text-white mb-2">
-          Mt. Roastmore
-        </h2>
-        <p className="text-white/50 text-sm max-w-md mx-auto">
-          The best and worst PMs, immortalized in roast.
-        </p>
-        <p className="text-white/40 text-xs mt-1">
-          <span className="hidden md:inline">Hover to peek the burn.</span><span className="md:hidden">Tap to flip.</span>
-        </p>
+      <div id="mt-roastmore" className="px-4 mb-10 md:mb-12 scroll-mt-16">
+        <SectionHeader
+          eyebrow="Hall of Fame & Shame"
+          title="Mt. Roastmore"
+          subtitle="The best and worst PMs, immortalized in roast."
+          hint={<><span className="hidden md:inline">Hover to peek the burn.</span><span className="md:hidden">Tap to flip.</span></>}
+        />
       </div>
 
       {/* First Row - Always visible */}
