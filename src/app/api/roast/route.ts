@@ -3,10 +3,14 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GoogleGenAI } from "@google/genai";
 import { RoastResult, DreamRole, DREAM_ROLES, PMElement } from "@/lib/types";
 import { storeCard } from "@/lib/card-storage";
-import { ELEMENT_SETTINGS } from "@/lib/image-generation";
+import { ELEMENT_SETTINGS, IMAGE_MODEL } from "@/lib/image-generation";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const genAINew = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+
+// Allow up to 60s on Vercel: text + image generation can exceed the default
+// ~15s function limit, which otherwise kills the request (a silent failure).
+export const maxDuration = 60;
 
 // Timeout wrapper for API calls
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> {
@@ -236,7 +240,7 @@ ABSOLUTELY DO NOT:
         // Use new SDK for image generation with profile photo (90s timeout)
         const response = await withTimeout(
           genAINew.models.generateContent({
-            model: "gemini-2.0-flash-exp-image-generation",
+            model: IMAGE_MODEL,
             contents: [
               {
                 role: "user",
@@ -255,7 +259,7 @@ ABSOLUTELY DO NOT:
               responseModalities: ["Text", "Image"],
             },
           }),
-          90000, // 90 second timeout for image generation
+          45000, // 45s (kept under the 60s function budget)
           "Image generation timeout"
         );
 
@@ -337,13 +341,13 @@ DO NOT:
     // Use new SDK with responseModalities for image generation (90s timeout)
     const response = await withTimeout(
       genAINew.models.generateContent({
-        model: "gemini-2.0-flash-exp-image-generation",
+        model: IMAGE_MODEL,
         contents: imagePrompt,
         config: {
           responseModalities: ["Text", "Image"],
         },
       }),
-      90000, // 90 second timeout for image generation
+      45000, // 45s (kept under the 60s function budget)
       "Image generation timeout"
     );
 

@@ -574,7 +574,7 @@ ABSOLUTELY DO NOT:
 
   try {
     const response = await genAI.models.generateContent({
-      model: "gemini-2.0-flash-exp-image-generation",
+      model: "gemini-2.5-flash-image",
       contents: [
         {
           role: "user",

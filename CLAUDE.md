@@ -13,8 +13,9 @@ PM Roast - A "Linear-style" web app that provides brutally honest AI career coac
 - **Animations**: Framer Motion
 - **Font**: Geist Sans
 - **AI Models**:
-  - Gemini Flash 2.0 for text generation (roast analysis)
-  - Gemini 2.0 Flash Exp for image generation (card artwork)
+  - `gemini-2.5-flash` for text generation (roast analysis) — used by `/api/roast` and `/api/roast-legend`
+  - `gemini-2.5-flash-image` ("Nano Banana") for image generation (card artwork) — centralized as `IMAGE_MODEL` in `src/lib/image-generation.ts`
+  - ⚠️ Gemini models get retired without warning. If cards submit but come back with no artwork (or roasts silently 500), a model was likely deprecated — run `curl "https://generativelanguage.googleapis.com/v1beta/models?key=$GEMINI_API_KEY"` to see live models, then update `IMAGE_MODEL` and the text model string. The old `gemini-2.0-flash-exp-image-generation` and `gemini-2.0-flash` were both retired.
 - **PDF Parsing**: pdf-parse
 - **Card Storage**: Vercel KV (Redis) for permanent card URLs
 - **OG Images**: Vercel Blob storage for pre-generated social preview images
@@ -105,10 +106,11 @@ public/
 
 ### `/api/roast`
 - Accepts `multipart/form-data` with `file` (PDF), `profileText`, `dreamRole`, `profileImageBase64`
-- Generates roast text via Gemini Flash 2.0
-- Generates personalized card image via Gemini 2.0 Flash Exp (if profile photo provided)
+- Generates roast text via `gemini-2.5-flash`
+- Generates personalized card image via `gemini-2.5-flash-image` (if profile photo provided)
 - Falls back to Pokemon creature image if no photo
 - Stores result in Vercel KV, returns `cardId` for permanent URL
+- `export const maxDuration = 60` — text + image generation runs ~20-45s and would otherwise hit Vercel's default ~15s function limit and fail silently
 
 ### `/api/roast-legend`
 - Generates roasts for famous people (celebrities, tech leaders, etc.)

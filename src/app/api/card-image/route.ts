@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 import { PMElement } from "@/lib/types";
-import { ELEMENT_SETTINGS } from "@/lib/image-generation";
+import { ELEMENT_SETTINGS, IMAGE_MODEL } from "@/lib/image-generation";
 
 const genAINew = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+
+// Image generation can exceed Vercel's default ~15s function limit.
+export const maxDuration = 60;
 
 // Generate archetype image using Gemini
 async function generateArchetypeImage(
@@ -63,7 +66,7 @@ ABSOLUTELY DO NOT:
 - Make it generic or boring - should have personality and charm`;
 
     const response = await genAINew.models.generateContent({
-      model: "gemini-2.0-flash-exp-image-generation",
+      model: IMAGE_MODEL,
       contents: imagePrompt,
       config: {
         responseModalities: ["Text", "Image"],

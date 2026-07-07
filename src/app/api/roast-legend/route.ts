@@ -6,9 +6,14 @@ import { RoastResult, DreamRole, DREAM_ROLES, PMElement } from "@/lib/types";
 import { FamousCard, getFamousCardByName, searchFamousCards } from "@/lib/famous-cards";
 import { storeCard } from "@/lib/card-storage";
 import { hasLennyEpisode, getLennyEpisode } from "@/lib/lenny-episodes";
+import { IMAGE_MODEL } from "@/lib/image-generation";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 const genAINew = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+
+// Allow up to 60s on Vercel: text + image generation can exceed the default
+// ~15s function limit, which otherwise kills the request (a silent failure).
+export const maxDuration = 60;
 
 // Timeout wrapper for API calls
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, errorMessage: string): Promise<T> {
@@ -126,7 +131,7 @@ ABSOLUTELY DO NOT:
       try {
         const response = await withTimeout(
           genAINew.models.generateContent({
-            model: "gemini-2.0-flash-exp-image-generation",
+            model: IMAGE_MODEL,
             contents: [
               {
                 role: "user",
@@ -145,7 +150,7 @@ ABSOLUTELY DO NOT:
               responseModalities: ["Text", "Image"],
             },
           }),
-          90000,
+          45000,
           "Image generation timeout"
         );
 
@@ -222,13 +227,13 @@ ABSOLUTELY DO NOT:
 
     const response = await withTimeout(
       genAINew.models.generateContent({
-        model: "gemini-2.0-flash-exp-image-generation",
+        model: IMAGE_MODEL,
         contents: illustrationPrompt,
         config: {
           responseModalities: ["Text", "Image"],
         },
       }),
-      90000,
+      45000,
       "Image generation timeout"
     );
 
@@ -561,7 +566,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate roast using Gemini (verification already done via /api/verify-legend)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Include Wikipedia context if available
     const wikiContextPrompt = wikiContext

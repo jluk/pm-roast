@@ -5,6 +5,15 @@
 
 import { PMElement } from "./types";
 
+// Gemini image-generation model. Centralized here so a model deprecation is a
+// one-line fix across /api/roast, /api/roast-legend, and /api/card-image.
+// NOTE: the previous "gemini-2.0-flash-exp-image-generation" was retired by
+// Google and 404s on every request — keep this pointed at a live image model.
+// Gemini 3 ("Nano Banana Pro" tier): best-in-class likeness preservation and
+// prompt-following, and faster than 2.5-flash-image in testing. Fallback if it
+// ever regresses: "gemini-2.5-flash-image".
+export const IMAGE_MODEL = "gemini-3.1-flash-image";
+
 // Element-specific visual settings for Pokemon TCG-style card images
 export const ELEMENT_SETTINGS: Record<PMElement, {
   bg: string;
