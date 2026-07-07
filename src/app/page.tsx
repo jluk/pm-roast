@@ -1057,6 +1057,8 @@ export default function Home() {
 
     setStep("analyzing");
     setError(null);
+    // Reroll isn't timed — clear so the panel shows the fallback, never a stale number
+    setGenerationMs(null);
 
     try {
       if (inputSource === "legend") {
@@ -1183,6 +1185,7 @@ export default function Home() {
       setInputSource("pdf");
       setStep("analyzing");
       setError(null);
+      const genStart = performance.now();
 
       try {
         const formData = new FormData();
@@ -1203,6 +1206,7 @@ export default function Home() {
         const { cardId: newCardId, ...roastResult } = data;
         setResult(roastResult);
         setCardId(newCardId || null);
+        setGenerationMs(performance.now() - genStart);
         setStep("results");
         incrementRoastCount();
       } catch (err) {
@@ -1224,6 +1228,7 @@ export default function Home() {
     setIsLoadingLinkedin(true);
     setStep("analyzing");
     setError(null);
+    const genStart = performance.now();
 
     try {
       const formData = new FormData();
@@ -1244,6 +1249,7 @@ export default function Home() {
       const { cardId: newCardId, ...roastResult } = data;
       setResult(roastResult);
       setCardId(newCardId || null);
+      setGenerationMs(performance.now() - genStart);
       setStep("results");
       incrementRoastCount();
     } catch (err) {
