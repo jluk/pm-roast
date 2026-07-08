@@ -105,6 +105,7 @@ interface PokemonCardProps {
   compact?: boolean;
   userName?: string; // User's actual name for personalized cards
   disableHoloEffects?: boolean; // Disable holo effects for screenshots
+  fusion?: { parents: { id: string; name: string; emoji: string }[] }; // Present on fusion cards
 }
 
 function EnergySymbol({ element, size = "sm" }: { element: PMElement; size?: "sm" | "md" }) {
@@ -135,6 +136,7 @@ export function PokemonCard({
   compact = false,
   userName,
   disableHoloEffects = false,
+  fusion,
 }: PokemonCardProps) {
   const elementData = PM_ELEMENTS[element];
   const rarity = getCardRarity(score);
@@ -235,6 +237,20 @@ export function PokemonCard({
             className={`relative rounded-lg overflow-hidden border-4 ${compact ? "h-36" : "h-[178px] sm:h-[196px]"}`}
             style={{ borderColor: `${elementData.borderColor}66` }}
           >
+            {/* Fusion badge + parent lineage */}
+            {fusion?.parents?.length === 2 && (
+              <div className="absolute top-1.5 left-1.5 z-20 flex items-center gap-1.5 pl-1.5 pr-2 py-0.5 rounded-full bg-black/70 backdrop-blur-sm border border-white/25 shadow">
+                <span className={compact ? "text-[10px]" : "text-xs"}>
+                  {fusion.parents[0].emoji}
+                  <span className="opacity-60">+</span>
+                  {fusion.parents[1].emoji}
+                </span>
+                <span className={`font-bold uppercase tracking-wider text-white ${compact ? "text-[8px]" : "text-[9px]"}`}>
+                  Fusion
+                </span>
+              </div>
+            )}
+
             {/* Elemental gradient background */}
             <div className={`absolute inset-0 bg-gradient-to-br ${elementData.bgGradient}`} />
 

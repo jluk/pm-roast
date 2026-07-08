@@ -130,6 +130,35 @@ export function Results({ result, dreamRole, onStartOver, onReroll, isSharePage 
     }
   };
 
+  // Seed this card into the Fusion Lab and jump there (works cross-page via sessionStorage)
+  const fuseWithLegend = () => {
+    try {
+      sessionStorage.setItem(
+        "fusionSeed",
+        JSON.stringify({
+          parent: {
+            id: "you",
+            name: result.userName || "Your Card",
+            archetypeName: result.archetype.name,
+            archetypeDescription: result.archetype.description,
+            archetypeEmoji: result.archetype.emoji,
+            element: result.archetype.element,
+            score: result.careerScore,
+            weakness: result.archetype.weakness,
+            stage: result.archetype.stage,
+            bangerQuote: result.bangerQuote,
+            moves: result.moves,
+            imageUrl: "",
+          },
+          image: result.archetypeImage || "",
+        })
+      );
+    } catch {
+      // Card art may be too large for sessionStorage — proceed; fusion still works from text
+    }
+    window.location.href = "/#fusion";
+  };
+
   // Generate the shareable URL - prefer cardId if available (permanent storage)
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
   const shareUrl = cardId
@@ -361,6 +390,7 @@ Get your PM card: ${shareUrl}
                   weakness={result.archetype.weakness || "Meetings"}
                   flavor={stripMarkdown(result.archetype.flavor || result.archetype.description)}
                   userName={result.userName}
+                  fusion={result.fusion}
                   disableHoloEffects={screenshotMode}
                 />
               </div>
@@ -710,6 +740,29 @@ Get your PM card: ${shareUrl}
           </motion.div>
         </div>
       </div>
+
+      {/* Fuse this card with a legend (hidden on fusion cards) */}
+      {!result.fusion && (
+        <motion.button
+          onClick={fuseWithLegend}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="group relative w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl px-6 py-4 flex items-center justify-between hover:border-indigo-400/30 transition-colors"
+        >
+          <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/10 via-violet-500/10 to-fuchsia-500/10 blur-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <div className="relative flex items-center gap-3 text-left">
+            <span className="text-2xl">⚗️</span>
+            <div>
+              <div className="text-sm font-semibold text-white">Fuse this card with a legend</div>
+              <div className="text-xs text-white/50">Polymerize your archetype with anyone on Mt. Roastmore.</div>
+            </div>
+          </div>
+          <span className="relative text-sm font-medium text-indigo-300 group-hover:text-indigo-200 transition-colors">
+            Open Fusion Lab →
+          </span>
+        </motion.button>
+      )}
 
       {/* Growth Plan - Premium Glassmorphism */}
       <motion.div

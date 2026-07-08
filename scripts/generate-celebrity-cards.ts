@@ -540,6 +540,10 @@ CRITICAL - PRESERVE THE PERSON'S LIKENESS:
 THE HILARIOUS SCENE:
 ${card.creativeScene}
 
+TEXT OVERRIDE (READ CAREFULLY):
+- If the scene above mentions banners, labels, signs, specimens, name tags, documents, decks, or "text", depict those objects as BLANK or with abstract non-letter squiggles ONLY.
+- Render ZERO legible letters, words, or numbers anywhere. This instruction OVERRIDES the scene description.
+
 HUMOR & VIBE (Internet meme energy):
 - FUNNY expressions - smug confidence, existential dread, manic energy, "this is fine" vibes
 - Internet humor and meme relevance - the kind of image people would share
@@ -574,7 +578,7 @@ ABSOLUTELY DO NOT:
 
   try {
     const response = await genAI.models.generateContent({
-      model: "gemini-2.5-flash-image",
+      model: "gemini-3-pro-image",
       contents: [
         {
           role: "user",
