@@ -1,72 +1,111 @@
-# pm-roast
-upload your linkedin, get honest feedback courtesy of Gemini 2.5 flash and a custom career card
+# PM Roast
 
-# 🎯 The Vibe
-A high-end, minimalist "Linear-style" web app that acts as a brutally honest AI career coach. 
-It uses the wisdom of 200+ world-class PMs (from Lenny’s Podcast transcripts) to "roast" a user's resume and provide a "Roadmap to the Top 1%."
+**A brutally honest AI career coach for product managers — and a working generative-media product.**
+Paste a LinkedIn/résumé/X handle (or just a famous name), get a Pokémon-TCG-style trading card: a roast, a PM archetype, an AI-illustrated likeness, and a shareable link.
 
-Vibe: Witty, data-driven, slightly elitist, but actually insightful.
+🔗 **Live:** [pmroast.com](https://www.pmroast.com)
 
-# 🛠 Feature List
-1. The "Ego Check" (Input)
-Resume/LinkedIn Upload: Users upload a PDF or paste their LinkedIn URL.
+---
 
-Context Selector: Users choose their "Dream Role" (e.g., "Founder," "CPO at a Series B," "L6 at Google"). Based on selection generate an honest reaction, i.e. "seriously, that's your dream?".
+## TL;DR
 
-2. The "Lenny Roast" (Analysis)
-Transcript RAG: AI scans the Lenny Transcripts to find relevant guest advice.
+PM Roast looks like a party trick, but under the hood it's a **multimodal generative-media pipeline**:
 
-Roast: Generate 3-4 biting but accurate bullet points about the user’s career.
+- **Text generation** turns a sparse profile into a scored, structured roast (archetype, moves, gaps, roadmap).
+- **Image generation** turns a photo into an identity-consistent trading-card illustration — and in **Fusion Lab**, conditions on *two* photos to blend two people into one coherent hybrid character.
+- Everything becomes a **permanent, shareable card** with a pre-rendered social preview, wired into a one-tap viral loop.
 
-Example: "You’ve spent 3 years at a 'Feature Factory.' Brian Chesky would say you’re a project manager, not a product person."
+The interesting engineering is less "call an LLM" and more **making generative media reliable, fast enough for a web request, identity-consistent, and safe** — plus surviving the fact that hosted models get renamed and retired underneath you.
 
-The "Archetype" Assignment: Assigns the user a persona like "The Safe-Bet Specialist," "The Growth Hacker (In Denial)," or "The Loom Video CEO." Generate a linkedin-style cringe image to represent the archetype assigned as a badge of shame.
+---
 
-3. The "Top 1% Roadmap" (Output)
-The Gap Analysis: Shows exactly what’s missing (e.g., "Lack of zero-to-one experience").
+## Architecture
 
-The 6-Month Plan: A tactical, month-by-month roadmap to fix their career.
+```mermaid
+flowchart TD
+  U["User input<br/>LinkedIn · résumé PDF · X · website · a famous name"] --> APP["Next.js 16 · App Router<br/>(Vercel serverless)"]
 
-Curated Playlists: Links to 3 specific Lenny’s Podcast episodes based on their weaknesses.
+  APP -->|"/api/roast"| ROAST["Roast a real profile"]
+  APP -->|"/api/roast-legend"| LEG["Roast a public figure"]
+  APP -->|"/api/fuse (streamed)"| FUSE["Polymerize two cards"]
 
-4. The "Viral Loop" (Share to X)
-The "PM Card": Generates a beautiful, shareable PNG/SVG card (similar to FIFA cards) containing:
+  subgraph GEN["Generation — Google Gemini"]
+    TXT["Gemini 2.5 Flash<br/>roast text · JSON mode"]
+    IMG["Gemini 3 Flash Image<br/>card illustration"]
+  end
 
-The user's profile picture from LinkedIn - if available.
+  ROAST --> TXT
+  LEG --> TXT
+  FUSE --> TXT
+  TXT --> IMG
+  FUSE -.->|"2 reference photos → 1 hybrid character"| IMG
 
-The User's Archetype.
+  IMG --> KV[("Vercel KV / Redis<br/>permanent card + leaderboard")]
+  KV --> CARD["/card/[id]<br/>shareable page"]
+  KV -.->|"fire-and-forget"| OG["/api/og-generate<br/>→ Vercel Blob (social preview)"]
+  CARD --> SHARE["Share to X / LinkedIn"]
+  SHARE --> U
+```
 
-One "Banger" quote from the roast.
+---
 
-A "Career Score" (0-100) based on "Lenny’s Frameworks."
+## How it works
 
-One-Click Post: A "Share to X" button with a pre-written viral thread starter tagging @lennysan and @[GuestName].
+### 1. Roasting a profile (`/api/roast`)
+1. Input is normalized to text — a PDF is parsed, a LinkedIn/website/X profile is scraped, or the user pastes it. A "dream role" is selected.
+2. **Gemini 2.5 Flash** returns a strict-JSON roast: archetype, 2 "moves," a 0–99 career score, gap analysis, a 4-month roadmap, and a screenshot-worthy "banger" quote — all framed around the *gap* to the dream role.
+3. **Gemini 3 Flash Image** illustrates the card. With a photo it preserves the person's likeness in a comedic scene; without one it falls back to an original "creature."
+4. The result is stored in **Vercel KV** and returned with a permanent `cardId`. A social-preview image is rendered to **Vercel Blob** in the background.
 
-# 🏗 Technical Requirements
-Frontend
-Framework: Next.js (App Router), Tailwind CSS, Shadcn/UI.
+### 2. Fusing two cards — "Polymerization" (`/api/fuse`)
+The showcase feature. Pick two Mt. Roastmore legends (or your own card) and merge them:
+- A **deterministic element-fusion matrix** decides the hybrid's type; a stat formula makes fusions feel powerful.
+- **Gemini 2.5 Flash** writes a hybrid archetype that references *both* people.
+- **Gemini 3 Flash Image** is given **both reference photos at once** and asked to synthesize a *single believable person* carrying features of each — multi-image conditioning, not a collage.
+- The endpoint **streams NDJSON stage events** (`analyze → text → image → store → done`) so the UI shows the live pipeline while you wait.
 
-Animations: Framer Motion (for that "high-end" feel during the "scanning" phase).
+---
 
-Image Generation: Use satori or html-to-image to generate the shareable "PM Card."
+## Tech stack
 
-Backend/AI
-Model: Claude 3.7 Sonnet (best for vibecoding and nuance).
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 16 (App Router), TypeScript, Turbopack |
+| UI | Tailwind CSS v4, Shadcn/UI, Framer Motion |
+| Text model | `gemini-2.5-flash` (JSON mode) |
+| Image model | `gemini-3.1-flash-image` (single- & multi-image conditioning) |
+| Card storage | Vercel KV (Redis) — permanent URLs + a leaderboard sorted set |
+| Social previews | Vercel Blob (pre-rendered OG images) |
+| Hosting | Vercel serverless functions (`maxDuration = 60`) |
 
-Data Source: Use the .txt or .json transcripts from the GitHub repo as a knowledge base.
+---
 
-System Prompt: "You are Lenny Rachitsky's AI twin. You have read every transcript. You are helpful but don't pull punches. You hate fluff like 'stakeholder management' and love 'impact,' 'product taste,' and 'rigor.'"
+## Key technical decisions (and why)
 
-# 🎨 Design System
-Background: Dark mode (#09090b).
+**One image model, defined once.** Hosted Gemini models get renamed and retired without warning — a retired image model once silently blanked every card, and a retired text model 500'd every legend roast. The image model now lives in a single `IMAGE_MODEL` constant (`src/lib/image-generation.ts`); a future retirement is a one-line fix, and `CLAUDE.md` carries a runbook for spotting it.
 
-Accent: "Lenny Yellow" (#FFD700) or "Product Green."
+**`maxDuration = 60` on every generation route.** A roast is a ~20–45s text-plus-image request. Vercel's default function timeout (~15s) would kill it *after* the model work — a true silent failure. Raising the ceiling (and trimming in-code image timeouts to 45s) keeps the request inside the budget.
 
-Font: Geist Sans or Inter.
+**Streaming the fusion pipeline (NDJSON).** A fusion takes ~20–30s. Rather than spin a generic loader, `/api/fuse` emits a stage event as each real step completes, and the client renders a live stepper naming the model/technique at each stage. The progress is *actually* server-driven, not faked.
 
-Components: Minimalist cards with subtle borders and "glowing" hover effects.
+**Identity-consistent image generation.** The hard part of the product isn't making an image — it's making it recognizably *you*. Prompts push hard on likeness preservation, and Fusion Lab pushes further: two input images → one coherent hybrid face. This is the exact "identity consistency across inputs" problem generative-media teams care about.
 
-# 🚀 The "Viral" Prompt (Use this for the X Flow)
-"Just got roasted by PM AI. Apparently, I’m a 'Middle-Manager Generalist' with a 42% chance of making CPO. 💀
+**Two models, split by job.** Text (`2.5-flash`, JSON mode) and image (`3.1-flash-image`) are separate calls. JSON mode guarantees parseable output, and the token budget is set high enough that the model's *thinking* tokens don't truncate the reply (an early bug). Keeping them separate means an image failure degrades gracefully to a text-only card instead of failing the whole roast.
 
-I got a 6-month roadmap to fix it. Build your own here: [YourURL]"
+**Permanent cards in KV + pre-rendered OG in Blob.** Cards need durable, shareable URLs and rich social previews. KV gives each card a stable `/card/[id]`; the OG image is generated once (fire-and-forget) and served from Blob, so a shared link unfurls instantly without re-running a model.
+
+**Responsible by design.** No text is baked into generated images (AI text always looks wrong); roasts target the role/résumé, never attack by name; public figures use public info only; uploaded photos are used to generate one card, not retained.
+
+---
+
+## Local development
+
+```bash
+npm install
+cp .env.example .env.local   # add GEMINI_API_KEY, KV + Blob tokens
+npm run dev                  # http://localhost:3000
+npm run build                # production build
+npm test                     # unit tests
+```
+
+See [`CLAUDE.md`](./CLAUDE.md) for the full architecture reference, API-route contracts, the card/rarity system, and the Mt. Roastmore card pipeline.
