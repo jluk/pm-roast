@@ -80,7 +80,7 @@ const CELEBRITY_CARDS = [
     outputImage: "ryan-reynolds-card.png",
     archetypeName: "Deadpool Marketer",
     element: "politics",
-    creativeScene: `This person breaking the fourth wall of a wordless trading card frame, literally leaning out of the frame to pitch a generic, unbranded gin to the viewer while wearing a Deadpool mask pushed up on their head. They're visually conveying self-aware sarcastic advertising through a thought bubble with ironic symbols. Behind them, distinct abstract symbols and colored shapes, representing different entities, fight for attention. Their face shows that signature smirk of someone who knows the joke before everyone else.`,
+    creativeScene: `This person as a charming, self-aware marketing wizard cheerfully juggling colorful unbranded gin bottles and glowing movie-reel orbs, winking playfully with a knowing smirk. Rainbow sparkles and confetti swirl around them. Behind them, abstract colored shapes representing rival brands comically compete for attention. Their expression is that of someone who knows the joke before everyone else.`,
   },
   {
     id: "gordon-ramsay",
